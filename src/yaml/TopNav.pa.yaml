@@ -115,7 +115,7 @@
       RadiusTopRight: =6
       RadiusBottomLeft: =6
       RadiusBottomRight: =6
-      DisplayMode: =If(IsBlank(gblPursuitId), DisplayMode.Disabled, DisplayMode.Edit)
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
       OnSelect: =Navigate(scrPursuitWorkspace, ScreenTransition.None)
 
 # ---------------------------------------------------------------------------
@@ -133,7 +133,7 @@
 # Selected tab:   Fill ClrAccent, Color ClrAccentText
 # Unselected tab: Fill ClrNav,    Color ClrTextMuted, HoverFill ClrCardHover
 #
-# The workspace tab is disabled until a pursuit has been opened — gblPursuitId is set
+# The workspace tab is disabled until a pursuit has been opened — gblPursuitKey is set
 # by the board and list screens. Without that guard the tab opens an empty detail page
 # and every gallery on it shows a blank-record error.
 # ---------------------------------------------------------------------------

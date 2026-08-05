@@ -34,8 +34,9 @@ gates you were trying to avoid, for one gesture.
 **Platform:** galleries scroll vertically only. There's no horizontal scroll container.
 
 **This build:** six columns sized to fit a 1366-wide tablet layout. Everything the
-scrollbar implied lives in the Excel export instead, which already carries account,
-target close, Salesforce opportunity, and sync status — fields the screen doesn't show.
+scrollbar implied lives in the Excel export instead, which already carries pursuit ID,
+account, health, target decision date, Salesforce URL, and estimated fees — six fields
+the screen doesn't show.
 
 **If you need more on screen:** widen the app to 1920 in Settings and add columns (you'd
 be designing for a monitor, not a laptop), or add a column-picker that swaps which six
@@ -58,38 +59,66 @@ single `TODO` string. Everything around the model call is finished and correct.
 **Three ways to finish it, cheapest first:**
 
 - **Write from outside.** Your Copilot - Pursuit Strategy Agent already produces this
-  kind of narrative. Have it write into `pursuit-tracker-AIOverviews` following the same
-  `IsCurrent` rule, and the app displays it with no premium anything. The Refresh button
-  becomes a re-read. Given that the deck lives in a "Copilot - Pursuit Strategy Agent"
-  folder, I'd guess this is what you already intended.
+  kind of narrative. Have it write into `pursuit-tracker-ai-history` following the same
+  `Is Current` rule, and the app displays it with no premium anything. The Refresh button
+  becomes a re-read. The schema is already built for this — `Include in AI Overview` on
+  documents is an input filter that nothing in the app populates, and `Source Summary`
+  reads like something a generator wrote. I'd guess this is what you already intended.
 - **A scheduled flow** that regenerates overviews nightly for pursuits whose Salesforce
   data changed. Still needs a model connector, but only *you* run the flow — app users
   stay free.
 - **AI Builder "Create text with GPT"** inside the flow. Cleanest experience, costs
   credits, and credits are a procurement conversation.
 
-## 4. Delegation will bite before you notice
+## 4. Delegation, and why the text keys help
 
 SharePoint returns at most 500 rows to a canvas app by default, 2000 at the ceiling, and
-anything the connector can't translate into a server-side query gets evaluated locally
+anything the connector can't translate into a server-side query is evaluated locally
 against only those rows. No error — just quietly incomplete data.
 
-What this build does about it:
+The schema's text keys are a real advantage here. Every child-list filter is
+`'Pursuit ID' = "PUR-001"` — text equality, which SharePoint delegates. Had the lists
+been keyed on Lookup columns, `Filter(list, Lookup.Id = x)` wouldn't delegate and you'd
+need helper columns. Nothing to add.
+
+What this build does:
 
 - Data row limit set to 2000 (`docs/02-app-setup.md`).
-- `PursuitKey` number columns on all four child lists, because `Filter(list,
-  Lookup.Id = x)` doesn't delegate and `Filter(list, PursuitKey = x)` does.
-- Tasks are fetched once into `colOpenTasks` and joined in memory, rather than looked up
-  per card.
+- `LoadPortfolio` pulls `'pursuit-tracker-actions'` **whole** and joins in memory. It
+  looks wasteful, but `Filter(actions, Status.Value <> "Completed")` is *not* delegable
+  — SharePoint delegates `=` on a choice column, never `<>` — so filtering server-side
+  would silently return a truncated set. Fetching unfiltered is both correct and faster
+  than a per-card lookup.
+- Workspace filters go to the server, because they're text equality.
 
-The one place it still bites: `Filter('pursuit-tracker-Tasks', Status.Value <>
-"Complete")` in `LoadPortfolio`. SharePoint delegates `=` on a choice column but not
-`<>`, so once the Tasks list passes 2000 rows *in total*, "next task due" starts going
-blank on cards for no visible reason. Studio will show a delegation warning on that line
-— it's correct, not noise.
+Where it bites eventually: once the actions list passes 2000 rows in total,
+`ClearCollect(colActions, 'pursuit-tracker-actions')` starts truncating, and "next task
+due" goes blank on cards for no visible reason. At three actions you have room.
 
-Fix when you get there: add an `IsOpen` Yes/No column to Tasks, maintained by the app on
-every status write, and filter on that. Yes/No delegates.
+Fix when you get there: add an `Is Open` Yes/No column to actions, maintained by the app
+on every status write, and filter on it server-side. Yes/No delegates.
+
+## 4b. Four schema facts that shape the app
+
+Detail and fixes in `docs/01-data-model.md`; the short version of what each one cost:
+
+**`Overview Text` is a 255-character Text column.** Your mockup's overview is about 430.
+SharePoint truncates rather than erroring, so this destroys content silently. Convert it
+before wiring up any generator.
+
+**`Aligned SIs` and `Hyperscalers` are single-select.** The mockups need multi — NiSource
+with Fujitsu *and* NTT Data. Every chip gallery in `docs/03`–`05` is written for
+multi-select and needs the column converted, or replacing with a single label.
+
+**Every Choice column has an empty choice list.** `Choices()` returns nothing, so the
+board can't read its columns from SharePoint and every dropdown in the add panels binds
+to a literal table instead. The stage order lives in `App.OnStart`, which means adding a
+stage is now an app edit rather than a list edit — a real regression against the original
+design, and it goes away once the choice values are defined.
+
+**`Active` is a Number and every row is `0`.** The app doesn't filter on it, so the board
+shows all fourteen pursuits including the three `Unassigned` ones. Decide what the column
+means, then switch the filter on — the line is in `App.OnStart`, commented.
 
 ## 5. Excel export is CSV
 
@@ -112,7 +141,7 @@ unchanged.
 ## 7. There are no transactions
 
 Canvas apps can't write atomically across two lists. The place this matters is the
-`IsCurrent` flip on AI overviews, which is why that code demotes before it inserts:
+`Is Current` flip on AI overviews, which is why that code demotes before it inserts:
 fail halfway and you get zero current versions rather than two, which is both easier to
 spot and easier to repair.
 
@@ -138,9 +167,11 @@ missed token.
 | Portfolio list | 1–2 hrs |
 | Pursuit workspace | 3–4 hrs |
 | Export flow | ~45 min |
-| Reconciling against your real list schemas | unknown until I see them |
+| The four SharePoint column changes | ~15 min |
 
-Call it a solid day if the lists match this doc, two if they don't.
+Call it a solid day. The formulas are now written against your real schema rather than
+an inferred one, so the reconciliation pass that would have eaten the second day is
+already done — what's left is confirming the five list titles.
 
 The workspace screen is the long pole — it's seven cards, five galleries, and two
 slide-over panels. If you want something usable fast, build the board and the list

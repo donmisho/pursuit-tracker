@@ -36,12 +36,16 @@ these.
 
 ## Read this before you start
 
-**The schemas in `docs/01` are inferred from the mockups, not read from your site.** The
-connector available to me can read SharePoint *files* but has no list API, so I couldn't
-inspect the five lists directly. Run `tools/dump-list-schema.js` in your browser console
-while signed in — it takes about ten seconds, reads only, and needs no permissions
-beyond the ones you already have. Send me the output and I'll reconcile every formula
-against your real column names.
+**Four SharePoint column changes come first**, listed at the bottom of
+`docs/01-data-model.md`. The blocking one: `Overview Text` is a 255-character Text
+column and your mockup's overview is about 430 — SharePoint truncates rather than
+erroring, so it destroys content silently. The other three (multi-select SIs and
+hyperscalers, defined choice values, deciding what `Active` means) are the difference
+between matching the mockups and approximating them.
+
+**The five list titles are inferred from your export filenames**, not confirmed against
+the site. Check them and find-and-replace across `docs/` and `src/` if they differ. The
+column names are read from the real schema and are correct.
 
 **Three things in the mockups can't be built this way.** Drag-and-drop doesn't exist in
 canvas apps, galleries can't scroll horizontally, and generating the AI overview needs a

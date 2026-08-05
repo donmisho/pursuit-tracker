@@ -1,65 +1,106 @@
 // Paste into: Power Apps Studio -> Tree view -> App -> OnStart property
 //
-// Kept deliberately small. OnStart runs before the first screen paints, so anything
-// slow here is felt as launch latency on every single open. Per-screen data loads live
-// in each screen's OnVisible.
+// Written against the real list schemas (docs/01-data-model.md). Joins are on the text
+// key -- pursuits.Title holds PUR-nnn, and every child list points back through a text
+// 'Pursuit ID' column. Text equality delegates in SharePoint, so no helper columns.
 
 Set(gblUser, User());
 
-// The board renders one column per Stage choice, read live from SharePoint. Adding a
-// stage in the list settings adds a board column with no change to the app.
-ClearCollect(colStages, Choices('pursuit-tracker-Pursuits'.Stage));
-
-// Which portfolio the board and list are showing. The mockups say "SI pursuit
-// management"; this exists so a second portfolio doesn't require a second app.
-Set(gblPortfolio, "SI pursuit management");
-
-// Card currently "picked up" for a stage move. Blank when nothing is selected.
-// See docs/07-gaps-and-decisions.md for why this exists instead of drag-and-drop.
+// Card currently picked up for a stage move. Blank when nothing is selected.
+// Canvas apps have no drag-and-drop -- see docs/07-gaps-and-decisions.md.
 Set(gblMoving, Blank());
 
 
 // =====================================================================
-// LoadPortfolio -- the shared refresh used by both the board and the list.
+// LoadPortfolio -- shared by the board and the list screens.
 //
-// Power Fx has no user-defined behaviour functions in a canvas app, so this block is
-// duplicated verbatim into scrPortfolioBoard.OnVisible and scrPortfolioList.OnVisible,
-// and re-run after any Patch that changes a stage. Change it here, then paste it into
-// both. (A named formula can't do it -- ClearCollect is a side effect.)
+// Canvas apps have no user-defined behaviour functions, so this block is duplicated
+// verbatim into scrPortfolioBoard.OnVisible and scrPortfolioList.OnVisible, and re-run
+// after any patch that changes a stage. Change it here, then paste it into both.
 // =====================================================================
 
-// Open tasks only. Pulled once and joined in memory rather than looked up per card:
-// a per-row LookUp inside a gallery template fires one request per visible card and
-// makes the board visibly stutter.
+// All actions, unfiltered. Filtering on Status <> "Completed" here would look tidier
+// but SharePoint doesn't delegate <> on a choice column, so the server would silently
+// return a truncated set. Pulling the list whole and filtering in memory is both
+// correct and faster, until the list passes the 2000-row data limit.
+ClearCollect(colActions, 'pursuit-tracker-actions');
+
+// Owner display names. The owner column is an email string, not a Person column, so
+// there's no .DisplayName to read -- resolve each distinct address once here rather
+// than calling the connector per card. IfError keeps a departed or mistyped address
+// from blanking the whole collection; you get the raw email in the UI instead.
 ClearCollect(
-    colOpenTasks,
-    Filter(
-        'pursuit-tracker-Tasks',
-        Status.Value <> "Complete"
+    colPeople,
+    ForAll(
+        Distinct('pursuit-tracker-pursuits', 'WM Pursuit Owner Entra ID') As E,
+        {
+            Email: E.Value,
+            Name:  IfError(Office365Users.UserProfileV2(E.Value).displayName, E.Value)
+        }
     )
 );
 
 ClearCollect(
     colPortfolio,
     AddColumns(
-        Filter(
-            'pursuit-tracker-Pursuits',
-            IsActive = true,
-            Portfolio.Value = gblPortfolio
-        ) As P,
-        // The whole next-task record, so cards can read .Title, .DueDate and
-        // .DueDescription without three separate lookups.
-        "NextTask",
+        // No Active filter. The column is a Number and every row is 0, so filtering on
+        // it empties the board. Once it means something, add:
+        //     Filter('pursuit-tracker-pursuits', Active = 1) As P
+        'pursuit-tracker-pursuits' As P,
+
+        "OwnerName",
+        Coalesce(
+            LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name,
+            P.'WM Pursuit Owner Entra ID'
+        ),
+
+        // The next open action, whole -- cards read .'Action Title' and .'Due Date'
+        // off it without three more lookups. Actions with no due date are excluded:
+        // they can't be "next due", and including them would let an undated action
+        // win the sort and blank the date line.
+        "NextAction",
         First(
             Sort(
-                Filter(colOpenTasks, PursuitKey = P.ID, Not(IsBlank(DueDate))),
-                DueDate,
+                Filter(
+                    colActions,
+                    'Pursuit ID' = P.Title,
+                    Status.Value <> "Completed",
+                    Not(IsBlank('Due Date'))
+                ),
+                'Due Date',
                 SortOrder.Ascending
             )
         ),
-        // Flattened multi-choice values. Galleries can bind to the raw table, but the
-        // Excel export needs them as text and computing it twice invites drift.
-        "SIsText",  Concat(P.AlignedSIs, Value, ", "),
+
+        // Flattened choice values. Galleries bind to the raw tables, but the Excel
+        // export needs text and computing it in two places invites drift.
+        // If you leave the two columns single-select, these become
+        //     P.'Aligned SIs'.Value    /    P.'Hyperscalers'.Value
+        "SIsText",  Concat(P.'Aligned SIs', Value, ", "),
         "HypeText", Concat(P.Hyperscalers, Value, ", ")
+    )
+);
+
+// Board columns. Every Choice column on these lists has an empty choice list with
+// fill-in enabled, so Choices() returns nothing and can't drive the board. This is the
+// authoritative stage order; anything found in the data but missing here is appended at
+// the end rather than silently dropped, so a new stage typed into SharePoint still gets
+// a column -- just an unsorted one, which is a visible prompt to add it above.
+ClearCollect(
+    colStages,
+    Table(
+        { Order: 1, Stage: "Unassigned" },
+        { Order: 2, Stage: "WM Account Team Assimilation" },
+        { Order: 3, Stage: "Partner Introduction" },
+        { Order: 4, Stage: "Preliminary Scoping" },
+        { Order: 5, Stage: "Proposal/Quote" }
+    )
+);
+ForAll(
+    Distinct(colPortfolio, 'Workflow Stage'.Value) As S,
+    If(
+        IsBlank(S.Value) || !IsBlank(LookUp(colStages, Stage = S.Value)),
+        false,
+        Collect(colStages, { Order: 99, Stage: S.Value })
     )
 );

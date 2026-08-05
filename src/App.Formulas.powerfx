@@ -55,22 +55,41 @@ RadiusChip     = 10;
 BoardColWidth  = 320;
 
 // ---------------------------------------------------------------- helpers
-// Stage colour, used for the thin accent on a board column header. Falls through to
-// the muted text colour for any stage added in SharePoint that isn't listed here, so
-// new stages degrade gracefully instead of rendering black-on-black.
+// Stage colour, used for the thin accent on a board column header. Stage names are the
+// values actually present in the list, casing included. Anything unmatched falls
+// through to the muted colour rather than rendering black-on-black.
 StageAccent(stage: Text): Color =
     Switch(
         stage,
-        "WM account team assimilation", ColorValue("#6B7DF2"),
-        "Partner introduction",         ColorValue("#5AB0C9"),
-        "Preliminary scoping",          ColorValue("#8E7BD8"),
+        "Unassigned",                   ColorValue("#5A6474"),
+        "WM Account Team Assimilation", ColorValue("#6B7DF2"),
+        "Partner Introduction",         ColorValue("#5AB0C9"),
+        "Preliminary Scoping",          ColorValue("#8E7BD8"),
+        "Proposal/Quote",               ColorValue("#D8A05A"),
         ClrTextMuted
     );
 
-// "August 7" when there's a real date, the free-text dependency wording when there
-// isn't. Mirrors the Legal review / "After proposal" row in the workspace mockup.
+// "August 7" when there's a due date; otherwise the dependency wording the app derives
+// from Predecessor Action ID ("after proposal / quote"), which is what the workspace
+// mockup shows in the Legal review row. Blank when there's neither.
 DueLabel(due: DateTime, wording: Text): Text =
-    If(IsBlank(wording), Text(due, "mmmm d"), wording);
+    If(
+        !IsBlank(due), Text(due, "mmmm d"),
+        !IsBlank(wording), wording,
+        ""
+    );
+
+// "Don Mishory" -> "DM". Owner columns hold email addresses, so when Office 365 Users
+// can't resolve one the raw address arrives here and yields a single letter -- ugly but
+// legible, and a visible cue that the address is wrong.
+Initials(name: Text): Text =
+    Concat(FirstN(Split(name, " "), 2), Left(Value, 1));
+
+// Document URLs are stored as plain text and some have no scheme
+// ("westmonroepartners1-my.sharepoint.com/..."), which Launch() treats as a relative
+// path and opens as a broken address.
+SafeUrl(url: Text): Text =
+    If(StartsWith(Lower(url), "http"), url, "https://" & url);
 
 // "Today" / "Yesterday" / "August 1" for the status update feed.
 RelativeDay(when: DateTime): Text =

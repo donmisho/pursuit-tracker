@@ -41,13 +41,22 @@ While you're in Settings:
 `https://westmonroepartners1.sharepoint.com/sites/PursuitTracking`, then select all
 five `pursuit-tracker-*` lists at once.
 
-Add **Office 365 Users** too — it's what renders owner photos if you'd rather have real
-avatars than the initials circles the mockups show.
+**Office 365 Users is required, not optional.** The owner columns hold email strings
+rather than Person values, so there is no display name in the data — every "Don Mishory"
+in the UI comes from resolving `dmishory@westmonroe.com` through this connector at load.
+It's a standard connector, so it costs nothing.
 
-> Every formula in `docs/03`–`05` refers to lists as `'pursuit-tracker-Pursuits'`,
-> `'pursuit-tracker-Tasks'`, and so on. If your actual list titles differ, do a
-> find-and-replace across those files before pasting, or Studio will flag every
-> reference red at once and it's hard to tell real errors from naming ones.
+> Every formula in `docs/03`–`05` refers to the lists as `'pursuit-tracker-pursuits'`,
+> `'pursuit-tracker-actions'`, `'pursuit-tracker-status-updates'`,
+> `'pursuit-tracker-documents'`, and `'pursuit-tracker-ai-history'` — inferred from your
+> export filenames, not confirmed against the site. If the real titles differ, do a
+> find-and-replace across `docs/` and `src/` before pasting, or Studio flags every
+> reference red at once and real errors get lost in naming ones.
+
+Before you build anything, read the four required SharePoint changes at the bottom of
+`docs/01-data-model.md`. One of them (the 255-character `Overview Text` column) silently
+destroys data rather than erroring, and the other three are the difference between
+matching the mockups and approximating them.
 
 ## 4. Paste the theme
 

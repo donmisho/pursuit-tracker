@@ -1,6 +1,6 @@
 # Screen — `scrPortfolioBoard`
 
-The kanban. One column per `Stage` choice, cards sorted within each column.
+The kanban. One column per workflow stage, cards sorted by target decision date.
 
 ```
 scrPortfolioBoard
@@ -9,20 +9,17 @@ scrPortfolioBoard
 ├── lblPageSub                       instruction line
 ├── btnNewPursuit                    "New pursuit"
 └── galStages                    ◄── horizontal gallery, one item per stage
-    ├── colBg                        column background
-    ├── lblStageName
-    ├── lblStageCount
-    ├── recDropTarget  + lblDropHint  "Move here", only while a card is picked up
+    ├── colBg + recStageAccent
+    ├── lblStageName / lblStageCount
+    ├── recDropTarget + lblDropHint   "Move here", only while a card is picked up
     └── galCards                 ◄── vertical gallery, the pursuits in this stage
-        ├── recCard                  card background
+        ├── recCard + recHealth
         ├── icoMove                  pick up / put down
         ├── lblCardTitle
-        ├── cirAvatar + lblInitials
-        ├── lblOwner
+        ├── cirAvatar + lblInitials + lblOwner
         ├── galCardSIs           ◄── horizontal gallery of SI chips
         ├── recCardDivider
-        ├── lblNextTask
-        └── lblNextTaskDue
+        └── lblNextTask + lblNextTaskDue
 ```
 
 Three nested galleries is the deepest canvas apps allow, and this uses all of it.
@@ -34,10 +31,10 @@ Three nested galleries is the deepest canvas apps allow, and this uses all of it
 | Property | Formula |
 |---|---|
 | `Fill` | `=ClrPage` |
-| `OnVisible` | paste the `LoadPortfolio` block from `src/App.OnStart.powerfx` (everything below the `LoadPortfolio` banner comment), then `Set(gblMoving, Blank())` |
+| `OnVisible` | paste the `LoadPortfolio` block from `src/App.OnStart.powerfx` (everything below the banner comment), then `Set(gblMoving, Blank())` |
 
-Re-running the load on every visit is what makes a stage change from the workspace
-screen show up when you come back to the board.
+Reloading on every visit is what makes a stage change from elsewhere in the app show up
+when you come back.
 
 ## Page header
 
@@ -46,24 +43,23 @@ screen show up when you come back to the board.
 | `lblPageTitle` | `Text` | `="SI pursuit management"` |
 | | `X` / `Y` | `=GapPage` / `=64 + GapPage` |
 | | `Size` / `FontWeight` / `Color` | `=SizePageTitle` / `=FontWeight.Semibold` / `=ClrText` |
-| `lblPageSub` | `Text` | `=If(IsBlank(gblMoving), "Select the move handle on a pursuit, then choose its new stage.", "Moving " & gblMoving.Title & " — choose a stage, or press the handle again to cancel.")` |
+| `lblPageSub` | `Text` | `=If(IsBlank(gblMoving), "Select the move handle on a pursuit, then choose its new stage.", "Moving " & gblMoving.'Pursuit Name' & " — choose a stage, or press the handle again to cancel.")` |
 | | `Y` | `=lblPageTitle.Y + lblPageTitle.Height` |
 | | `Size` / `Color` | `=SizeBody` / `=ClrTextMuted` |
 | `btnNewPursuit` | `Text` | `="New pursuit"` |
 | | `X` | `=Parent.Width - Self.Width - GapPage` |
 | | `Fill` / `Color` / `HoverFill` | `=ClrAccent` / `=ClrAccentText` / `=ClrAccentHover` |
-| | `OnSelect` | `=Set(gblPursuitId, Blank()); Set(gblNewPursuit, true); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
+| | `OnSelect` | `=Set(gblPursuitKey, Blank()); Set(gblNewPursuit, true); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
 
-The subtitle differs from the mockup, which reads "Drag pursuits into the current
-workflow stage." Canvas apps have no drag-and-drop and the label would be a promise the
-app can't keep — the reasoning and the alternatives are in
-`docs/07-gaps-and-decisions.md`.
+The subtitle differs from the mockup's "Drag pursuits into the current workflow stage."
+Canvas apps have no drag-and-drop, and the label would be a promise the app can't keep —
+reasoning and alternatives in `docs/07-gaps-and-decisions.md`.
 
 ## `galStages` — the columns
 
 | Property | Formula |
 |---|---|
-| `Items` | `=colStages` |
+| `Items` | `=Sort(colStages, Order, SortOrder.Ascending)` |
 | `Layout` | Horizontal |
 | `TemplateSize` | `=BoardColWidth` |
 | `TemplatePadding` | `=8` |
@@ -72,9 +68,13 @@ app can't keep — the reasoning and the alternatives are in
 | `Width` | `=Parent.Width - (GapPage * 2)` |
 | `Height` | `=Parent.Height - Self.Y - GapPage` |
 
-`colStages` comes from `Choices('pursuit-tracker-Pursuits'.Stage)`, so the board's
-columns are whatever the SharePoint choice column says they are — in the order
-SharePoint stores them.
+`colStages` is the explicit ordered table built in `App.OnStart`, not
+`Choices(...)` — every Choice column on these lists has an empty choice list, so
+`Choices()` returns nothing. `docs/01-data-model.md` covers why and how to fix it at
+source.
+
+Your five stages plus the horizontal scroll means about three and a half columns visible
+at 1366 wide. That's expected; the gallery scrolls.
 
 ### Inside the column template
 
@@ -84,65 +84,58 @@ SharePoint stores them.
 | | `Fill` / `BorderColor` / `BorderThickness` | `=ClrColumn` / `=ClrBorder` / `=1` |
 | | all four `Radius*` | `=RadiusCard` |
 | `recStageAccent` (Rectangle) | `Height` / `Width` | `=3` / `=colBg.Width` |
-| | `Fill` | `=StageAccent(ThisItem.Value)` |
-| `lblStageName` | `Text` | `=ThisItem.Value` |
+| | `Fill` | `=StageAccent(ThisItem.Stage)` |
+| `lblStageName` | `Text` | `=ThisItem.Stage` |
 | | `Size` / `FontWeight` / `Color` | `=SizeBody` / `=FontWeight.Semibold` / `=ClrText` |
-| `lblStageCount` | `Text` | `=CountRows(Filter(colPortfolio, Stage.Value = ThisItem.Value))` |
+| `lblStageCount` | `Text` | `=CountRows(Filter(colPortfolio, 'Workflow Stage'.Value = ThisItem.Stage))` |
 | | `Align` / `Color` | `=Align.Right` / `=ClrTextMuted` |
 
 ### The drop target
 
-Only visible while a card is picked up, and never on the column the card is already in.
+Visible only while a card is picked up, and never on the column it's already in.
 
 | Control | Property | Formula |
 |---|---|---|
-| `recDropTarget` (Rectangle) | `Visible` | `=Not(IsBlank(gblMoving)) && gblMoving.Stage.Value <> ThisItem.Value` |
+| `recDropTarget` | `Visible` | `=Not(IsBlank(gblMoving)) && gblMoving.'Workflow Stage'.Value <> ThisItem.Stage` |
 | | `Fill` | `=ColorFade(ClrAccent, 0.75)` |
 | | `BorderColor` / `BorderStyle` / `BorderThickness` | `=ClrAccent` / `=BorderStyle.Dashed` / `=1` |
 | | `Height` | `=44` |
-| | `OnSelect` | see below |
-| `lblDropHint` | `Text` | `="Move here"` |
-| | `Visible` | `=recDropTarget.Visible` |
+| `lblDropHint` | `Text` / `Visible` | `="Move here"` / `=recDropTarget.Visible` |
 | | `Color` / `Align` | `=ClrAccent` / `=Align.Center` |
 
 `recDropTarget.OnSelect`:
 
 ```powerfx
 Patch(
-    'pursuit-tracker-Pursuits',
-    LookUp('pursuit-tracker-Pursuits', ID = gblMoving.ID),
-    {
-        Stage: { Value: ThisItem.Value },
-        BoardOrder: Coalesce(
-            Max(Filter(colPortfolio, Stage.Value = ThisItem.Value), BoardOrder),
-            0
-        ) + 10
-    }
+    'pursuit-tracker-pursuits',
+    LookUp('pursuit-tracker-pursuits', Title = gblMoving.Title),
+    { 'Workflow Stage': { Value: ThisItem.Stage } }
 );
 Set(gblMoving, Blank());
-// Re-read rather than patching the local collection: the SharePoint item may have
-// changed underneath us, and a stale board is worse than a half-second pause.
+// Re-read rather than patching the local collection: the item may have changed
+// underneath us, and a stale board is worse than a half-second pause.
 ClearCollect(
     colPortfolio,
     AddColumns(
-        Filter('pursuit-tracker-Pursuits', IsActive = true, Portfolio.Value = gblPortfolio) As P,
-        "NextTask",
-        First(Sort(Filter(colOpenTasks, PursuitKey = P.ID, Not(IsBlank(DueDate))), DueDate, SortOrder.Ascending)),
-        "SIsText",  Concat(P.AlignedSIs, Value, ", "),
+        'pursuit-tracker-pursuits' As P,
+        "OwnerName", Coalesce(LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name, P.'WM Pursuit Owner Entra ID'),
+        "NextAction", First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)),
+        "SIsText",  Concat(P.'Aligned SIs', Value, ", "),
         "HypeText", Concat(P.Hyperscalers, Value, ", ")
     )
 );
-Notify("Moved to " & ThisItem.Value, NotificationType.Success, 2000)
+Notify("Moved to " & ThisItem.Stage, NotificationType.Success, 2000)
 ```
 
-New cards land at the bottom of the target column: `Max(...) + 10`, with gaps of ten so
-you can hand-insert between two cards later without renumbering the column.
+There's no `BoardOrder` column in the real schema, so a move sets the stage and nothing
+else — order within a column comes from the target decision date. That's one fewer thing
+to maintain and one fewer thing to get out of sync.
 
 ## `galCards` — the cards
 
 | Property | Formula |
 |---|---|
-| `Items` | `=SortByColumns(Filter(colPortfolio, Stage.Value = ThisItem.Value), "BoardOrder", SortOrder.Ascending, "Title", SortOrder.Ascending)` |
+| `Items` | `=Sort(Filter(colPortfolio, 'Workflow Stage'.Value = ThisItem.Stage), If(IsBlank('Target Decision Date'), Date(2099, 12, 31), 'Target Decision Date'), SortOrder.Ascending)` |
 | `Layout` | Vertical |
 | `TemplateSize` | `=178` |
 | `TemplatePadding` | `=6` |
@@ -150,62 +143,79 @@ you can hand-insert between two cards later without renumbering the column.
 | `Height` | `=colBg.Height - 60` |
 | `ShowScrollbar` | `=true` |
 
-`Title` is the tie-breaker so two cards with the same `BoardOrder` — which will happen
-the first time you load real data, since the column starts empty — hold a stable order
-instead of shuffling on every refresh.
+Three of your fourteen pursuits have no target decision date. Sorting on the raw column
+would float those to the top of their column, because blank sorts before every real
+date — the substitution pushes them to the bottom instead, which is where an undated
+pursuit belongs.
+
+`Sort` rather than `SortByColumns` throughout: `SortByColumns` takes column names as
+strings, and these columns have spaces in their display names and meaningless
+`field_n` internal names. `Sort` takes an expression and resolves the same way the rest
+of the app does.
 
 ### Inside the card template
 
 | Control | Property | Formula |
 |---|---|---|
 | `recCard` | `Fill` | `=ClrCard` |
-| | `BorderColor` | `=If(gblMoving.ID = ThisItem.ID, ClrAccent, ClrBorder)` |
-| | `BorderThickness` | `=If(gblMoving.ID = ThisItem.ID, 2, 1)` |
+| | `BorderColor` | `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrBorder)` |
+| | `BorderThickness` | `=If(gblMoving.Title = ThisItem.Title, 2, 1)` |
 | | all four `Radius*` | `=RadiusCard` |
-| | `OnSelect` | `=Set(gblPursuitId, ThisItem.ID); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
-| `icoMove` (Icon, `Reorder`) | `Color` | `=If(gblMoving.ID = ThisItem.ID, ClrAccent, ClrTextFaint)` |
+| | `OnSelect` | `=Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
+| `recHealth` (Rectangle) | `Width` / `Height` / `X` | `=3` / `=recCard.Height` / `=recCard.X` |
+| | `Fill` | `=If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)` |
+| `icoMove` (Icon, `Reorder`) | `Color` | `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)` |
 | | `X` | `=recCard.Width - Self.Width - 10` |
 | | `Tooltip` | `="Move to another stage"` |
-| | `OnSelect` | `=Set(gblMoving, If(gblMoving.ID = ThisItem.ID, Blank(), ThisItem))` |
-| `lblCardTitle` | `Text` | `=ThisItem.Title` |
+| | `OnSelect` | `=Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))` |
+| `lblCardTitle` | `Text` | `=ThisItem.'Pursuit Name'` |
 | | `Size` / `FontWeight` / `Color` | `=SizeCardTitle` / `=FontWeight.Semibold` / `=ClrText` |
 | | `Wrap` / `Height` | `=true` / `=44` |
 | `cirAvatar` (Circle) | `Fill` / `Width` / `Height` | `=ClrAvatar` / `=24` / `=24` |
-| `lblInitials` | `Text` | `=Concat(FirstN(Split(ThisItem.PursuitOwner.DisplayName, " "), 2), Left(Value, 1))` |
+| `lblInitials` | `Text` | `=Initials(ThisItem.OwnerName)` |
 | | `Size` / `Color` / `Align` | `=SizeChip` / `=ClrAvatarText` / `=Align.Center` |
-| `lblOwner` | `Text` | `=ThisItem.PursuitOwner.DisplayName` |
+| `lblOwner` | `Text` | `=ThisItem.OwnerName` |
 | | `Size` / `Color` | `=SizeBody` / `=ClrTextMuted` |
 | `recCardDivider` | `Height` / `Fill` | `=1` / `=ClrDivider` |
-| `lblNextTask` | `Text` | `="Next task due: " & Coalesce(ThisItem.NextTask.Title, "—")` |
+| `lblNextTask` | `Text` | `="Next task due: " & Coalesce(ThisItem.NextAction.'Action Title', "—")` |
 | | `Size` / `Color` / `Wrap` | `=SizeBody` / `=ClrText` / `=true` |
-| `lblNextTaskDue` | `Text` | `=If(IsBlank(ThisItem.NextTask), "No open tasks", DueLabel(ThisItem.NextTask.DueDate, ThisItem.NextTask.DueDescription))` |
+| `lblNextTaskDue` | `Text` | `=If(IsBlank(ThisItem.NextAction), "No open actions", Text(ThisItem.NextAction.'Due Date', "mmmm d"))` |
 | | `Size` / `Color` | `=SizeBody` / `=ClrDate` |
 
-`icoMove` sits on top of `recCard`, so its `OnSelect` wins and picking up a card doesn't
-also navigate away from the board.
+Cards identify by `Title` (`PUR-001`) rather than by list item ID, matching the join key
+the rest of the data uses.
 
-`lblInitials` splits the display name and takes the first letter of the first two words
-— "Don Mishory" → "DM". Names with a middle name or a suffix still give two letters,
-which is what you want; single-word display names give one.
+`recHealth` is a thin bar down the left edge of a card whose pursuit is at risk. It
+isn't in the mockups, but `Health` is populated on every row and a board that can't show
+risk is a board people stop trusting. Set its `Fill` to `=Transparent` permanently if
+you'd rather match the mockup exactly.
+
+`Initials` and the owner name both come from `OwnerName`, resolved once per distinct
+email in `App.OnStart` — the owner column is an email string, not a Person column, so
+there's no `.DisplayName` to read off the record.
 
 ### `galCardSIs` — the chips
 
 | Property | Formula |
 |---|---|
-| `Items` | `=ThisItem.AlignedSIs` |
+| `Items` | `=ThisItem.'Aligned SIs'` |
 | `Layout` | Horizontal |
 | `TemplateSize` | `=76` |
 | `Height` | `=22` |
 
-Inside: `recChip` (Rectangle, `Fill = ClrChip`, all `Radius* = RadiusChip`) and
-`lblChip` (`Text = ThisItem.Value`, `Size = SizeChip`, `Color = ClrChipText`,
+Inside: `recChip` (Rectangle, `Fill = ClrChip`, all `Radius* = RadiusChip`) and `lblChip`
+(`Text = ThisItem.Value`, `Size = SizeChip`, `Color = ClrChipText`,
 `Align = Align.Center`).
 
-`Items` is evaluated in the *card's* scope, so `ThisItem` there is the pursuit. Inside
-this gallery's own template `ThisItem` is the individual choice value. That scope shift
-is the single most confusing thing about nested galleries in Power Fx and the most
-common reason a chip row renders empty.
+**This assumes `Aligned SIs` has been switched to multi-select** (`docs/01`, required
+change 2). While it's single-select, `ThisItem.'Aligned SIs'` is a record rather than a
+table and the gallery won't bind — replace the whole gallery with one chip whose label
+reads `=ThisItem.'Aligned SIs'.Value`.
 
-A fixed `TemplateSize` means long SI names clip. Variable-width chips need
-`Self.Width` bound to the label's text width, which canvas doesn't expose — the
-practical fix is to keep the choice values short in SharePoint.
+`Items` is evaluated in the *card's* scope, so `ThisItem` there is the pursuit; inside
+this gallery's own template `ThisItem` is the individual choice value. That scope shift
+is the most common reason a chip row renders empty.
+
+Fixed `TemplateSize` clips long names — "Internal/West Monroe" and "NTT Data" both
+appear in your data and only one fits. Variable-width chips need the label's rendered
+text width, which canvas doesn't expose, so the practical fix is shorter choice values.

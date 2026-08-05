@@ -33,25 +33,27 @@ Add one input:
   "items": {
     "type": "object",
     "properties": {
-      "Pursuit":      { "type": "string" },
-      "Account":      { "type": "string" },
-      "StageName":    { "type": "string" },
-      "Owner":        { "type": "string" },
-      "AlignedSIs":   { "type": "string" },
-      "Hyperscalers": { "type": "string" },
-      "NextTaskName": { "type": "string" },
-      "NextTaskDue":  { "type": "string" },
-      "TargetClose":  { "type": "string" },
-      "Salesforce":   { "type": "string" },
-      "SyncStatus":   { "type": "string" }
+      "PursuitId":       { "type": "string" },
+      "PursuitName":     { "type": "string" },
+      "Account":         { "type": "string" },
+      "StageName":       { "type": "string" },
+      "HealthName":      { "type": "string" },
+      "Owner":           { "type": "string" },
+      "SIs":             { "type": "string" },
+      "Hype":            { "type": "string" },
+      "NextActionName":  { "type": "string" },
+      "NextActionDue":   { "type": "string" },
+      "TargetDate":      { "type": "string" },
+      "SfUrl":           { "type": "string" },
+      "Fees":            { "type": "string" }
     }
   }
 }
 ```
 
-Every property is `string` because the app pre-formats dates and flattens choice columns
-before serialising. Declaring `TargetClose` as a date here would fail the moment a
-pursuit has no target close date and the app sends `""`.
+Every property is `string` because the app pre-formats dates, currency, and choice values
+before serialising. Declaring `TargetDate` as a date here would fail the moment a pursuit
+has none and the app sends `""` — which is three of your fourteen rows today.
 
 ### 3. Create CSV table
 
@@ -60,17 +62,19 @@ pursuit has no target close date and the app sends `""`.
 
 | Header | Value |
 |---|---|
-| Pursuit | `item()?['Pursuit']` |
+| Pursuit ID | `item()?['PursuitId']` |
+| Pursuit | `item()?['PursuitName']` |
 | Account | `item()?['Account']` |
 | Stage | `item()?['StageName']` |
+| Health | `item()?['HealthName']` |
 | Owner | `item()?['Owner']` |
-| Aligned SIs | `item()?['AlignedSIs']` |
-| Hyperscalers | `item()?['Hyperscalers']` |
-| Next task | `item()?['NextTaskName']` |
-| Next task due | `item()?['NextTaskDue']` |
-| Target close | `item()?['TargetClose']` |
-| Salesforce opportunity | `item()?['Salesforce']` |
-| Sync status | `item()?['SyncStatus']` |
+| Aligned SIs | `item()?['SIs']` |
+| Hyperscalers | `item()?['Hype']` |
+| Next action | `item()?['NextActionName']` |
+| Next action due | `item()?['NextActionDue']` |
+| Target decision | `item()?['TargetDate']` |
+| Salesforce opportunity | `item()?['SfUrl']` |
+| Estimated fees | `item()?['Fees']` |
 
 Leaving Columns on **Automatic** works, but you get raw property names as headers and
 no control over column order.
