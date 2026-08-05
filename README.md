@@ -8,10 +8,16 @@ Everything here stays on standard connectors — SharePoint, Office 365 Users, O
 for Business — so it needs no app registration, no admin consent, no premium licence,
 and no IT involvement.
 
-This repo is the build specification, not the app. Canvas apps live in Power Platform;
-what's version-controlled here is the data contract, the full Power Fx for every screen,
-the theme, and the flow definition. The app gets assembled in Power Apps Studio from
-these.
+The app is built, as far as anything outside Power Platform can build a canvas app.
+`src/yaml/` holds all three screens as Power Apps code-view YAML — 153 controls,
+positioned, with every formula — which you paste into Studio one screen at a time. The
+theme and startup logic paste into two App properties. `docs/` carries the same thing as
+property tables, both as a fallback and as the record of why each formula is what it is.
+
+What can't be produced from here is a `.msapp`: packing one needs the Power Platform CLI,
+and this environment has neither the .NET SDK nor network access to install it. Hand-
+forging the archive isn't an option either — Studio validates internal checksums, and a
+corrupt file is worse than no file.
 
 ## Order of work
 
@@ -31,7 +37,10 @@ these.
 |---|---|
 | `src/App.Formulas.powerfx` | Dark theme as named formulas. Paste into App → Formulas |
 | `src/App.OnStart.powerfx` | Startup state and the shared portfolio load |
-| `src/yaml/TopNav.pa.yaml` | The nav bar as code-view YAML. Paste onto each screen |
+| `src/yaml/01-PortfolioBoard.pa.yaml` | The kanban as code-view YAML — 30 controls. Paste onto `scrPortfolioBoard` |
+| `src/yaml/02-PortfolioList.pa.yaml` | The table and export button — 33 controls |
+| `src/yaml/03-PursuitWorkspace.pa.yaml` | The detail page, seven cards and both slide-over panels — 90 controls |
+| `tools/validate-screens.py` | Structural check over the screen YAML |
 | `tools/dump-list-schema.js` | Browser-console script that dumps your real list schemas |
 
 ## Read this before you start

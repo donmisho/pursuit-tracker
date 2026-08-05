@@ -1,0 +1,498 @@
+# scrPortfolioBoard — complete screen.
+#
+# PASTE: create the three screens first (scrPortfolioBoard / scrPortfolioList /
+# scrPursuitWorkspace) and set App.Formulas + App.OnStart, then right-click
+# scrPortfolioBoard in the tree view -> Paste. Set the screen's Fill to =ClrPage.
+#
+# Laid out for Tablet (1366 x 768) with "Scale to fit" OFF.
+#
+# If Studio rejects the paste, it is almost always one of two controls: see the
+# FALLBACKS note at the foot of this file. Nothing else here is exotic.
+
+# ---------------------------------------------------------------- nav bar
+- navBg:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =0
+      Width: =Parent.Width
+      Height: =64
+      Fill: =ClrNav
+
+- navRule:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =63
+      Width: =Parent.Width
+      Height: =1
+      Fill: =ClrBorder
+
+- navBrand:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =0
+      Width: =180
+      Height: =64
+      Text: ="Pursuit Tracker"
+      Font: =FontUI
+      Size: =14
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      VerticalAlign: =VerticalAlign.Middle
+
+- btnNavBoard:
+    Control: Button
+    Properties:
+      X: =210
+      Y: =14
+      Width: =170
+      Height: =36
+      Text: ="Portfolio board"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =false
+
+- btnNavList:
+    Control: Button
+    Properties:
+      X: =390
+      Y: =14
+      Width: =160
+      Height: =36
+      Text: ="Portfolio list"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Navigate(scrPortfolioList, ScreenTransition.None)
+
+- btnNavWorkspace:
+    Control: Button
+    Properties:
+      X: =560
+      Y: =14
+      Width: =190
+      Height: =36
+      Text: ="Pursuit workspace"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Navigate(scrPursuitWorkspace, ScreenTransition.None)
+
+# ---------------------------------------------------------------- page header
+- lblPageTitle:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =88
+      Width: =700
+      Height: =36
+      Text: ="SI pursuit management"
+      Font: =FontUI
+      Size: =SizePageTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- lblPageSub:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =126
+      Width: =900
+      Height: =24
+      Text: |
+        =If(
+            IsBlank(gblMoving),
+            "Select the move handle on a pursuit, then choose its new stage.",
+            "Moving " & gblMoving.'Pursuit Name' & " — choose a stage, or press the handle again to cancel."
+        )
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =If(IsBlank(gblMoving), ClrTextMuted, ClrAccent)
+
+- btnNewPursuit:
+    Control: Button
+    Properties:
+      X: =Parent.Width - Self.Width - GapPage
+      Y: =96
+      Width: =150
+      Height: =40
+      Text: ="New pursuit"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Set(gblPursuitKey, Blank()); Set(gblNewPursuit, true); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+
+# ---------------------------------------------------------------- the board
+- galStages:
+    Control: Gallery
+    Variant: Horizontal
+    Properties:
+      X: =GapPage
+      Y: =170
+      Width: =Parent.Width - (GapPage * 2)
+      Height: =Parent.Height - 170 - GapPage
+      Items: =colStages
+      TemplateSize: =BoardColWidth
+      TemplatePadding: =0
+      ShowScrollbar: =true
+    Children:
+      - colBg:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =Parent.TemplateWidth - 12
+            Height: =Parent.Height - 8
+            Fill: =ClrColumn
+            BorderColor: =ClrBorder
+            BorderThickness: =1
+            RadiusTopLeft: =RadiusCard
+            RadiusTopRight: =RadiusCard
+            RadiusBottomLeft: =RadiusCard
+            RadiusBottomRight: =RadiusCard
+
+      - recStageAccent:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =colBg.Width
+            Height: =3
+            Fill: =StageAccent(ThisItem.Stage)
+            RadiusTopLeft: =RadiusCard
+            RadiusTopRight: =RadiusCard
+
+      - lblStageName:
+          Control: Label
+          Properties:
+            X: =16
+            Y: =14
+            Width: =230
+            Height: =24
+            Text: =ThisItem.Stage
+            Font: =FontUI
+            Size: =SizeBody
+            FontWeight: =FontWeight.Semibold
+            Color: =ClrText
+            VerticalAlign: =VerticalAlign.Middle
+
+      - lblStageCount:
+          Control: Label
+          Properties:
+            X: =252
+            Y: =14
+            Width: =40
+            Height: =24
+            Text: =CountRows(Filter(colPortfolio, 'Workflow Stage'.Value = ThisItem.Stage))
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrTextMuted
+            Align: =Align.Right
+            VerticalAlign: =VerticalAlign.Middle
+
+      - recDropTarget:
+          Control: Rectangle
+          Properties:
+            X: =14
+            Y: =48
+            Width: =280
+            Height: =44
+            Visible: =Not(IsBlank(gblMoving)) && gblMoving.'Workflow Stage'.Value <> ThisItem.Stage
+            Fill: =ColorFade(ClrAccent, 0.75)
+            BorderColor: =ClrAccent
+            BorderStyle: =BorderStyle.Dashed
+            BorderThickness: =1
+            RadiusTopLeft: =RadiusCard
+            RadiusTopRight: =RadiusCard
+            RadiusBottomLeft: =RadiusCard
+            RadiusBottomRight: =RadiusCard
+            OnSelect: |
+              =Patch(
+                  'pursuit-tracker-pursuits',
+                  LookUp('pursuit-tracker-pursuits', Title = gblMoving.Title),
+                  { 'Workflow Stage': { Value: ThisItem.Stage } }
+              );
+              Set(gblMoving, Blank());
+              ClearCollect(
+                  colPortfolio,
+                  AddColumns(
+                      'pursuit-tracker-pursuits' As P,
+                      "OwnerName",
+                      Coalesce(LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name, P.'WM Pursuit Owner Entra ID'),
+                      "NextAction",
+                      First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)),
+                      "SIsText",  Concat(P.'Aligned SIs', Value, ", "),
+                      "HypeText", Concat(P.Hyperscalers, Value, ", ")
+                  )
+              );
+              Notify("Moved to " & ThisItem.Stage, NotificationType.Success, 2000)
+
+      - lblDropHint:
+          Control: Label
+          Properties:
+            X: =14
+            Y: =48
+            Width: =280
+            Height: =44
+            Visible: =recDropTarget.Visible
+            Text: ="Move here"
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrAccent
+            Align: =Align.Center
+            VerticalAlign: =VerticalAlign.Middle
+
+      - galCards:
+          Control: Gallery
+          Variant: Vertical
+          Properties:
+            X: =14
+            Y: =If(recDropTarget.Visible, 100, 52)
+            Width: =288
+            Height: =Parent.Height - Self.Y - 24
+            Items: |
+              =Sort(
+                  Filter(colPortfolio, 'Workflow Stage'.Value = ThisItem.Stage),
+                  If(IsBlank('Target Decision Date'), Date(2099, 12, 31), 'Target Decision Date'),
+                  SortOrder.Ascending
+              )
+            TemplateSize: =178
+            TemplatePadding: =6
+            ShowScrollbar: =true
+          Children:
+            - recCard:
+                Control: Rectangle
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =282
+                  Height: =170
+                  Fill: =ClrCard
+                  BorderColor: =If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrBorder)
+                  BorderThickness: =If(gblMoving.Title = ThisItem.Title, 2, 1)
+                  RadiusTopLeft: =RadiusCard
+                  RadiusTopRight: =RadiusCard
+                  RadiusBottomLeft: =RadiusCard
+                  RadiusBottomRight: =RadiusCard
+                  OnSelect: =Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+
+            - recHealth:
+                Control: Rectangle
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =3
+                  Height: =170
+                  Fill: =If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)
+                  RadiusTopLeft: =RadiusCard
+                  RadiusBottomLeft: =RadiusCard
+
+            - lblMoveHandle:
+                Control: Label
+                Properties:
+                  X: =246
+                  Y: =8
+                  Width: =28
+                  Height: =28
+                  Text: ="⋮⋮"
+                  Font: =FontUI
+                  Size: =12
+                  Color: =If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)
+                  Align: =Align.Center
+                  VerticalAlign: =VerticalAlign.Middle
+                  Tooltip: ="Move to another stage"
+                  OnSelect: =Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))
+
+            - lblCardTitle:
+                Control: Label
+                Properties:
+                  X: =14
+                  Y: =10
+                  Width: =228
+                  Height: =46
+                  Text: =ThisItem.'Pursuit Name'
+                  Font: =FontUI
+                  Size: =SizeCardTitle
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ClrText
+                  Wrap: =true
+
+            - recAvatar:
+                Control: Rectangle
+                Properties:
+                  X: =14
+                  Y: =64
+                  Width: =24
+                  Height: =24
+                  Fill: =ClrAvatar
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+
+            - lblInitials:
+                Control: Label
+                Properties:
+                  X: =14
+                  Y: =64
+                  Width: =24
+                  Height: =24
+                  Text: =Initials(ThisItem.OwnerName)
+                  Font: =FontUI
+                  Size: =SizeChip
+                  Color: =ClrAvatarText
+                  Align: =Align.Center
+                  VerticalAlign: =VerticalAlign.Middle
+
+            - lblOwner:
+                Control: Label
+                Properties:
+                  X: =44
+                  Y: =64
+                  Width: =200
+                  Height: =24
+                  Text: =ThisItem.OwnerName
+                  Font: =FontUI
+                  Size: =SizeBody
+                  Color: =ClrTextMuted
+                  VerticalAlign: =VerticalAlign.Middle
+
+            - galCardSIs:
+                Control: Gallery
+                Variant: Horizontal
+                Properties:
+                  X: =14
+                  Y: =94
+                  Width: =256
+                  Height: =22
+                  Items: =ThisItem.'Aligned SIs'
+                  TemplateSize: =76
+                  TemplatePadding: =0
+                  ShowScrollbar: =false
+                Children:
+                  - recChip:
+                      Control: Rectangle
+                      Properties:
+                        X: =0
+                        Y: =0
+                        Width: =72
+                        Height: =22
+                        Fill: =ClrChip
+                        RadiusTopLeft: =RadiusChip
+                        RadiusTopRight: =RadiusChip
+                        RadiusBottomLeft: =RadiusChip
+                        RadiusBottomRight: =RadiusChip
+                  - lblChip:
+                      Control: Label
+                      Properties:
+                        X: =0
+                        Y: =0
+                        Width: =72
+                        Height: =22
+                        Text: =ThisItem.Value
+                        Font: =FontUI
+                        Size: =SizeChip
+                        Color: =ClrChipText
+                        Align: =Align.Center
+                        VerticalAlign: =VerticalAlign.Middle
+
+            - recCardDivider:
+                Control: Rectangle
+                Properties:
+                  X: =14
+                  Y: =124
+                  Width: =254
+                  Height: =1
+                  Fill: =ClrDivider
+
+            - lblNextTask:
+                Control: Label
+                Properties:
+                  X: =14
+                  Y: =128
+                  Width: =254
+                  Height: =20
+                  Text: |
+                    ="Next task due: " & Coalesce(ThisItem.NextAction.'Action Title', "—")
+                  Font: =FontUI
+                  Size: =SizeBody
+                  Color: =ClrText
+                  Wrap: =true
+
+            - lblNextTaskDue:
+                Control: Label
+                Properties:
+                  X: =14
+                  Y: =146
+                  Width: =254
+                  Height: =18
+                  Text: =If(IsBlank(ThisItem.NextAction), "No open actions", Text(ThisItem.NextAction.'Due Date', "mmmm d"))
+                  Font: =FontUI
+                  Size: =SizeBody
+                  Color: =ClrDate
+
+# ---------------------------------------------------------------------------
+# SCREEN PROPERTIES — set these by hand, they aren't part of a control paste:
+#
+#   Fill       =ClrPage
+#   OnVisible  paste the LoadPortfolio block from src/App.OnStart.powerfx,
+#              then add:  Set(gblMoving, Blank())
+#
+# FALLBACKS — if the paste is rejected, the cause is one of these two:
+#
+#   1. galCardSIs is a gallery inside a gallery inside a gallery. If Studio
+#      refuses the depth, delete that control and replace it with a Label:
+#          X 14  Y 94  W 256  H 22
+#          Text  =Concat(ThisItem.'Aligned SIs', Value, "  ·  ")
+#          Size  =SizeChip   Color =ClrChipText
+#      You lose the chip pills and keep the information.
+#
+#   2. Gallery Variant strings move between Studio releases. If "Horizontal" or
+#      "Vertical" isn't recognised, insert a blank gallery of the right
+#      orientation by hand, then paste each child control into it and copy the
+#      gallery's own properties from docs/03-screen-portfolio-board.md.
+# ---------------------------------------------------------------------------

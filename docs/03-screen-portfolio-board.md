@@ -4,7 +4,7 @@ The kanban. One column per workflow stage, cards sorted by target decision date.
 
 ```
 scrPortfolioBoard
-├── [TopNav.pa.yaml]                 nav bar, pasted
+├── nav bar                       navBg, navBrand, three tabs
 ├── lblPageTitle                     "SI pursuit management"
 ├── lblPageSub                       instruction line
 ├── btnNewPursuit                    "New pursuit"
@@ -14,9 +14,9 @@ scrPortfolioBoard
     ├── recDropTarget + lblDropHint   "Move here", only while a card is picked up
     └── galCards                 ◄── vertical gallery, the pursuits in this stage
         ├── recCard + recHealth
-        ├── icoMove                  pick up / put down
+        ├── lblMoveHandle            pick up / put down
         ├── lblCardTitle
-        ├── cirAvatar + lblInitials + lblOwner
+        ├── recAvatar + lblInitials + lblOwner
         ├── galCardSIs           ◄── horizontal gallery of SI chips
         ├── recCardDivider
         └── lblNextTask + lblNextTaskDue
@@ -169,14 +169,14 @@ of the app does.
 | | `OnSelect` | `=Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
 | `recHealth` (Rectangle) | `Width` / `Height` / `X` | `=3` / `=recCard.Height` / `=recCard.X` |
 | | `Fill` | `=If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)` |
-| `icoMove` (Icon, `Reorder`) | `Color` | `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)` |
+| `lblMoveHandle` (Label, text `"⋮⋮"`) | `Color` | `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)` |
 | | `X` | `=recCard.Width - Self.Width - 10` |
 | | `Tooltip` | `="Move to another stage"` |
 | | `OnSelect` | `=Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))` |
 | `lblCardTitle` | `Text` | `=ThisItem.'Pursuit Name'` |
 | | `Size` / `FontWeight` / `Color` | `=SizeCardTitle` / `=FontWeight.Semibold` / `=ClrText` |
 | | `Wrap` / `Height` | `=true` / `=44` |
-| `cirAvatar` (Circle) | `Fill` / `Width` / `Height` | `=ClrAvatar` / `=24` / `=24` |
+| `recAvatar` (Rectangle, all `Radius* = 12`) | `Fill` / `Width` / `Height` | `=ClrAvatar` / `=24` / `=24` |
 | `lblInitials` | `Text` | `=Initials(ThisItem.OwnerName)` |
 | | `Size` / `Color` / `Align` | `=SizeChip` / `=ClrAvatarText` / `=Align.Center` |
 | `lblOwner` | `Text` | `=ThisItem.OwnerName` |

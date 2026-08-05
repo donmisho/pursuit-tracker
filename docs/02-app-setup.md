@@ -81,40 +81,54 @@ Set **App → StartScreen** to `=scrPortfolioBoard`.
 On each screen set `Fill` to `=ClrPage`. If the screen stays white, named formulas
 aren't switched on yet — go back to step 2.
 
-## 6. Paste the nav bar onto each screen
+## 6. Paste the three screens
 
-`src/yaml/TopNav.pa.yaml` is the shared header, as Power Apps code-view YAML.
+`src/yaml/` holds each screen as complete Power Apps code-view YAML — every control,
+positioned, with every formula. 153 controls across the three files.
 
-1. Open `scrPortfolioBoard`, right-click the screen in the tree view → **Paste** (or
-   Ctrl+V with the YAML on your clipboard). Studio validates the YAML and builds the
-   controls.
-2. Repeat on the other two screens.
-3. On each screen, set the `Fill` of the tab that represents *that* screen to
-   `=ClrAccent` — that's the selected-tab state in the mockups. The YAML ships with
-   `scrPortfolioBoard` selected.
+For each screen in turn:
 
-If a paste is rejected, build the nav manually from the property table at the bottom of
-that file and move on — the YAML is an accelerator, not a dependency. Studio only
-accepts YAML in the exact shape it generates itself, and control versions shift between
-releases.
+1. Open the file, select all, copy.
+2. In Studio, right-click the matching screen in the tree view → **Paste**. The first
+   paste triggers a browser clipboard-permission prompt; approve it.
+3. Set the screen's `Fill` to `=ClrPage`.
+4. Set the screen's `OnVisible` — the comment block at the foot of each YAML file says
+   which one, and `docs/03`–`05` carry the formulas.
 
-## 7. Then build the screens
+| File | Screen | Controls |
+|---|---|---|
+| `01-PortfolioBoard.pa.yaml` | `scrPortfolioBoard` | 30 |
+| `02-PortfolioList.pa.yaml` | `scrPortfolioList` | 33 |
+| `03-PursuitWorkspace.pa.yaml` | `scrPursuitWorkspace` | 90 |
 
-In order, because each depends on state the previous one sets:
+The nav bar is included in all three files rather than pasted separately, so each screen
+is one paste. The selected-tab styling is already set per screen.
 
-1. `docs/03-screen-portfolio-board.md`
-2. `docs/04-screen-portfolio-list.md`
-3. `docs/05-screen-pursuit-workspace.md`
-4. `docs/06-flows.md` — the Excel export, once the list screen exists
+### If a paste is rejected
+
+Studio only accepts the exact YAML shape its own code view emits, and that shape moves
+between releases — I can't verify a paste from outside Power Apps, so treat this as an
+accelerator with a known fallback rather than a guarantee. Each file ends with a
+FALLBACKS note naming the two controls most likely to be the cause. Beyond those,
+`docs/03`–`05` carry every control and formula as property tables, which always work:
+insert the control by hand and paste the formulas into the property box.
+
+Two things worth knowing before you paste:
+
+**Set App.Formulas and App.OnStart first** (step 4). Nearly every property here resolves
+through a theme token — a screen pasted before the theme exists shows a wall of red
+errors that all disappear once the tokens are defined.
+
+**Create all three screens first** (step 5). The nav buttons navigate by screen name, and
+a `Navigate()` to a screen that doesn't exist is an error Studio can't resolve.
 
 ## A note on how the screen docs are written
 
-Each gives you a control tree and a table of **every non-default property**, keyed to
-control name. Properties not listed keep their Power Apps defaults.
+`docs/03`–`05` give each screen as a control tree plus a table of **every non-default
+property**, keyed to control name. Properties not listed keep their Power Apps defaults.
 
-I've written them as formula references rather than as more pasteable YAML on purpose.
-Chrome — bars, headers, card frames — pastes reliably. Galleries don't: their YAML
-carries template metadata and a `Variant` string that changes between Studio releases,
-and a rejected paste on a nested gallery costs more time to unpick than building the
-two galleries by hand. The formulas are the part that's hard to get right, and they
-paste into a property box perfectly.
+They exist alongside the YAML rather than being replaced by it. The YAML is faster when
+it works; the tables always work, and they carry the reasoning — why the board sorts on a
+substituted date, why `ShowColumns` wraps `AddColumns` in the export, why the at-risk pill
+reads `Health` and not `Status`. Read the tables when something looks wrong; paste the
+YAML when you just want the screen on the canvas.

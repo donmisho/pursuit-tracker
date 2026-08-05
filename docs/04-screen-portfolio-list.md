@@ -4,14 +4,14 @@ The same portfolio as a reportable table, plus the Excel download.
 
 ```
 scrPortfolioList
-├── [TopNav.pa.yaml]
+├── nav bar
 ├── lblPageTitle / lblPageSub
 ├── btnDownloadExcel
 ├── recHeaderRule + six column-header labels
 ├── galPortfolioList             ◄── one row per pursuit
 │   ├── lblRowTitle / lblRowSfLink
 │   ├── lblRowStage
-│   ├── cirRowAvatar + lblRowInitials + lblRowOwner
+│   ├── recRowAvatar + lblRowInitials + lblRowOwner
 │   ├── galRowSIs / galRowHype   ◄── chips
 │   ├── lblRowNextTask + lblRowNextDue
 │   └── recRowDivider
@@ -85,7 +85,7 @@ Each control's `X` and `Width` match its column header.
 | | `Size` / `Color` | `=SizeMeta` / `=ClrTextFaint` |
 | `lblRowStage` | `Text` | `=ThisItem.'Workflow Stage'.Value` |
 | | `Size` / `Color` / `Wrap` | `=SizeBody` / `=ClrTextMuted` / `=true` |
-| `cirRowAvatar` (Circle) | `Fill` / `Width` / `Height` | `=ClrAvatar` / `=24` / `=24` |
+| `recRowAvatar` (Rectangle, all `Radius* = 12`) | `Fill` / `Width` / `Height` | `=ClrAvatar` / `=24` / `=24` |
 | `lblRowInitials` | `Text` | `=Initials(ThisItem.OwnerName)` |
 | | `Size` / `Color` / `Align` | `=SizeChip` / `=ClrAvatarText` / `=Align.Center` |
 | `lblRowOwner` | `Text` | `=ThisItem.OwnerName` |

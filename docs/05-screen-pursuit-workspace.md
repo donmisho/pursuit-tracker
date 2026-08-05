@@ -5,7 +5,7 @@ right rail (alignment, documents, updates, overview history).
 
 ```
 scrPursuitWorkspace
-├── [TopNav.pa.yaml]
+├── nav bar
 ├── lblBreadcrumb / lblTitle / lblSubtitle
 ├── btnAddAction / btnAddUpdate
 ├── LEFT RAIL
@@ -128,9 +128,9 @@ pursuit.
 | `lblSyncPill` | `Text` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), "Not linked", "Linked")` |
 | | `Color` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChipText, ClrOkText)` |
 | `lblOwnerCap` | `Text` | `="PURSUIT OWNER"` — `Size = SizeMeta`, `Color = ClrTextMuted` |
-| `cirOwner` / `lblOwnerInitials` | `Text` | `=Initials(Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID'))` |
-| `lblOwnerName` | `Text` | `=Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID')` |
-| `lblOwnerOrg` | `Text` | `="West Monroe · Entra ID"` — `Size = SizeMeta`, `Color = ClrTextFaint` |
+| `recWsAvatar` (Rectangle, all `Radius* = 12`) / `lblWsInitials` | `Text` | `=Initials(Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID'))` |
+| `lblWsOwnerName` | `Text` | `=Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID')` |
+| `lblWsOwnerOrg` | `Text` | `="West Monroe · Entra ID"` — `Size = SizeMeta`, `Color = ClrTextFaint` |
 | `lblCloseCap` | `Text` | `="TARGET DECISION"` |
 | `lblCloseDate` | `Text` | `=If(IsBlank(gblPursuit.'Target Decision Date'), "Not set", Text(gblPursuit.'Target Decision Date', "mmmm d"))` |
 | | `Size` / `FontWeight` / `Color` | `=SizeCardTitle` / `=FontWeight.Semibold` / `=ClrText` |

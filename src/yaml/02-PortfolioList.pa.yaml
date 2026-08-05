@@ -1,0 +1,472 @@
+# scrPortfolioList — complete screen. Paste onto scrPortfolioList.
+# Tablet (1366 x 768), "Scale to fit" OFF. See 01-PortfolioBoard.pa.yaml for paste
+# instructions and fallbacks.
+
+# ---------------------------------------------------------------- nav bar
+- navBg:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =0
+      Width: =Parent.Width
+      Height: =64
+      Fill: =ClrNav
+
+- navRule:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =63
+      Width: =Parent.Width
+      Height: =1
+      Fill: =ClrBorder
+
+- navBrand:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =0
+      Width: =180
+      Height: =64
+      Text: ="Pursuit Tracker"
+      Font: =FontUI
+      Size: =14
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      VerticalAlign: =VerticalAlign.Middle
+
+- btnNavBoard:
+    Control: Button
+    Properties:
+      X: =210
+      Y: =14
+      Width: =170
+      Height: =36
+      Text: ="Portfolio board"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Navigate(scrPortfolioBoard, ScreenTransition.None)
+
+- btnNavList:
+    Control: Button
+    Properties:
+      X: =390
+      Y: =14
+      Width: =160
+      Height: =36
+      Text: ="Portfolio list"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =false
+
+- btnNavWorkspace:
+    Control: Button
+    Properties:
+      X: =560
+      Y: =14
+      Width: =190
+      Height: =36
+      Text: ="Pursuit workspace"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Navigate(scrPursuitWorkspace, ScreenTransition.None)
+
+# ---------------------------------------------------------------- page header
+- lblPageTitle:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =88
+      Width: =700
+      Height: =36
+      Text: ="SI pursuit management"
+      Font: =FontUI
+      Size: =SizePageTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- lblPageSub:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =126
+      Width: =900
+      Height: =24
+      Text: ="A reportable view of the same portfolio shown on the board."
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrTextMuted
+
+- btnDownloadExcel:
+    Control: Button
+    Properties:
+      X: =Parent.Width - Self.Width - GapPage
+      Y: =96
+      Width: =170
+      Height: =40
+      Text: =If(gblExporting, "Preparing…", "Download Excel")
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      DisplayMode: =If(gblExporting || CountRows(galPortfolioList.AllItems) = 0, DisplayMode.Disabled, DisplayMode.Edit)
+      # Wire this AFTER creating the flow (docs/06-flows.md) and adding it as a data
+      # source. Until then it notifies rather than erroring on an unknown name.
+      OnSelect: =Notify("Connect the PursuitTracker-ExportPortfolio flow first — see docs/06-flows.md.", NotificationType.Warning)
+
+# ---------------------------------------------------------------- column headers
+- lblHdrPursuit:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =218
+      Width: =210
+      Height: =20
+      Text: ="PURSUIT"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- lblHdrStage:
+    Control: Label
+    Properties:
+      X: =244
+      Y: =218
+      Width: =200
+      Height: =20
+      Text: ="STAGE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- lblHdrOwner:
+    Control: Label
+    Properties:
+      X: =454
+      Y: =218
+      Width: =190
+      Height: =20
+      Text: ="OWNER"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- lblHdrSIs:
+    Control: Label
+    Properties:
+      X: =654
+      Y: =218
+      Width: =150
+      Height: =20
+      Text: ="ALIGNED SIS"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- lblHdrHype:
+    Control: Label
+    Properties:
+      X: =814
+      Y: =218
+      Width: =150
+      Height: =20
+      Text: ="HYPERSCALERS"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- lblHdrNext:
+    Control: Label
+    Properties:
+      X: =974
+      Y: =218
+      Width: =200
+      Height: =20
+      Text: ="NEXT TASK"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- recHeaderRule:
+    Control: Rectangle
+    Properties:
+      X: =GapPage
+      Y: =242
+      Width: =Parent.Width - (GapPage * 2)
+      Height: =1
+      Fill: =ClrBorder
+
+# ---------------------------------------------------------------- the table
+- galPortfolioList:
+    Control: Gallery
+    Variant: Vertical
+    Properties:
+      X: =GapPage
+      Y: =250
+      Width: =Parent.Width - (GapPage * 2)
+      Height: =Parent.Height - 250 - 56
+      Items: =Sort(colPortfolio, 'Pursuit Name', SortOrder.Ascending)
+      TemplateSize: =110
+      TemplatePadding: =0
+      ShowScrollbar: =true
+    Children:
+      - lblRowTitle:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =8
+            Width: =210
+            Height: =64
+            Text: =ThisItem.'Pursuit Name'
+            Font: =FontUI
+            Size: =SizeCardTitle
+            FontWeight: =FontWeight.Semibold
+            Color: =ClrText
+            Wrap: =true
+            OnSelect: =Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+
+      - lblRowSfLink:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =72
+            Width: =210
+            Height: =18
+            Text: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Salesforce opportunity linked")
+            Font: =FontUI
+            Size: =SizeMeta
+            Color: =ClrTextFaint
+
+      - lblRowStage:
+          Control: Label
+          Properties:
+            X: =220
+            Y: =8
+            Width: =200
+            Height: =40
+            Text: =ThisItem.'Workflow Stage'.Value
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrTextMuted
+            Wrap: =true
+
+      - recRowAvatar:
+          Control: Rectangle
+          Properties:
+            X: =430
+            Y: =10
+            Width: =24
+            Height: =24
+            Fill: =ClrAvatar
+            RadiusTopLeft: =12
+            RadiusTopRight: =12
+            RadiusBottomLeft: =12
+            RadiusBottomRight: =12
+
+      - lblRowInitials:
+          Control: Label
+          Properties:
+            X: =430
+            Y: =10
+            Width: =24
+            Height: =24
+            Text: =Initials(ThisItem.OwnerName)
+            Font: =FontUI
+            Size: =SizeChip
+            Color: =ClrAvatarText
+            Align: =Align.Center
+            VerticalAlign: =VerticalAlign.Middle
+
+      - lblRowOwner:
+          Control: Label
+          Properties:
+            X: =462
+            Y: =10
+            Width: =158
+            Height: =24
+            Text: =ThisItem.OwnerName
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrText
+            VerticalAlign: =VerticalAlign.Middle
+
+      - galRowSIs:
+          Control: Gallery
+          Variant: Vertical
+          Properties:
+            X: =630
+            Y: =8
+            Width: =150
+            Height: =78
+            Items: =ThisItem.'Aligned SIs'
+            TemplateSize: =26
+            TemplatePadding: =0
+            ShowScrollbar: =false
+          Children:
+            - recSIChip:
+                Control: Rectangle
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =92
+                  Height: =22
+                  Fill: =ClrChip
+                  RadiusTopLeft: =RadiusChip
+                  RadiusTopRight: =RadiusChip
+                  RadiusBottomLeft: =RadiusChip
+                  RadiusBottomRight: =RadiusChip
+            - lblSIChip:
+                Control: Label
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =92
+                  Height: =22
+                  Text: =ThisItem.Value
+                  Font: =FontUI
+                  Size: =SizeChip
+                  Color: =ClrChipText
+                  Align: =Align.Center
+                  VerticalAlign: =VerticalAlign.Middle
+
+      - galRowHype:
+          Control: Gallery
+          Variant: Vertical
+          Properties:
+            X: =790
+            Y: =8
+            Width: =150
+            Height: =78
+            Items: =ThisItem.Hyperscalers
+            TemplateSize: =26
+            TemplatePadding: =0
+            ShowScrollbar: =false
+          Children:
+            - recHypeChip:
+                Control: Rectangle
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =92
+                  Height: =22
+                  Fill: =ClrChip
+                  RadiusTopLeft: =RadiusChip
+                  RadiusTopRight: =RadiusChip
+                  RadiusBottomLeft: =RadiusChip
+                  RadiusBottomRight: =RadiusChip
+            - lblHypeChip:
+                Control: Label
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =92
+                  Height: =22
+                  Text: =ThisItem.Value
+                  Font: =FontUI
+                  Size: =SizeChip
+                  Color: =ClrChipText
+                  Align: =Align.Center
+                  VerticalAlign: =VerticalAlign.Middle
+
+      - lblRowNextTask:
+          Control: Label
+          Properties:
+            X: =950
+            Y: =8
+            Width: =200
+            Height: =42
+            Text: =Coalesce(ThisItem.NextAction.'Action Title', "—")
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrText
+            Wrap: =true
+
+      - lblRowNextDue:
+          Control: Label
+          Properties:
+            X: =950
+            Y: =52
+            Width: =200
+            Height: =20
+            Text: =If(IsBlank(ThisItem.NextAction), "", Text(ThisItem.NextAction.'Due Date', "mmmm d"))
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrDate
+
+      - recRowDivider:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =Parent.TemplateHeight - 1
+            Width: =Parent.Width - 20
+            Height: =1
+            Fill: =ClrDivider
+
+# ---------------------------------------------------------------- footer
+- lblFooterNote:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =Parent.Height - 40
+      Width: =1100
+      Height: =24
+      Text: ="The download follows the visible list and is designed for offline review, reporting, and follow-up analysis."
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrTextMuted
+
+# ---------------------------------------------------------------------------
+# SCREEN PROPERTIES — set by hand:
+#
+#   Fill       =ClrPage
+#   OnVisible  the LoadPortfolio block from src/App.OnStart.powerfx
+#
+# AFTER BUILDING THE FLOW: replace btnDownloadExcel.OnSelect with the full
+# export formula in docs/04-screen-portfolio-list.md. The placeholder here
+# exists so the screen pastes and runs before the flow exists — a reference to
+# a flow that hasn't been added yet is an error Studio can't resolve, and it
+# would block the whole paste.
+# ---------------------------------------------------------------------------

@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+"""
+Structural check on the screen YAML in src/yaml/.
+
+This is not a Power Apps validator -- nothing outside Power Apps Studio can tell you
+whether a paste will be accepted, because Studio only takes the exact YAML shape its own
+code view emits and that shape moves between releases. What this catches is the class of
+mistake that is entirely mine to make: malformed YAML, a control with no type, a property
+value missing its leading '=', a duplicate control name, or a formula referencing a
+control that isn't on the same screen.
+
+    python3 tools/validate-screens.py
+"""
+import re
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    sys.exit("PyYAML required:  pip install pyyaml")
+
+YAML_DIR = Path(__file__).resolve().parent.parent / "src" / "yaml"
+
+# Properties whose values are designer settings rather than Power Fx formulas.
+NON_FORMULA_KEYS = {"Control", "Variant", "Layout", "MetadataKey", "IsLocked", "Group",
+                    "ComponentName"}
+
+# Named formulas and user-defined functions declared in App.Formulas.powerfx, plus the
+# globals and collections App.OnStart creates. Referencing anything else that looks like
+# a bare identifier is worth a second look.
+KNOWN_GLOBALS = {
+    "ClrPage", "ClrNav", "ClrColumn", "ClrCard", "ClrCardHover", "ClrBorder", "ClrDivider",
+    "ClrText", "ClrTextMuted", "ClrTextFaint", "ClrAccent", "ClrAccentHover",
+    "ClrAccentText", "ClrDate", "ClrLink", "ClrChip", "ClrChipText", "ClrAvatar",
+    "ClrAvatarText", "ClrRiskFill", "ClrRiskText", "ClrOkFill", "ClrOkText",
+    "FontUI", "SizePageTitle", "SizeCardTitle", "SizeBody", "SizeMeta", "SizeChip",
+    "GapPage", "GapCard", "RadiusCard", "RadiusChip", "BoardColWidth",
+    "StageAccent", "DueLabel", "Initials", "SafeUrl", "RelativeDay",
+    "gblUser", "gblMoving", "gblPursuitKey", "gblNewPursuit", "gblPanel", "gblPursuit",
+    "gblOverview", "gblExport", "gblExporting",
+    "colActions", "colActions_P", "colPeople", "colPortfolio", "colStages", "colUpdates",
+    "colDocs", "colHistory",
+    "scrPortfolioBoard", "scrPortfolioList", "scrPursuitWorkspace",
+    "Office365Users", "Parent", "Self", "ThisItem", "Value",
+}
+
+errors, warnings = [], []
+
+
+def walk(controls, path, names, file):
+    """Recurse the control tree, collecting names and checking each property."""
+    if not isinstance(controls, list):
+        errors.append(f"{file}: {path} should be a list of controls, got {type(controls).__name__}")
+        return
+    for entry in controls:
+        if not isinstance(entry, dict) or len(entry) != 1:
+            errors.append(f"{file}: {path} has an entry that isn't a single-key 'Name:' map")
+            continue
+        name, body = next(iter(entry.items()))
+        here = f"{path}/{name}"
+        if name in names:
+            errors.append(f"{file}: duplicate control name '{name}'")
+        names.add(name)
+
+        if not isinstance(body, dict):
+            errors.append(f"{file}: {here} has no body")
+            continue
+        if "Control" not in body:
+            errors.append(f"{file}: {here} is missing a Control type")
+
+        for key, value in body.get("Properties", {}).items():
+            if key in NON_FORMULA_KEYS:
+                continue
+            if not isinstance(value, str):
+                errors.append(f"{file}: {here}.{key} is {type(value).__name__}, expected a '=' formula string")
+            elif not value.lstrip().startswith("="):
+                errors.append(f"{file}: {here}.{key} does not start with '='")
+
+        walk(body.get("Children", []), here, names, file)
+
+
+def referenced_identifiers(body):
+    """Bare Foo.Bar references in formulas, minus quoted strings and column names."""
+    found = set()
+    for key, value in body.get("Properties", {}).items():
+        if key in NON_FORMULA_KEYS or not isinstance(value, str):
+            continue
+        stripped = re.sub(r'"[^"]*"', '""', value)      # drop string literals
+        stripped = re.sub(r"'[^']*'", "''", stripped)   # drop 'Column Name' references
+        found.update(re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\.", stripped))
+    return found
+
+
+def collect_refs(controls, acc):
+    for entry in controls or []:
+        if not isinstance(entry, dict) or len(entry) != 1:
+            continue
+        _, body = next(iter(entry.items()))
+        if isinstance(body, dict):
+            acc.update(referenced_identifiers(body))
+            collect_refs(body.get("Children", []), acc)
+
+
+files = sorted(YAML_DIR.glob("*.pa.yaml"))
+if not files:
+    sys.exit(f"No .pa.yaml files under {YAML_DIR}")
+
+for path in files:
+    try:
+        doc = yaml.safe_load(path.read_text())
+    except yaml.YAMLError as exc:
+        errors.append(f"{path.name}: YAML did not parse -- {exc}")
+        continue
+
+    names, refs = set(), set()
+    walk(doc, path.stem, names, path.name)
+    collect_refs(doc, refs)
+
+    # Power Fx enums (Color.Red, Align.Center, ...) are capitalised the same way controls
+    # are, so only flag lower-camel names, which is the convention every control here uses.
+    for ref in sorted(refs - names - KNOWN_GLOBALS):
+        if ref[0].islower():
+            warnings.append(f"{path.name}: '{ref}.…' referenced but no control of that name on this screen")
+
+    print(f"{path.name}: {len(names)} controls")
+
+for w in warnings:
+    print(f"  warn  {w}")
+for e in errors:
+    print(f"  ERROR {e}")
+
+print()
+print(f"{len(errors)} errors, {len(warnings)} warnings")
+sys.exit(1 if errors else 0)

@@ -1,0 +1,1365 @@
+# scrPursuitWorkspace — complete screen. Paste onto scrPursuitWorkspace.
+# Tablet (1366 x 768), "Scale to fit" OFF. See 01-PortfolioBoard.pa.yaml for paste
+# instructions and fallbacks.
+#
+# Left rail  X 24,  W 640.   Right rail X 688, W 630.
+# The seven cards are sized to fit 768px without page scrolling — canvas screens don't
+# scroll — so each gallery scrolls inside its own card instead. If you want more room,
+# rebuild this screen from the "Scrollable screen" layout and drop these controls into
+# its Canvas; every formula below is unchanged by that.
+
+# ---------------------------------------------------------------- nav bar
+- navBg:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =0
+      Width: =Parent.Width
+      Height: =64
+      Fill: =ClrNav
+
+- navRule:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =63
+      Width: =Parent.Width
+      Height: =1
+      Fill: =ClrBorder
+
+- navBrand:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =0
+      Width: =180
+      Height: =64
+      Text: ="Pursuit Tracker"
+      Font: =FontUI
+      Size: =14
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      VerticalAlign: =VerticalAlign.Middle
+
+- btnNavBoard:
+    Control: Button
+    Properties:
+      X: =210
+      Y: =14
+      Width: =170
+      Height: =36
+      Text: ="Portfolio board"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Navigate(scrPortfolioBoard, ScreenTransition.None)
+
+- btnNavList:
+    Control: Button
+    Properties:
+      X: =390
+      Y: =14
+      Width: =160
+      Height: =36
+      Text: ="Portfolio list"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Navigate(scrPortfolioList, ScreenTransition.None)
+
+- btnNavWorkspace:
+    Control: Button
+    Properties:
+      X: =560
+      Y: =14
+      Width: =190
+      Height: =36
+      Text: ="Pursuit workspace"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =false
+
+# ---------------------------------------------------------------- page header
+- lblBreadcrumb:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =74
+      Width: =700
+      Height: =20
+      Text: ="SI pursuit management / " & gblPursuit.'Account Name'
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrTextFaint
+
+- lblTitle:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =96
+      Width: =1000
+      Height: =38
+      Text: =gblPursuit.'Pursuit Name'
+      Font: =FontUI
+      Size: =SizePageTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- lblSubtitle:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =136
+      Width: =900
+      Height: =20
+      Text: ="Pursuit details are supplied from Salesforce."
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrTextMuted
+
+- btnAddAction:
+    Control: Button
+    Properties:
+      X: =1080
+      Y: =100
+      Width: =110
+      Height: =38
+      Text: ="Add task"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrCard
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Set(gblPanel, "action"); Reset(txtActionTitle)
+
+- btnAddUpdate:
+    Control: Button
+    Properties:
+      X: =1202
+      Y: =100
+      Width: =140
+      Height: =38
+      Text: ="Add update"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Set(gblPanel, "update"); Reset(txtUpdateBody)
+
+# ================================================================ LEFT RAIL
+# ---- Salesforce card ------------------------------------------------------
+- cardSalesforce:
+    Control: Rectangle
+    Properties:
+      X: =GapPage
+      Y: =176
+      Width: =640
+      Height: =190
+      Fill: =ClrCard
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblSfHead:
+    Control: Label
+    Properties:
+      X: =44
+      Y: =190
+      Width: =400
+      Height: =24
+      Text: ="Salesforce opportunity"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- lnkSfOpp:
+    Control: Label
+    Properties:
+      X: =44
+      Y: =220
+      Width: =420
+      Height: =24
+      Text: =Coalesce(gblPursuit.'Salesforce Opportunity ID', "No opportunity linked")
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrTextMuted, ClrLink)
+      Underline: =Not(IsBlank(gblPursuit.'Salesforce Opportunity URL'))
+      DisplayMode: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), DisplayMode.View, DisplayMode.Edit)
+      OnSelect: =Launch(gblPursuit.'Salesforce Opportunity URL')
+
+- lblSfHint:
+    Control: Label
+    Properties:
+      X: =44
+      Y: =244
+      Width: =430
+      Height: =34
+      Text: |
+        ="Synced CRM information: account, opportunity owner, amount, close date, and stage"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextFaint
+      Wrap: =true
+
+- recSyncPill:
+    Control: Rectangle
+    Properties:
+      X: =546
+      Y: =220
+      Width: =90
+      Height: =24
+      Fill: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChip, ClrOkFill)
+      RadiusTopLeft: =RadiusChip
+      RadiusTopRight: =RadiusChip
+      RadiusBottomLeft: =RadiusChip
+      RadiusBottomRight: =RadiusChip
+
+- lblSyncPill:
+    Control: Label
+    Properties:
+      X: =546
+      Y: =220
+      Width: =90
+      Height: =24
+      Text: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), "Not linked", "Linked")
+      Font: =FontUI
+      Size: =SizeChip
+      Color: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChipText, ClrOkText)
+      Align: =Align.Center
+      VerticalAlign: =VerticalAlign.Middle
+
+- recOwnerBox:
+    Control: Rectangle
+    Properties:
+      X: =44
+      Y: =288
+      Width: =285
+      Height: =62
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+
+- lblOwnerCap:
+    Control: Label
+    Properties:
+      X: =58
+      Y: =294
+      Width: =200
+      Height: =16
+      Text: ="PURSUIT OWNER"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- recWsAvatar:
+    Control: Rectangle
+    Properties:
+      X: =58
+      Y: =314
+      Width: =24
+      Height: =24
+      Fill: =ClrAvatar
+      RadiusTopLeft: =12
+      RadiusTopRight: =12
+      RadiusBottomLeft: =12
+      RadiusBottomRight: =12
+
+- lblWsInitials:
+    Control: Label
+    Properties:
+      X: =58
+      Y: =314
+      Width: =24
+      Height: =24
+      Text: =Initials(Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID'))
+      Font: =FontUI
+      Size: =SizeChip
+      Color: =ClrAvatarText
+      Align: =Align.Center
+      VerticalAlign: =VerticalAlign.Middle
+
+- lblWsOwnerName:
+    Control: Label
+    Properties:
+      X: =88
+      Y: =312
+      Width: =220
+      Height: =18
+      Text: =Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID')
+      Font: =FontUI
+      Size: =SizeBody
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- lblWsOwnerOrg:
+    Control: Label
+    Properties:
+      X: =88
+      Y: =330
+      Width: =220
+      Height: =16
+      Text: ="West Monroe · Entra ID"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextFaint
+
+- recCloseBox:
+    Control: Rectangle
+    Properties:
+      X: =345
+      Y: =288
+      Width: =285
+      Height: =62
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+
+- lblCloseCap:
+    Control: Label
+    Properties:
+      X: =359
+      Y: =294
+      Width: =240
+      Height: =16
+      Text: ="TARGET DECISION"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- lblCloseDate:
+    Control: Label
+    Properties:
+      X: =359
+      Y: =314
+      Width: =250
+      Height: =26
+      Text: =If(IsBlank(gblPursuit.'Target Decision Date'), "Not set", Text(gblPursuit.'Target Decision Date', "mmmm d"))
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+# ---- AI overview card -----------------------------------------------------
+- cardOverview:
+    Control: Rectangle
+    Properties:
+      X: =GapPage
+      Y: =378
+      Width: =640
+      Height: =180
+      Fill: =ClrCard
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblOverviewHead:
+    Control: Label
+    Properties:
+      X: =44
+      Y: =392
+      Width: =400
+      Height: =24
+      Text: ="AI overview"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- lblOverviewBody:
+    Control: Label
+    Properties:
+      X: =44
+      Y: =422
+      Width: =592
+      Height: =96
+      Text: =Coalesce(gblOverview.'Overview Text', "No overview has been generated for this pursuit yet.")
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Wrap: =true
+
+- lblOverviewMeta:
+    Control: Label
+    Properties:
+      X: =44
+      Y: =522
+      Width: =592
+      Height: =28
+      Text: |
+        =If(
+            IsBlank(gblOverview),
+            "",
+            "Version " & gblOverview.'Version Number' &
+            " · refreshed " & Lower(RelativeDay(gblOverview.'Refreshed Date')) &
+            " · prior versions retained in history"
+        )
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextFaint
+      Wrap: =true
+
+# ---- Actions card ---------------------------------------------------------
+- cardActions:
+    Control: Rectangle
+    Properties:
+      X: =GapPage
+      Y: =570
+      Width: =640
+      Height: =174
+      Fill: =ClrCard
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblActionsHead:
+    Control: Label
+    Properties:
+      X: =44
+      Y: =584
+      Width: =400
+      Height: =24
+      Text: ="Actions and dependencies"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- galActions:
+    Control: Gallery
+    Variant: Vertical
+    Properties:
+      X: =44
+      Y: =614
+      Width: =592
+      Height: =116
+      Items: =colActions_P
+      TemplateSize: =56
+      TemplatePadding: =0
+      ShowScrollbar: =true
+    Children:
+      - lblActionTitle:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =6
+            Width: =230
+            Height: =42
+            Text: =ThisItem.'Action Title'
+            Font: =FontUI
+            Size: =SizeBody
+            FontWeight: =FontWeight.Semibold
+            Color: =If(ThisItem.Status.Value = "Completed", ClrTextFaint, ClrText)
+            Wrap: =true
+
+      - lblActionStage:
+          Control: Label
+          Properties:
+            X: =240
+            Y: =6
+            Width: =140
+            Height: =42
+            Text: =ThisItem.'Workflow Stage'.Value
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrTextMuted
+            Wrap: =true
+
+      - lblActionEffort:
+          Control: Label
+          Properties:
+            X: =390
+            Y: =6
+            Width: =80
+            Height: =24
+            Text: =ThisItem.'Effort Size'.Value
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrText
+
+      - recActionPill:
+          Control: Rectangle
+          Properties:
+            X: =480
+            Y: =8
+            Width: =84
+            Height: =24
+            Visible: =ThisItem.Health.Value = "At risk"
+            Fill: =ClrRiskFill
+            RadiusTopLeft: =RadiusChip
+            RadiusTopRight: =RadiusChip
+            RadiusBottomLeft: =RadiusChip
+            RadiusBottomRight: =RadiusChip
+
+      - lblActionPill:
+          Control: Label
+          Properties:
+            X: =480
+            Y: =8
+            Width: =84
+            Height: =24
+            Visible: =recActionPill.Visible
+            Text: ="At risk"
+            Font: =FontUI
+            Size: =SizeChip
+            Color: =ClrRiskText
+            Align: =Align.Center
+            VerticalAlign: =VerticalAlign.Middle
+
+      - lblActionDue:
+          Control: Label
+          Properties:
+            X: =480
+            Y: =8
+            Width: =110
+            Height: =24
+            Visible: =Not(recActionPill.Visible)
+            Text: =DueLabel(ThisItem.'Due Date', ThisItem.DueWording)
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrTextMuted
+            VerticalAlign: =VerticalAlign.Middle
+
+      - recActionDivider:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =Parent.TemplateHeight - 1
+            Width: =Parent.Width - 20
+            Height: =1
+            Fill: =ClrDivider
+
+# ================================================================ RIGHT RAIL
+# ---- Alignment card -------------------------------------------------------
+- cardAlignment:
+    Control: Rectangle
+    Properties:
+      X: =688
+      Y: =176
+      Width: =630
+      Height: =130
+      Fill: =ClrCard
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblAlignHead:
+    Control: Label
+    Properties:
+      X: =708
+      Y: =186
+      Width: =400
+      Height: =24
+      Text: ="Alignment"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- lblSICap:
+    Control: Label
+    Properties:
+      X: =708
+      Y: =212
+      Width: =300
+      Height: =14
+      Text: ="SYSTEMS INTEGRATORS"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- galAlignSIs:
+    Control: Gallery
+    Variant: Horizontal
+    Properties:
+      X: =708
+      Y: =228
+      Width: =590
+      Height: =26
+      Items: =gblPursuit.'Aligned SIs'
+      TemplateSize: =88
+      TemplatePadding: =0
+      ShowScrollbar: =false
+    Children:
+      - recAlignSIChip:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =84
+            Height: =24
+            Fill: =ClrChip
+            RadiusTopLeft: =RadiusChip
+            RadiusTopRight: =RadiusChip
+            RadiusBottomLeft: =RadiusChip
+            RadiusBottomRight: =RadiusChip
+      - lblAlignSIChip:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =0
+            Width: =84
+            Height: =24
+            Text: =ThisItem.Value
+            Font: =FontUI
+            Size: =SizeChip
+            Color: =ClrChipText
+            Align: =Align.Center
+            VerticalAlign: =VerticalAlign.Middle
+
+- lblHypeCap:
+    Control: Label
+    Properties:
+      X: =708
+      Y: =258
+      Width: =300
+      Height: =14
+      Text: ="HYPERSCALERS"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- galAlignHype:
+    Control: Gallery
+    Variant: Horizontal
+    Properties:
+      X: =708
+      Y: =274
+      Width: =590
+      Height: =26
+      Items: =gblPursuit.Hyperscalers
+      TemplateSize: =88
+      TemplatePadding: =0
+      ShowScrollbar: =false
+    Children:
+      - recAlignHypeChip:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =84
+            Height: =24
+            Fill: =ClrChip
+            RadiusTopLeft: =RadiusChip
+            RadiusTopRight: =RadiusChip
+            RadiusBottomLeft: =RadiusChip
+            RadiusBottomRight: =RadiusChip
+      - lblAlignHypeChip:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =0
+            Width: =84
+            Height: =24
+            Text: =ThisItem.Value
+            Font: =FontUI
+            Size: =SizeChip
+            Color: =ClrChipText
+            Align: =Align.Center
+            VerticalAlign: =VerticalAlign.Middle
+
+# ---- Documents card -------------------------------------------------------
+- cardDocuments:
+    Control: Rectangle
+    Properties:
+      X: =688
+      Y: =318
+      Width: =630
+      Height: =118
+      Fill: =ClrCard
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblDocsHead:
+    Control: Label
+    Properties:
+      X: =708
+      Y: =328
+      Width: =400
+      Height: =24
+      Text: ="Documents and links"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- galDocs:
+    Control: Gallery
+    Variant: Vertical
+    Properties:
+      X: =708
+      Y: =356
+      Width: =590
+      Height: =72
+      Items: =colDocs
+      TemplateSize: =44
+      TemplatePadding: =0
+      ShowScrollbar: =true
+    Children:
+      - lblDocLink:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =2
+            Width: =570
+            Height: =22
+            Text: =ThisItem.Title
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrLink
+            Underline: =true
+            OnSelect: =Launch(SafeUrl(ThisItem.'Document URL'))
+      - lblDocType:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =22
+            Width: =570
+            Height: =18
+            Text: =ThisItem.'Document Type'.Value & If(ThisItem.'Include in AI Overview'.Value = "Yes", " · in overview", "")
+            Font: =FontUI
+            Size: =SizeMeta
+            Color: =ClrTextFaint
+
+# ---- Status updates card --------------------------------------------------
+- cardUpdates:
+    Control: Rectangle
+    Properties:
+      X: =688
+      Y: =448
+      Width: =630
+      Height: =160
+      Fill: =ClrCard
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblUpdatesHead:
+    Control: Label
+    Properties:
+      X: =708
+      Y: =458
+      Width: =400
+      Height: =24
+      Text: ="Status updates"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- galUpdates:
+    Control: Gallery
+    Variant: Vertical
+    Properties:
+      X: =708
+      Y: =486
+      Width: =590
+      Height: =112
+      Items: =colUpdates
+      TemplateSize: =84
+      TemplatePadding: =0
+      ShowScrollbar: =true
+    Children:
+      - lblUpdateBody:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =4
+            Width: =470
+            Height: =42
+            Text: =ThisItem.'Update Text'
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrText
+            Wrap: =true
+      - recUpdateTag:
+          Control: Rectangle
+          Properties:
+            X: =486
+            Y: =4
+            Width: =76
+            Height: =22
+            Visible: =Not(IsBlank(ThisItem.'Risk / Decision'.Value))
+            Fill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
+            RadiusTopLeft: =RadiusChip
+            RadiusTopRight: =RadiusChip
+            RadiusBottomLeft: =RadiusChip
+            RadiusBottomRight: =RadiusChip
+      - lblUpdateTag:
+          Control: Label
+          Properties:
+            X: =486
+            Y: =4
+            Width: =76
+            Height: =22
+            Visible: =recUpdateTag.Visible
+            Text: =ThisItem.'Risk / Decision'.Value
+            Font: =FontUI
+            Size: =SizeChip
+            Color: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskText, ClrChipText)
+            Align: =Align.Center
+            VerticalAlign: =VerticalAlign.Middle
+      - lblUpdateMeta:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =50
+            Width: =560
+            Height: =18
+            Text: |
+              =RelativeDay(ThisItem.'Update Date') &
+               " · " & Lower(ThisItem.'Update Type'.Value) &
+               " · " & Coalesce(LookUp(colPeople, Email = ThisItem.'Created By Entra ID').Name, ThisItem.'Created By Entra ID')
+            Font: =FontUI
+            Size: =SizeMeta
+            Color: =ClrTextFaint
+      - recUpdateDivider:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =Parent.TemplateHeight - 1
+            Width: =Parent.Width - 20
+            Height: =1
+            Fill: =ClrDivider
+
+# ---- AI overview history card ---------------------------------------------
+- cardHistory:
+    Control: Rectangle
+    Properties:
+      X: =688
+      Y: =620
+      Width: =630
+      Height: =124
+      Fill: =ClrCard
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblHistoryHead:
+    Control: Label
+    Properties:
+      X: =708
+      Y: =630
+      Width: =400
+      Height: =24
+      Text: ="AI overview history"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+- galHistory:
+    Control: Gallery
+    Variant: Vertical
+    Properties:
+      X: =708
+      Y: =658
+      Width: =590
+      Height: =76
+      Items: =colHistory
+      TemplateSize: =56
+      TemplatePadding: =0
+      ShowScrollbar: =true
+    Children:
+      - lblVersion:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =4
+            Width: =400
+            Height: =20
+            Text: ="Version " & ThisItem.'Version Number' & If(ThisItem.'Is Current'.Value = "Yes", " · current", "")
+            Font: =FontUI
+            Size: =SizeBody
+            FontWeight: =FontWeight.Semibold
+            Color: =If(ThisItem.'Is Current'.Value = "Yes", ClrText, ClrTextMuted)
+            OnSelect: =Set(gblOverview, ThisItem)
+      - lblVersionMeta:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =24
+            Width: =400
+            Height: =18
+            Text: =RelativeDay(ThisItem.'Refreshed Date')
+            Font: =FontUI
+            Size: =SizeMeta
+            Color: =ClrTextFaint
+      - recVersionDivider:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =Parent.TemplateHeight - 1
+            Width: =Parent.Width - 20
+            Height: =1
+            Fill: =ClrDivider
+
+# ================================================================ SLIDE-OVER
+- recPanelScrim:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =0
+      Width: =Parent.Width
+      Height: =Parent.Height
+      Visible: =gblPanel <> ""
+      Fill: =ColorFade(ClrPage, -0.4)
+      OnSelect: =Set(gblPanel, "")
+
+- recPanel:
+    Control: Rectangle
+    Properties:
+      X: =Parent.Width - 420
+      Y: =0
+      Width: =420
+      Height: =Parent.Height
+      Visible: =gblPanel <> ""
+      Fill: =ClrCard
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+
+- lblPanelHead:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 396
+      Y: =32
+      Width: =380
+      Height: =30
+      Visible: =gblPanel <> ""
+      Text: =If(gblPanel = "action", "Add task", "Add update")
+      Font: =FontUI
+      Size: =18
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+
+# ---- action fields --------------------------------------------------------
+- lblFldActionTitle:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 396
+      Y: =84
+      Width: =372
+      Height: =18
+      Visible: =gblPanel = "action"
+      Text: ="TASK"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtActionTitle:
+    Control: TextInput
+    Properties:
+      X: =Parent.Width - 396
+      Y: =104
+      Width: =372
+      Height: =38
+      Visible: =gblPanel = "action"
+      Default: =""
+      HintText: ="Confirm buying committee"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+
+- lblFldActionStage:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 396
+      Y: =154
+      Width: =372
+      Height: =18
+      Visible: =gblPanel = "action"
+      Text: ="WORKFLOW STAGE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpActionStage:
+    Control: DropDown
+    Properties:
+      X: =Parent.Width - 396
+      Y: =174
+      Width: =372
+      Height: =38
+      Visible: =gblPanel = "action"
+      Items: =Choices('pursuit-tracker-actions'.'Workflow Stage')
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+
+- lblFldActionEffort:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 396
+      Y: =224
+      Width: =372
+      Height: =18
+      Visible: =gblPanel = "action"
+      Text: ="EFFORT SIZE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpActionEffort:
+    Control: DropDown
+    Properties:
+      X: =Parent.Width - 396
+      Y: =244
+      Width: =372
+      Height: =38
+      Visible: =gblPanel = "action"
+      Items: =Choices('pursuit-tracker-actions'.'Effort Size')
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+
+- lblFldActionDue:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 396
+      Y: =294
+      Width: =372
+      Height: =18
+      Visible: =gblPanel = "action"
+      Text: ="DUE DATE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- dteActionDue:
+    Control: DatePicker
+    Properties:
+      X: =Parent.Width - 396
+      Y: =314
+      Width: =372
+      Height: =38
+      Visible: =gblPanel = "action"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+
+- lblFldActionOwner:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 396
+      Y: =364
+      Width: =372
+      Height: =18
+      Visible: =gblPanel = "action"
+      Text: ="OWNER"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- cmbActionOwner:
+    Control: ComboBox
+    Properties:
+      X: =Parent.Width - 396
+      Y: =384
+      Width: =372
+      Height: =38
+      Visible: =gblPanel = "action"
+      Items: |
+        =Office365Users.SearchUser({searchTerm: Self.SearchText})
+      SelectMultiple: =false
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+
+# ---- update fields --------------------------------------------------------
+- lblFldUpdateBody:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 396
+      Y: =84
+      Width: =372
+      Height: =18
+      Visible: =gblPanel = "update"
+      Text: ="UPDATE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtUpdateBody:
+    Control: TextInput
+    Properties:
+      X: =Parent.Width - 396
+      Y: =104
+      Width: =372
+      Height: =140
+      Visible: =gblPanel = "update"
+      Mode: =TextMode.MultiLine
+      Default: =""
+      HintText: ="What changed on this pursuit?"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+
+- lblFldUpdateType:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 396
+      Y: =256
+      Width: =372
+      Height: =18
+      Visible: =gblPanel = "update"
+      Text: ="UPDATE TYPE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpUpdateType:
+    Control: DropDown
+    Properties:
+      X: =Parent.Width - 396
+      Y: =276
+      Width: =372
+      Height: =38
+      Visible: =gblPanel = "update"
+      Items: =Choices('pursuit-tracker-status-updates'.'Update Type')
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+
+- lblFldUpdateRisk:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 396
+      Y: =326
+      Width: =372
+      Height: =18
+      Visible: =gblPanel = "update"
+      Text: ="RISK / DECISION (OPTIONAL)"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpUpdateRisk:
+    Control: DropDown
+    Properties:
+      X: =Parent.Width - 396
+      Y: =346
+      Width: =372
+      Height: =38
+      Visible: =gblPanel = "update"
+      Items: =Choices('pursuit-tracker-status-updates'.'Risk / Decision')
+      AllowEmptySelection: =true
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+
+# ---- panel buttons --------------------------------------------------------
+- btnPanelCancel:
+    Control: Button
+    Properties:
+      X: =Parent.Width - 396
+      Y: =Parent.Height - 76
+      Width: =120
+      Height: =40
+      Visible: =gblPanel <> ""
+      Text: ="Cancel"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrCard
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Set(gblPanel, "")
+
+- btnPanelSave:
+    Control: Button
+    Properties:
+      X: =Parent.Width - 156
+      Y: =Parent.Height - 76
+      Width: =132
+      Height: =40
+      Visible: =gblPanel <> ""
+      Text: ="Save"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      DisplayMode: |
+        =If(
+            (gblPanel = "action" && !IsBlank(txtActionTitle.Text)) ||
+            (gblPanel = "update" && !IsBlank(txtUpdateBody.Text)),
+            DisplayMode.Edit,
+            DisplayMode.Disabled
+        )
+      OnSelect: |
+        =If(
+            gblPanel = "action",
+
+            With(
+                { nextId: "ACT-" & Text(Coalesce(Max(ForAll('pursuit-tracker-actions' As A, Value(Right(A.Title, 3))), Value), 0) + 1, "000") },
+                Collect(
+                    'pursuit-tracker-actions',
+                    {
+                        Title:                   nextId,
+                        'Pursuit ID':            gblPursuitKey,
+                        'Action Title':          txtActionTitle.Text,
+                        'Workflow Stage':        { Value: drpActionStage.Selected.Value },
+                        'Action Owner Entra ID': cmbActionOwner.Selected.Mail,
+                        Status:                  { Value: "Not started" },
+                        Health:                  { Value: "On track" },
+                        'Effort Size':           { Value: drpActionEffort.Selected.Value },
+                        'Due Date':              dteActionDue.SelectedDate
+                    }
+                )
+            );
+            ClearCollect(colActions, 'pursuit-tracker-actions');
+            ClearCollect(
+                colActions_P,
+                AddColumns(
+                    Sort(Filter('pursuit-tracker-actions', 'Pursuit ID' = gblPursuitKey), If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'), SortOrder.Ascending) As A,
+                    "DueWording",
+                    If(
+                        !IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'),
+                        "",
+                        "After " & Lower(LookUp('pursuit-tracker-actions', Title = A.'Predecessor Action ID').'Workflow Stage'.Value)
+                    )
+                )
+            ),
+
+            With(
+                { nextId: "UPD-" & Text(Coalesce(Max(ForAll('pursuit-tracker-status-updates' As U, Value(Right(U.Title, 3))), Value), 0) + 1, "000") },
+                Collect(
+                    'pursuit-tracker-status-updates',
+                    {
+                        Title:                 nextId,
+                        'Pursuit ID':          gblPursuitKey,
+                        'Update Date':         Now(),
+                        'Update Type':         { Value: drpUpdateType.Selected.Value },
+                        'Update Text':         txtUpdateBody.Text,
+                        'Risk / Decision':     { Value: drpUpdateRisk.Selected.Value },
+                        'Created By Entra ID': gblUser.Email
+                    }
+                )
+            );
+            ClearCollect(
+                colUpdates,
+                Sort(Filter('pursuit-tracker-status-updates', 'Pursuit ID' = gblPursuitKey), 'Update Date', SortOrder.Descending)
+            );
+            Reset(txtUpdateBody)
+        );
+        Set(gblPanel, "")
+
+# ---------------------------------------------------------------------------
+# SCREEN PROPERTIES — set by hand:
+#
+#   Fill       =ClrPage
+#   OnVisible  the block at the top of docs/05-screen-pursuit-workspace.md
+#
+# NOT INCLUDED: the "New pursuit" create panel. btnNewPursuit on the board
+# navigates here with gblPursuitKey blank and gblNewPursuit true, and this
+# screen has no branch for that yet — it renders an empty record. Either build
+# the create panel described at the foot of docs/05, or point btnNewPursuit at
+# the SharePoint list's own new-item form until you do.
+# ---------------------------------------------------------------------------
