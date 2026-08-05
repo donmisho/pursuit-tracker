@@ -59,7 +59,7 @@ reasoning and alternatives in `docs/07-gaps-and-decisions.md`.
 
 | Property | Formula |
 |---|---|
-| `Items` | `=Sort(colStages, Order, SortOrder.Ascending)` |
+| `Items` | `=colStages` |
 | `Layout` | Horizontal |
 | `TemplateSize` | `=BoardColWidth` |
 | `TemplatePadding` | `=8` |
@@ -68,10 +68,15 @@ reasoning and alternatives in `docs/07-gaps-and-decisions.md`.
 | `Width` | `=Parent.Width - (GapPage * 2)` |
 | `Height` | `=Parent.Height - Self.Y - GapPage` |
 
-`colStages` is the explicit ordered table built in `App.OnStart`, not
-`Choices(...)` — every Choice column on these lists has an empty choice list, so
-`Choices()` returns nothing. `docs/01-data-model.md` covers why and how to fix it at
-source.
+`colStages` is built in `App.OnStart` from
+`Choices('pursuit-tracker-pursuits'.'Workflow Stage')`, so board columns and their order
+are a SharePoint list setting, not an app edit. No sort here on purpose — the choice
+order *is* the workflow order, and sorting alphabetically would put Preliminary Scoping
+before Proposal/Quote.
+
+`App.OnStart` also handles two edge cases the raw `Choices()` call doesn't: an empty
+choice list (which renders a blank board with no error) and pursuits carrying a
+typed-in stage that isn't in the list.
 
 Your five stages plus the horizontal scroll means about three and a half columns visible
 at 1366 wide. That's expected; the gallery scrolls.
@@ -206,11 +211,6 @@ there's no `.DisplayName` to read off the record.
 Inside: `recChip` (Rectangle, `Fill = ClrChip`, all `Radius* = RadiusChip`) and `lblChip`
 (`Text = ThisItem.Value`, `Size = SizeChip`, `Color = ClrChipText`,
 `Align = Align.Center`).
-
-**This assumes `Aligned SIs` has been switched to multi-select** (`docs/01`, required
-change 2). While it's single-select, `ThisItem.'Aligned SIs'` is a record rather than a
-table and the gallery won't bind — replace the whole gallery with one chip whose label
-reads `=ThisItem.'Aligned SIs'.Value`.
 
 `Items` is evaluated in the *card's* scope, so `ThisItem` there is the pursuit; inside
 this gallery's own template `ThisItem` is the individual choice value. That scope shift

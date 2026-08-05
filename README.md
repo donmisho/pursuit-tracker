@@ -36,22 +36,21 @@ these.
 
 ## Read this before you start
 
-**Four SharePoint column changes come first**, listed at the bottom of
-`docs/01-data-model.md`. The blocking one: `Overview Text` is a 255-character Text
-column and your mockup's overview is about 430 — SharePoint truncates rather than
-erroring, so it destroys content silently. The other three (multi-select SIs and
-hyperscalers, defined choice values, deciding what `Active` means) are the difference
-between matching the mockups and approximating them.
+**The schema is confirmed and current.** Column names come from the real list exports,
+the five list titles are confirmed, and the four schema changes the mockups needed are
+applied. One item is open: `Active` is a Number reading `0` on every row, so the app
+doesn't filter on it and the board shows all fourteen pursuits. Both filter variants sit
+commented in `src/App.OnStart.powerfx`.
 
-**The five list titles are inferred from your export filenames**, not confirmed against
-the site. Check them and find-and-replace across `docs/` and `src/` if they differ. The
-column names are read from the real schema and are correct.
+**The AI overview is display-only.** SharePoint's native AI populates the overview text
+and its version history; the app reads and renders it, and there's no Refresh button.
+That takes the one thing that couldn't be done on standard connectors off the table
+entirely.
 
-**Three things in the mockups can't be built this way.** Drag-and-drop doesn't exist in
-canvas apps, galleries can't scroll horizontally, and generating the AI overview needs a
-model connector that is premium in every form. Each has a worked-around alternative in
-`docs/07-gaps-and-decisions.md`. The workarounds are in the build; nothing is left
-half-specified.
+**Two things in the mockups can't be built this way.** Drag-and-drop doesn't exist in
+canvas apps, and galleries can't scroll horizontally. Both have worked-around
+alternatives in `docs/07-gaps-and-decisions.md` — the workarounds are in the build,
+nothing is left half-specified.
 
 ## Why canvas rather than something local
 

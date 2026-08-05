@@ -109,9 +109,6 @@ distinction is worth drawing.
 Vertical rather than horizontal: the mockup stacks NiSource's two SIs rather than
 running them across, and stacking degrades better at three partners.
 
-Both assume the multi-select conversion in `docs/01`. Single-select, each becomes one
-label bound to `=ThisItem.'Aligned SIs'.Value`.
-
 ## Footer
 
 `lblFooterNote`, `Y = Parent.Height - 40`, `Size = SizeBody`, `Color = ClrTextMuted`:

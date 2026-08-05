@@ -42,33 +42,29 @@ the screen doesn't show.
 be designing for a monitor, not a laptop), or add a column-picker that swaps which six
 render. Both are real work, and the export is usually what people actually wanted.
 
-## 3. The AI overview can't be generated inside the free tier
+## 3. The AI overview is display-only
 
 **Mockup:** a "Refresh overview" button that regenerates the narrative from Salesforce
 plus attached materials.
 
 **Platform:** every route from a canvas app to a language model is premium, admin-gated,
-or both. AI Builder needs credits. Copilot Studio needs licences. The HTTP connector and
-any custom connector are premium and make every user of the app premium. Azure OpenAI
-needs a subscription and a key you'd have to get from someone.
+or both. AI Builder needs credits, Copilot Studio needs licences, and the HTTP and custom
+connectors are premium — using any of them makes every user of the app premium.
 
-**This build:** the button owns the version lifecycle — number the new version, demote
-the old one, write the provenance line, refresh history — with the generated text as a
-single `TODO` string. Everything around the model call is finished and correct.
+**This build:** no Refresh button. SharePoint's native AI populates `Overview Text`,
+`Version Number`, `Refreshed Date`, and `Is Current`; the workspace reads them and writes
+nothing back. That's the right split — the generation problem moves to the tool that
+already solves it, and the app stops needing a connector it can't have.
 
-**Three ways to finish it, cheapest first:**
+What went out with the button: version numbering, the `Is Current` flip, the pointer
+update on the pursuit, and the transaction-ordering care all of that needed. The workspace
+is meaningfully simpler for it.
 
-- **Write from outside.** Your Copilot - Pursuit Strategy Agent already produces this
-  kind of narrative. Have it write into `pursuit-tracker-ai-history` following the same
-  `Is Current` rule, and the app displays it with no premium anything. The Refresh button
-  becomes a re-read. The schema is already built for this — `Include in AI Overview` on
-  documents is an input filter that nothing in the app populates, and `Source Summary`
-  reads like something a generator wrote. I'd guess this is what you already intended.
-- **A scheduled flow** that regenerates overviews nightly for pursuits whose Salesforce
-  data changed. Still needs a model connector, but only *you* run the flow — app users
-  stay free.
-- **AI Builder "Create text with GPT"** inside the flow. Cleanest experience, costs
-  credits, and credits are a procurement conversation.
+**One thing to watch.** Nothing now enforces exactly one `Is Current = "Yes"` per pursuit
+— the app used to guarantee it. Whatever populates the list owns that invariant. The
+workspace falls back to the highest `Version Number` when the flag is missing or
+ambiguous, so a card degrades to "probably the right version" rather than to blank, but
+that's tolerance, not correctness.
 
 ## 4. Delegation, and why the text keys help
 
@@ -98,27 +94,29 @@ due" goes blank on cards for no visible reason. At three actions you have room.
 Fix when you get there: add an `Is Open` Yes/No column to actions, maintained by the app
 on every status write, and filter on it server-side. Yes/No delegates.
 
-## 4b. Four schema facts that shape the app
+## 4b. Schema constraints, resolved
 
-Detail and fixes in `docs/01-data-model.md`; the short version of what each one cost:
+Four gaps between the exported schema and what the mockups need have been closed in
+SharePoint: `Overview Text` is multi-line, `Aligned SIs` and `Hyperscalers` are
+multi-select, the Choice columns have real values, and `Source Summary` is gone. Detail
+in `docs/01-data-model.md`.
 
-**`Overview Text` is a 255-character Text column.** Your mockup's overview is about 430.
-SharePoint truncates rather than erroring, so this destroys content silently. Convert it
-before wiring up any generator.
+Two of those are load-bearing in ways that aren't obvious from the app:
 
-**`Aligned SIs` and `Hyperscalers` are single-select.** The mockups need multi — NiSource
-with Fujitsu *and* NTT Data. Every chip gallery in `docs/03`–`05` is written for
-multi-select and needs the column converted, or replacing with a single label.
+**Defined choice values gave the board back its wiring.** With empty choice lists,
+`Choices()` returned nothing and the stage order had to live in `App.OnStart` — adding a
+workflow stage would have meant editing the app. It now reads from the column, so stage
+order is a list setting. `App.OnStart` keeps a fallback for an empty choice list, because
+fill-in is still enabled and the failure mode is a blank board with no error.
 
-**Every Choice column has an empty choice list.** `Choices()` returns nothing, so the
-board can't read its columns from SharePoint and every dropdown in the add panels binds
-to a literal table instead. The stage order lives in `App.OnStart`, which means adding a
-stage is now an app edit rather than a list edit — a real regression against the original
-design, and it goes away once the choice values are defined.
+**Multi-select is what the chip galleries bind to.** Reverting either column to
+single-select turns `ThisItem.'Aligned SIs'` from a table into a record, and every chip
+gallery on all three screens renders empty rather than erroring.
 
-**`Active` is a Number and every row is `0`.** The app doesn't filter on it, so the board
-shows all fourteen pursuits including the three `Unassigned` ones. Decide what the column
-means, then switch the filter on — the line is in `App.OnStart`, commented.
+**Still open: `Active`.** A Number column reading `0` on all fourteen rows, so the app
+doesn't filter on it and the board shows everything, `Unassigned` included. Both filter
+variants are in `App.OnStart`, commented — `Active = 1` if it stays a Number, `Active` if
+it becomes Yes/No. Until one is uncommented, "active pursuit" isn't a concept the app has.
 
 ## 5. Excel export is CSV
 
@@ -140,13 +138,13 @@ unchanged.
 
 ## 7. There are no transactions
 
-Canvas apps can't write atomically across two lists. The place this matters is the
-`Is Current` flip on AI overviews, which is why that code demotes before it inserts:
-fail halfway and you get zero current versions rather than two, which is both easier to
-spot and easier to repair.
+Canvas apps can't write atomically across two lists. As built this doesn't bite: every
+write the app makes — a stage change, a new action, a new update — touches exactly one
+list. The one place it would have mattered was the `Is Current` flip on AI overviews, and
+that moved to SharePoint's AI along with the rest of the generation work.
 
-Anywhere else you add a multi-list write, sequence it so a partial failure leaves
-something visibly wrong rather than subtly wrong.
+Worth remembering if you add a multi-list write later: sequence it so a partial failure
+leaves something visibly wrong rather than subtly wrong.
 
 ## 8. The dark theme is hand-built
 
@@ -165,13 +163,14 @@ missed token.
 | Setup, data sources, theme | ~30 min |
 | Portfolio board | 2–3 hrs |
 | Portfolio list | 1–2 hrs |
-| Pursuit workspace | 3–4 hrs |
+| Pursuit workspace | 2–3 hrs |
 | Export flow | ~45 min |
-| The four SharePoint column changes | ~15 min |
 
-Call it a solid day. The formulas are now written against your real schema rather than
-an inferred one, so the reconciliation pass that would have eaten the second day is
-already done — what's left is confirming the five list titles.
+Under a day. The formulas are written against your real schema, the list titles are
+confirmed, and the schema changes are applied — the reconciliation pass that would have
+eaten a second day is done. The workspace also lost its Refresh button and the version
+lifecycle behind it, which is the largest single piece of logic that was in the original
+estimate.
 
 The workspace screen is the long pole — it's seven cards, five galleries, and two
 slide-over panels. If you want something usable fast, build the board and the list

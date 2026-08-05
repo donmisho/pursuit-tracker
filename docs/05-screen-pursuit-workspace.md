@@ -67,7 +67,11 @@ ClearCollect(
     colHistory,
     Sort(Filter('pursuit-tracker-ai-history', 'Pursuit ID' = gblPursuitKey), 'Version Number', SortOrder.Descending)
 );
+// The app never writes this list, so nothing in it guarantees exactly one current
+// version. Prefer the flag; fall back to the highest version number when it's missing
+// or ambiguous, so the card always shows something rather than going blank.
 Set(gblOverview, LookUp(colHistory, 'Is Current'.Value = "Yes"));
+If(IsBlank(gblOverview), Set(gblOverview, First(colHistory)));
 
 // Update authors are email strings too, and they aren't necessarily pursuit owners, so
 // colPeople (built at startup from owners only) won't have them. Top it up here.
@@ -146,74 +150,38 @@ linked to Salesforce at all. Eight of your fourteen currently aren't.
 | Control | Property | Formula |
 |---|---|---|
 | `lblOverviewHead` | `Text` | `="AI overview"` |
-| `btnRefreshOverview` | `Text` | `="Refresh overview"` |
-| | `Fill` / `Color` | `=ClrAccent` / `=ClrAccentText` |
 | `lblOverviewBody` | `Text` | `=Coalesce(gblOverview.'Overview Text', "No overview has been generated for this pursuit yet.")` |
 | | `Size` / `Color` / `Wrap` / `AutoHeight` | `=SizeBody` / `=ClrText` / `=true` / `=true` |
-| `lblOverviewMeta` | `Text` | `=If(IsBlank(gblOverview), "", "Current version refreshed " & Lower(RelativeDay(gblOverview.'Refreshed Date')) & " from " & gblOverview.'Source Summary' & " · Prior versions retained in history")` |
+| `lblOverviewMeta` | `Text` | `=If(IsBlank(gblOverview), "", "Version " & gblOverview.'Version Number' & " · refreshed " & Lower(RelativeDay(gblOverview.'Refreshed Date')) & " · prior versions retained in history")` |
 | | `Size` / `Color` / `Wrap` | `=SizeMeta` / `=ClrTextFaint` / `=true` |
 
-**`btnRefreshOverview` is the one control that can't be finished inside the free tier.**
-Generating the narrative needs a model, and every route to one — AI Builder, Copilot
-Studio, the HTTP connector, Azure OpenAI — is premium, admin-gated, or both. Options are
-in `docs/07-gaps-and-decisions.md`. The button is wired to the version-management half of
-the job, which has to be right regardless of where the text comes from:
+**Display only — there is no Refresh button.** SharePoint's native AI populates
+`Overview Text`, `Version Number`, `Refreshed Date`, and `Is Current`; the app reads them
+and writes nothing back. That removes the one part of this build that couldn't be finished
+on standard connectors, and it removes the version-management code with it — no version
+numbering, no `Is Current` flip, no transaction ordering to worry about.
 
-```powerfx
-With(
-    {
-        nextVersion: Coalesce(Max(colHistory, 'Version Number'), 0) + 1,
-        // Overview IDs run AI-001, AI-002... across the whole list, so the next one is
-        // the highest existing suffix plus one. Assumes the three-digit format holds.
-        nextId: "AI-" & Text(
-            Coalesce(Max(ForAll('pursuit-tracker-ai-history' As H, Value(Right(H.Title, 3))), Value), 0) + 1,
-            "000"
-        ),
-        included: CountRows(Filter(colDocs, 'Include in AI Overview'.Value = "Yes"))
-    },
+Two consequences worth knowing:
 
-    // Demote the current version first. If this fails the Collect below never runs, and
-    // you're left with no current version rather than two -- easier to spot, easier to
-    // repair.
-    If(
-        !IsBlank(gblOverview),
-        Patch(
-            'pursuit-tracker-ai-history',
-            LookUp('pursuit-tracker-ai-history', Title = gblOverview.Title),
-            { 'Is Current': { Value: "No" } }
-        )
-    );
+**Nothing enforces one current version per pursuit.** The app used to guarantee that by
+demoting before inserting. Now whatever populates the list owns that invariant, which is
+why `OnVisible` falls back to the highest `Version Number` when the flag is missing — the
+card degrades to "probably right" rather than to blank.
 
-    Collect(
-        'pursuit-tracker-ai-history',
-        {
-            Title:            nextId,
-            'Pursuit ID':     gblPursuitKey,
-            'Version Number': nextVersion,
-            // Replace with the call to whatever generates the narrative.
-            'Overview Text':  "TODO: generated narrative",
-            'Refreshed Date': Now(),
-            'Source Summary': "Salesforce opportunity + " & included & " included documents",
-            'Is Current':     { Value: "Yes" }
-        }
-    );
+**The provenance line no longer names its sources.** With `Source Summary` removed it
+reads "Version 3 · refreshed today · prior versions retained in history". The mockup's
+"from Salesforce and four attached materials" phrasing needs a column to read it from; if
+you want it back, the closest free substitute is counting documents where
+`Include in AI Overview` is `Yes`, which the workspace already loads:
+`CountRows(Filter(colDocs, 'Include in AI Overview'.Value = "Yes")) & " included documents"`.
+That counts what's flagged now, not what the overview was actually built from, so it will
+drift as documents are added — which is why it isn't the default.
 
-    // Keep the denormalised pointer on the pursuit in step with reality.
-    Patch(
-        'pursuit-tracker-pursuits',
-        LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey),
-        { 'AI Overview Current Version': nextId }
-    )
-);
-ClearCollect(colHistory, Sort(Filter('pursuit-tracker-ai-history', 'Pursuit ID' = gblPursuitKey), 'Version Number', SortOrder.Descending));
-Set(gblOverview, LookUp(colHistory, 'Is Current'.Value = "Yes"))
-```
-
-**Before you wire a generator to this: `Overview Text` is a 255-character Text column.**
-Anything longer is silently truncated on write — SharePoint doesn't error. Change it to
-Multiple lines of text first (`docs/01-data-model.md`, required change 1). The sample row
-is 197 characters and the mockup's overview is about 430, so this will bite on the first
-real run.
+**One thing to check on the SharePoint side: `Overview Text` is a 255-character Text
+column** until you convert it (`docs/01-data-model.md`, required change 1). The sample row
+is 197 characters and the mockup's overview is about 430. SharePoint truncates rather than
+erroring, and since the AI is writing the column rather than the app, you'd only notice by
+reading a cut-off overview in the app.
 
 ## `cardActions` — `galActions`
 
@@ -257,13 +225,13 @@ dependency relationship, which is the point of the panel.
 | `galAlignHype` | `Items` | `=gblPursuit.Hyperscalers` |
 
 Both: `Layout` Horizontal, `TemplateSize = 76`, `Height = 26`, chip template as on the
-board. Both assume the multi-select conversion in `docs/01`.
+board.
 
-The mockup's "+ Other" chips are the SharePoint fill-in-choice behaviour surfacing in the
-UI. Since these columns already have `FillInChoice` on, adding a text input that patches
-a new value works — but leave it out until the choice lists actually have defined values,
-or every ad-hoc spelling becomes permanent. That's how you end up with both
-"Proposal/Quote" and "Proposal / Quote".
+The mockup's "+ Other" chips are SharePoint's fill-in-choice behaviour surfacing in the
+UI, and these columns do have it enabled — a text input that patches a new value works.
+I've left it out. Fill-in choices are how you end up with both "Proposal/Quote" and
+"Proposal / Quote" in the same system, and now that the choice lists have real values,
+adding to them deliberately in SharePoint is worth the extra thirty seconds.
 
 ## `cardDocuments` — `galDocs`
 
@@ -322,13 +290,16 @@ you want the mockup exactly.
 |---|---|---|
 | `lblVersion` | `Text` | `="Version " & ThisItem.'Version Number' & If(ThisItem.'Is Current'.Value = "Yes", " · current", "")` |
 | | `FontWeight` / `Color` | `=FontWeight.Semibold` / `=If(ThisItem.'Is Current'.Value = "Yes", ClrText, ClrTextMuted)` |
-| `lblVersionMeta` | `Text` | `=RelativeDay(ThisItem.'Refreshed Date') & " · " & ThisItem.'Source Summary'` |
+| `lblVersionMeta` | `Text` | `=RelativeDay(ThisItem.'Refreshed Date')` |
 | | `Size` / `Color` | `=SizeMeta` / `=ClrTextFaint` |
 | `recVersionDivider` | `Y` / `Height` / `Fill` | `=Parent.TemplateHeight - 1` / `=1` / `=ClrDivider` |
 | (template) | `OnSelect` | `=Set(gblOverview, ThisItem)` |
 
-Selecting a version displays it. It doesn't make it current — reading an old version
-shouldn't rewrite the record. `OnVisible` resets to the current one.
+Selecting a version displays it in the overview card. It doesn't make it current — the
+app doesn't write to this list at all. `OnVisible` resets to the current one.
+
+This whole card is read-only display over rows the AI already wrote, so it costs nothing
+to keep. Delete it if you'd rather the workspace showed only the current narrative.
 
 ---
 
@@ -346,10 +317,10 @@ Build each as a Rectangle (`Fill = ClrCard`, `X = Parent.Width - 420`, full heig
 and `cmbActionOwner` (Combo box,
 `Items = Office365Users.SearchUser({searchTerm: Self.SearchText})`).
 
-The choice dropdowns can't use `Choices()` — the choice lists are empty. Bind them to
-literal tables until the values are defined in SharePoint:
-`Items = ["Qualify", "Proposal / Quote", "Review / Decision"]` and
-`Items = ["Small", "Medium", "Large", "XL"]`.
+The choice dropdowns read from SharePoint:
+`drpActionStage.Items = Choices('pursuit-tracker-actions'.'Workflow Stage')` and
+`drpActionEffort.Items = Choices('pursuit-tracker-actions'.'Effort Size')`, both bound
+through `.Value`.
 
 ```powerfx
 // btnSaveAction.OnSelect
@@ -397,8 +368,10 @@ Reloading `colActions` as well as `colActions_P` keeps the board's next-task cal
 correct after adding an action.
 
 **Add update** — `txtUpdateBody` (multiline), `drpUpdateType`
-(`Items = ["Manual", "Voice update", "Teams", "Email", "Agent"]`), `drpUpdateRisk`
-(`Items = ["", "Risk", "Decision"]`).
+(`Items = Choices('pursuit-tracker-status-updates'.'Update Type')`), and `drpUpdateRisk`
+(`Items = Choices('pursuit-tracker-status-updates'.'Risk / Decision')`). Set
+`drpUpdateRisk.AllowEmptySelection = true` — most updates are neither a risk nor a
+decision, and a dropdown that can't be cleared forces a tag onto every one of them.
 
 ```powerfx
 // btnSaveUpdate.OnSelect
@@ -440,6 +413,6 @@ decision date. Generate `Title` as `"PUR-" & Text(max + 1, "000")` using the sam
 as above, then set `gblPursuitKey` to it and `gblNewPursuit` to false — the rails populate
 normally.
 
-That `Max(Value(Right(Title, 3)))` pattern appears four times across this doc, and it
+That `Max(Value(Right(Title, 3)))` pattern appears three times across this doc, and it
 assumes the three-digit format holds. At `PUR-999` it silently starts colliding. That is a
 long way off at fourteen pursuits, but it is the kind of thing worth knowing you built.

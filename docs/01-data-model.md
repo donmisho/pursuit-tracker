@@ -1,10 +1,14 @@
 # Data model — the real schema
 
 Read from the five list exports, replacing the version I inferred from the mockups.
-Several things are materially different from that guess; the differences are called out
-in **[What changed](#what-changed-from-the-inferred-model)** at the bottom, and the
-handful of SharePoint edits the mockups actually require are in
-**[Required changes](#four-changes-you-need-to-make-in-sharepoint)**.
+Several things are materially different from that guess; the differences are in
+**[What changed](#what-changed-from-the-inferred-model)** at the bottom. The four schema
+edits the mockups needed have since been applied — they're recorded in
+**[Schema changes applied](#schema-changes-applied)**, because the formulas depend on
+them.
+
+List titles are confirmed: `pursuit-tracker-pursuits`, `-actions`, `-status-updates`,
+`-documents`, `-ai-history`.
 
 ## Two structural facts that shape every formula
 
@@ -53,13 +57,14 @@ in a separate `Document ID` column.
 | `Workflow Stage` | `field_6` | Choice | Board columns |
 | `Health` | `field_7` | Choice | On track / At risk |
 | `Target Decision Date` | `field_8` | DateTime | "TARGET CLOSE" on the workspace |
-| `Aligned SIs` | `field_9` | Choice | **Single-select today** — see required changes |
-| `Hyperscalers` | `field_10` | Choice | **Single-select today** |
-| `AI Overview Current Version` | `field_11` | Text | Pointer to the current `AI-nnn`. Empty in all rows |
+| `Aligned SIs` | `field_9` | Choice, multiple | Converted from single-select |
+| `Hyperscalers` | `field_10` | Choice, multiple | Converted from single-select |
+| `AI Overview Current Version` | `field_11` | Text | Pointer to the current `AI-nnn`. Empty in all rows; the app reads `Is Current` instead |
 | `Active` | `field_12` | **Number** | Not Yes/No. `0` in all 14 rows |
 | `Estimated Fees` | `field_13` | Currency | Empty in all rows |
 
-**Stage values present in the data**, in workflow order:
+**Stage values**, in workflow order. The board reads these from the choice list, so this
+order is the board's column order — change it in SharePoint, not in the app:
 
 1. `Unassigned`
 2. `WM Account Team Assimilation`
@@ -70,9 +75,10 @@ in a separate `Document ID` column.
 Note the casing differs from the mockups ("WM account team assimilation"). The app uses
 the data's casing — matching the mockup would mean rewriting 14 rows to buy nothing.
 
-**`Active` is a number and every row is `0`.** If the app filtered on it, the board
-would be empty. So it doesn't filter on it at all, and `docs/07` explains how to switch
-that on once the column means something. Treat this as the first thing to decide.
+**`Active` is a number and every row is `0`.** If the app filtered on it, the board would
+be empty, so it doesn't filter at all — every pursuit shows, including the three
+`Unassigned` ones. This is the one open item; see the note at the end of
+[Schema changes applied](#schema-changes-applied).
 
 ## 2. `pursuit-tracker-actions`
 
@@ -147,9 +153,10 @@ pill on the update; drop the control if you'd rather match the mockup exactly.
 and opens a broken address, so the app prepends `https://` when it's missing rather than
 requiring the data to be cleaned first.
 
-`Include in AI Overview` is the input filter for overview generation, and `Source
-Summary` on the history list ("four included documents") is its output. The app counts
-documents where this is `Yes` when it writes a new version.
+`Include in AI Overview` is the input filter for overview generation. The app neither
+reads nor writes it — it's there for whatever populates the overviews — but the workspace
+does surface it as a small "in overview" tag on each document, so you can see at a glance
+what the narrative was built from.
 
 Also note `field_2` and `field_5` don't exist — the import dropped two spreadsheet
 columns. Harmless, but it's why the numbering skips.
@@ -163,7 +170,6 @@ columns. Harmless, but it's why the numbering skips.
 | `Version Number` | `field_2` | Number | |
 | `Overview Text` | `field_3` | **Text (255 max)** | See below |
 | `Refreshed Date` | `field_4` | DateTime | |
-| `Source Summary` | `field_5` | Text | "Salesforce opportunity + four included documents" |
 | `Is Current` | `field_6` | Choice | **"Yes" / "No" strings, not a boolean** |
 
 **`Overview Text` is a single-line Text column, capped at 255 characters.** The sample
@@ -171,42 +177,48 @@ row is 197. The overview in your workspace mockup is about 430. Overviews will b
 silently truncated on write — SharePoint doesn't error, it just cuts. This is the one
 schema problem that will cost you real content, so it's first on the list below.
 
-`Is Current` being a Choice means the test is `'Is Current'.Value = "Yes"`, and writes
-patch `{ 'Is Current': { Value: "Yes" } }`.
+`Is Current` being a Choice means the test is `'Is Current'.Value = "Yes"`.
+
+The app only reads this list — SharePoint's native AI populates it. That means nothing in
+the app guarantees exactly one `Is Current = "Yes"` per pursuit, so the workspace falls
+back to the highest `Version Number` when the flag is missing or ambiguous. See
+`docs/05-screen-pursuit-workspace.md`.
 
 ---
 
-## Four changes you need to make in SharePoint
+## Schema changes applied
 
-Only the first is strictly blocking. The rest are what separates "close to the mockups"
-from "matches them".
+These were the gaps between the schema as exported and what the mockups need. All four
+are done — recorded here because every formula in `docs/03`–`05` depends on them, and
+because reverting any one of them breaks specific controls.
 
-**1. `Overview Text` → Multiple lines of text.** List settings → the column → change
-type. Existing values survive. Without this, every overview longer than a tweet gets
-cut.
+**1. `Overview Text` → Multiple lines of text.** It was a 255-character Text column and
+the mockup's overview runs to about 430. SharePoint truncates rather than erroring, and
+now that its native AI writes this column rather than the app, a silent cut would only
+surface as a sentence ending mid-word on screen.
 
-**2. `Aligned SIs` and `Hyperscalers` → allow multiple selections.** Both are
-single-select today. The mockups need multi — NiSource carries Fujitsu *and* NTT Data,
-Evergreen carries Microsoft *and* AWS — and single-select can't represent that. Column
-settings → "Allow multiple selections". Existing single values convert cleanly.
+**2. `Aligned SIs` and `Hyperscalers` → multiple selections.** Both were single-select,
+which can't represent NiSource carrying Fujitsu *and* NTT Data. Every chip gallery binds
+to these as tables; single-select makes them records and the galleries render empty.
 
-The formulas in `docs/03`–`05` are written for multi-select. If you'd rather leave them
-single, each chip gallery becomes a single label bound to `ThisItem.'Aligned SIs'.Value`
-and you lose nothing else.
+**3. Choice values defined.** Every Choice column had an empty list with fill-in enabled,
+so `Choices()` returned nothing. With real values the board reads its columns from
+SharePoint again and the add-panel dropdowns bind directly — adding a workflow stage is a
+list setting rather than an app change. `App.OnStart` keeps a fallback for an empty
+choice list, and appends any stage a pursuit carries that isn't in the list, since
+fill-in is still on.
 
-**3. Define the choice values.** Every Choice column on all five lists currently has an
-*empty* choice list with `FillInChoice` on — values exist only because rows filled them
-in ad hoc. That means `Choices('pursuit-tracker-pursuits'.'Workflow Stage')` returns
-nothing, which is why the board no longer reads its columns from SharePoint (`src/App.OnStart.powerfx`
-carries an explicit ordered stage table instead). Filling in the real choice values gives
-you validated dropdowns in the SharePoint UI and stops "Proposal/Quote" and "Proposal /
-Quote" style drift. The app works either way.
+**4. `Source Summary` removed** from the AI history list. The provenance line under the
+overview now reads "Version 3 · refreshed today · prior versions retained in history"
+rather than naming its sources. `docs/05` has the substitute if you want the sources back.
 
-**4. Decide what `Active` means.** It's a Number, and it's `0` on all 14 rows. Either
-populate `1` for live pursuits and switch the filter on in `LoadPortfolio`, or change it
-to Yes/No, or drop it. Until then the board shows everything including `Unassigned`.
+### Still open: what `Active` means
 
----
+The one item not resolved. It was a Number column reading `0` on all fourteen rows, so
+the app doesn't filter on it and the board shows everything — including the three
+`Unassigned` pursuits. Both versions of the filter are in `App.OnStart`, commented:
+`Active = 1` if it stayed a Number, `Active` on its own if it became Yes/No. Uncomment
+one once the column is populated.
 
 ## What changed from the inferred model
 
@@ -216,10 +228,10 @@ For traceability, since the previous commit's formulas were built on the guess:
 |---|---|
 | Integer `ID` joins, needing `PursuitKey` number columns | Text `PUR-nnn` keys, which delegate fine on their own |
 | `PursuitOwner` as a Person column | Email text. Display names come from Office 365 Users at load |
-| Multi-choice SIs and hyperscalers | Single-choice, needs converting |
+| Multi-choice SIs and hyperscalers | Were single-choice, since converted |
 | `IsActive` Yes/No | `Active` Number, all zero |
 | `IsCurrent` Yes/No | `Is Current` Choice, "Yes"/"No" |
-| Board columns from `Choices()` | Choice lists are empty; explicit ordered table |
+| Board columns from `Choices()` | Choice lists were empty; values since defined, so `Choices()` drives the board after all |
 | `DueDescription` free text for dependencies | Derived from `Predecessor Action ID` |
 | Status `Complete`; at-risk from `Status` | Status `Completed`; at-risk from `Health` |
 | `BoardOrder`, `Portfolio`, `ShortName` columns | Don't exist; board sorts by target date |
