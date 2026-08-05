@@ -23,8 +23,8 @@ corrupt file is worse than no file.
 
 | | |
 |---|---|
-| [`docs/01-data-model.md`](docs/01-data-model.md) | The five lists, column by column. **Start here** — reconcile it against your real schema |
-| [`docs/02-app-setup.md`](docs/02-app-setup.md) | Create the app, connect the lists, paste the theme, paste the nav bar |
+| [`docs/01-data-model.md`](docs/01-data-model.md) | The five lists, column by column. **Start here** — it's what every formula binds to |
+| [`docs/02-app-setup.md`](docs/02-app-setup.md) | Create the app, connect the lists, paste the theme, paste the three screens |
 | [`docs/03-screen-portfolio-board.md`](docs/03-screen-portfolio-board.md) | The kanban |
 | [`docs/04-screen-portfolio-list.md`](docs/04-screen-portfolio-list.md) | The reportable table and the Excel download |
 | [`docs/05-screen-pursuit-workspace.md`](docs/05-screen-pursuit-workspace.md) | The detail page |
