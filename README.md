@@ -30,6 +30,7 @@ corrupt file is worse than no file.
 | [`docs/05-screen-pursuit-workspace.md`](docs/05-screen-pursuit-workspace.md) | The detail page |
 | [`docs/06-flows.md`](docs/06-flows.md) | The one Power Automate flow |
 | [`docs/07-gaps-and-decisions.md`](docs/07-gaps-and-decisions.md) | Where the mockups and the platform disagree |
+| [`docs/08-deploy-and-test.md`](docs/08-deploy-and-test.md) | Publishing, sharing, and what "working" looks like on your data |
 
 ## Source
 
