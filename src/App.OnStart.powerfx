@@ -1,0 +1,65 @@
+// Paste into: Power Apps Studio -> Tree view -> App -> OnStart property
+//
+// Kept deliberately small. OnStart runs before the first screen paints, so anything
+// slow here is felt as launch latency on every single open. Per-screen data loads live
+// in each screen's OnVisible.
+
+Set(gblUser, User());
+
+// The board renders one column per Stage choice, read live from SharePoint. Adding a
+// stage in the list settings adds a board column with no change to the app.
+ClearCollect(colStages, Choices('pursuit-tracker-Pursuits'.Stage));
+
+// Which portfolio the board and list are showing. The mockups say "SI pursuit
+// management"; this exists so a second portfolio doesn't require a second app.
+Set(gblPortfolio, "SI pursuit management");
+
+// Card currently "picked up" for a stage move. Blank when nothing is selected.
+// See docs/07-gaps-and-decisions.md for why this exists instead of drag-and-drop.
+Set(gblMoving, Blank());
+
+
+// =====================================================================
+// LoadPortfolio -- the shared refresh used by both the board and the list.
+//
+// Power Fx has no user-defined behaviour functions in a canvas app, so this block is
+// duplicated verbatim into scrPortfolioBoard.OnVisible and scrPortfolioList.OnVisible,
+// and re-run after any Patch that changes a stage. Change it here, then paste it into
+// both. (A named formula can't do it -- ClearCollect is a side effect.)
+// =====================================================================
+
+// Open tasks only. Pulled once and joined in memory rather than looked up per card:
+// a per-row LookUp inside a gallery template fires one request per visible card and
+// makes the board visibly stutter.
+ClearCollect(
+    colOpenTasks,
+    Filter(
+        'pursuit-tracker-Tasks',
+        Status.Value <> "Complete"
+    )
+);
+
+ClearCollect(
+    colPortfolio,
+    AddColumns(
+        Filter(
+            'pursuit-tracker-Pursuits',
+            IsActive = true,
+            Portfolio.Value = gblPortfolio
+        ) As P,
+        // The whole next-task record, so cards can read .Title, .DueDate and
+        // .DueDescription without three separate lookups.
+        "NextTask",
+        First(
+            Sort(
+                Filter(colOpenTasks, PursuitKey = P.ID, Not(IsBlank(DueDate))),
+                DueDate,
+                SortOrder.Ascending
+            )
+        ),
+        // Flattened multi-choice values. Galleries can bind to the raw table, but the
+        // Excel export needs them as text and computing it twice invites drift.
+        "SIsText",  Concat(P.AlignedSIs, Value, ", "),
+        "HypeText", Concat(P.Hyperscalers, Value, ", ")
+    )
+);

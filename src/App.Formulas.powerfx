@@ -1,0 +1,82 @@
+// Paste into: Power Apps Studio -> Tree view -> App -> Formulas property
+//
+// These are Named Formulas, not variables. They are evaluated lazily and recomputed
+// automatically, they cost nothing at startup, and they can't be accidentally
+// overwritten by a stray Set() somewhere in the app. Every colour in the three screens
+// resolves through here -- change a token, the whole app follows.
+//
+// Named formulas can't reference controls and can't have side effects. Anything that
+// loads data lives in App.OnStart / screen OnVisible instead.
+
+// ---------------------------------------------------------------- surfaces
+ClrPage        = ColorValue("#10141F");   // app background
+ClrNav         = ColorValue("#1A2030");   // top nav bar
+ClrColumn      = ColorValue("#171D2B");   // kanban column background
+ClrCard        = ColorValue("#1E2534");   // cards, panels
+ClrCardHover   = ColorValue("#252D3E");
+ClrBorder      = ColorValue("#2C3547");
+ClrDivider     = ColorValue("#232B3B");
+
+// ---------------------------------------------------------------- text
+ClrText        = ColorValue("#F2F5FA");   // primary
+ClrTextMuted   = ColorValue("#98A3B8");   // subtitles, column headers
+ClrTextFaint   = ColorValue("#6F7B90");   // provenance lines, timestamps
+
+// ---------------------------------------------------------------- accents
+ClrAccent      = ColorValue("#6B7DF2");   // New pursuit / Download Excel / Refresh
+ClrAccentHover = ColorValue("#5A6CE0");
+ClrAccentText  = ColorValue("#FFFFFF");
+ClrDate        = ColorValue("#EFA98E");   // "August 7" on cards -- warm, deliberate
+ClrLink        = ColorValue("#8FA2FF");
+
+// ---------------------------------------------------------------- chips & pills
+ClrChip        = ColorValue("#2A3243");
+ClrChipText    = ColorValue("#CBD4E4");
+ClrAvatar      = ColorValue("#3D4A66");
+ClrAvatarText  = ColorValue("#DCE3F0");
+ClrRiskFill    = ColorValue("#7E3B3B");
+ClrRiskText    = ColorValue("#F6D2D2");
+ClrOkFill      = ColorValue("#2F4A3C");
+ClrOkText      = ColorValue("#BFE3CE");
+
+// ---------------------------------------------------------------- type scale
+FontUI         = Font.'Segoe UI';
+SizePageTitle  = 26;
+SizeCardTitle  = 15;
+SizeBody       = 12;
+SizeMeta       = 10;
+SizeChip       = 9;
+
+// ---------------------------------------------------------------- metrics
+GapPage        = 24;   // page gutter
+GapCard        = 16;   // inside a card
+RadiusCard     = 8;
+RadiusChip     = 10;
+BoardColWidth  = 320;
+
+// ---------------------------------------------------------------- helpers
+// Stage colour, used for the thin accent on a board column header. Falls through to
+// the muted text colour for any stage added in SharePoint that isn't listed here, so
+// new stages degrade gracefully instead of rendering black-on-black.
+StageAccent(stage: Text): Color =
+    Switch(
+        stage,
+        "WM account team assimilation", ColorValue("#6B7DF2"),
+        "Partner introduction",         ColorValue("#5AB0C9"),
+        "Preliminary scoping",          ColorValue("#8E7BD8"),
+        ClrTextMuted
+    );
+
+// "August 7" when there's a real date, the free-text dependency wording when there
+// isn't. Mirrors the Legal review / "After proposal" row in the workspace mockup.
+DueLabel(due: DateTime, wording: Text): Text =
+    If(IsBlank(wording), Text(due, "mmmm d"), wording);
+
+// "Today" / "Yesterday" / "August 1" for the status update feed.
+RelativeDay(when: DateTime): Text =
+    Switch(
+        DateDiff(when, Now(), TimeUnit.Days),
+        0, "Today",
+        1, "Yesterday",
+        Text(when, "mmmm d")
+    );

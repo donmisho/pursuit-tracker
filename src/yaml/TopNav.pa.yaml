@@ -1,0 +1,139 @@
+# Top navigation bar — paste onto each of the three screens.
+#
+# HOW TO USE
+#   1. Create all three screens first (scrPortfolioBoard / scrPortfolioList /
+#      scrPursuitWorkspace). The OnSelect formulas below reference them by name.
+#   2. Copy this whole file to your clipboard.
+#   3. In Power Apps Studio, right-click the screen in the tree view -> Paste.
+#      The first paste triggers a browser clipboard-permission prompt; approve it.
+#   4. On each screen, change the selected tab's Fill to =ClrAccent and its Color to
+#      =ClrAccentText. This file ships with the board tab selected.
+#
+# Studio only accepts YAML in the exact shape it generates itself, and control versions
+# move between releases. If a paste is rejected, build these five controls by hand from
+# the property table at the bottom of this file — it's the same information.
+
+- navBg:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =0
+      Width: =Parent.Width
+      Height: =64
+      Fill: =ClrNav
+
+- navRule:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =63
+      Width: =Parent.Width
+      Height: =1
+      Fill: =ClrBorder
+
+- navBrand:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =0
+      Width: =180
+      Height: =64
+      Text: ="Pursuit Tracker"
+      Font: =FontUI
+      Size: =14
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      VerticalAlign: =VerticalAlign.Middle
+
+- btnNavBoard:
+    Control: Button
+    Properties:
+      X: =210
+      Y: =14
+      Width: =170
+      Height: =36
+      Text: ="Portfolio board"
+      Font: =FontUI
+      Size: =12
+      FontWeight: =FontWeight.Normal
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Navigate(scrPortfolioBoard, ScreenTransition.None)
+
+- btnNavList:
+    Control: Button
+    Properties:
+      X: =390
+      Y: =14
+      Width: =160
+      Height: =36
+      Text: ="Portfolio list"
+      Font: =FontUI
+      Size: =12
+      FontWeight: =FontWeight.Normal
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Navigate(scrPortfolioList, ScreenTransition.None)
+
+- btnNavWorkspace:
+    Control: Button
+    Properties:
+      X: =560
+      Y: =14
+      Width: =190
+      Height: =36
+      Text: ="Pursuit workspace"
+      Font: =FontUI
+      Size: =12
+      FontWeight: =FontWeight.Normal
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      DisplayMode: =If(IsBlank(gblPursuitId), DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Navigate(scrPursuitWorkspace, ScreenTransition.None)
+
+# ---------------------------------------------------------------------------
+# Manual fallback — the same five controls, if the paste above is rejected.
+#
+#   navBg     Rectangle  X 0    Y 0   W Parent.Width  H 64   Fill ClrNav
+#   navRule   Rectangle  X 0    Y 63  W Parent.Width  H 1    Fill ClrBorder
+#   navBrand  Label      X 24   Y 0   W 180  H 64  "Pursuit Tracker", Size 14,
+#                        Semibold, Color ClrText, VerticalAlign Middle
+#   btnNavBoard      Button  X 210  Y 14  W 170  H 36  "Portfolio board"
+#   btnNavList       Button  X 390  Y 14  W 160  H 36  "Portfolio list"
+#   btnNavWorkspace  Button  X 560  Y 14  W 190  H 36  "Pursuit workspace"
+#
+# Every button: BorderThickness 0, all four Radius 6, Size 12, Font FontUI.
+# Selected tab:   Fill ClrAccent, Color ClrAccentText
+# Unselected tab: Fill ClrNav,    Color ClrTextMuted, HoverFill ClrCardHover
+#
+# The workspace tab is disabled until a pursuit has been opened — gblPursuitId is set
+# by the board and list screens. Without that guard the tab opens an empty detail page
+# and every gallery on it shows a blank-record error.
+# ---------------------------------------------------------------------------
