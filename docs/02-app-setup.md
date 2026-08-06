@@ -23,6 +23,12 @@ Then, before anything else, **Settings → Display → turn off "Scale to fit"**
 mockups are a dense information layout; with scaling on, Power Apps letterboxes the app
 and the board columns end up floating in grey bars on a wide monitor.
 
+Newer versions of the maker create the app as **Responsive** and show no Scale to fit
+toggle at all. That's the same outcome — the two are mutually exclusive — so there's
+nothing to change. It does mean `Parent.Width` follows the browser window rather than a
+fixed 1366, which the layout accounts for: see [Responsive
+notes](#responsive-notes) below.
+
 While you're in Settings:
 
 - **General → Data row limit: 2000** (the maximum). Default is 500, and it silently
@@ -132,3 +138,25 @@ it works; the tables always work, and they carry the reasoning — why the board
 substituted date, why `ShowColumns` wraps `AddColumns` in the export, why the at-risk pill
 reads `Health` and not `Status`. Read the tables when something looks wrong; paste the
 YAML when you just want the screen on the canvas.
+
+## Responsive notes
+
+The screens are positioned for 1366×768 and stretch from there. What adapts and what
+doesn't:
+
+**Board — fully responsive.** The stage gallery is `Parent.Width - 48` wide and
+everything inside it is relative, so it gains columns as the window widens.
+
+**Workspace — responsive across.** The right rail and both header buttons are anchored to
+`Parent.Width`, so the rail grows with the window and the buttons stay pinned right.
+
+**List — fixed columns, left-aligned.** The six column headers and their matching row
+cells sit at fixed X positions. They stay aligned with each other at any width; a window
+wider than 1366 just leaves whitespace on the right. Widening them properly means moving
+twelve controls onto proportional formulas, which is worth doing only if you find the gap
+annoying.
+
+**Height doesn't adapt anywhere.** The workspace stacks cards to y=744. A browser window
+shorter than about 800px clips the bottom card. Either keep the window reasonably tall or
+rebuild that screen on the Scrollable screen layout — the note at the top of
+`src/yaml/03-PursuitWorkspace.pa.yaml` covers it, and no formula changes.

@@ -12,7 +12,9 @@ No explanations. Reasoning lives in `docs/01`–`08`.
 ## B. Settings
 
 4. Gear icon (top right) → **Settings**.
-5. **Display** → turn **Scale to fit** OFF.
+5. **Display** → turn **Scale to fit** OFF. **If there's no such toggle and the layout
+   already says Responsive, skip this step** — responsive and scale-to-fit are mutually
+   exclusive, so it's already off.
 6. **General** → **Data row limit** → `2000`.
 7. **Updates** → **New** tab → turn ON **Named formulas** and **User-defined functions**.
 8. Close Settings. **File → Save**. Reload the browser tab.
@@ -80,7 +82,9 @@ Do these three in order. For each one:
 ## H. Run it
 
 27. **File → Save**.
-28. **F5** to preview.
+28. **F5** to preview. On a responsive app, run the browser maximised at 1366×768 or
+    larger — the layout is positioned for that size and a smaller window clips the bottom
+    of the workspace.
 29. Check against the expected results in `docs/08-deploy-and-test.md` §2.
 
 **Preview writes to your real SharePoint lists.** Before testing the move handle or the

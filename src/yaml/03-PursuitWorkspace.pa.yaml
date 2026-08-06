@@ -151,7 +151,7 @@
 - btnAddAction:
     Control: Button
     Properties:
-      X: =1080
+      X: =btnAddUpdate.X - Self.Width - 12
       Y: =100
       Width: =110
       Height: =38
@@ -175,7 +175,7 @@
 - btnAddUpdate:
     Control: Button
     Properties:
-      X: =1202
+      X: =Parent.Width - Self.Width - GapPage
       Y: =100
       Width: =140
       Height: =38
@@ -602,7 +602,7 @@
     Properties:
       X: =688
       Y: =176
-      Width: =630
+      Width: =Parent.Width - 688 - GapPage
       Height: =130
       Fill: =ClrCard
       BorderColor: =ClrBorder
@@ -643,7 +643,7 @@
     Properties:
       X: =708
       Y: =228
-      Width: =590
+      Width: =Parent.Width - 708 - GapPage
       Height: =26
       Items: =gblPursuit.'Aligned SIs'
       TemplateSize: =88
@@ -694,7 +694,7 @@
     Properties:
       X: =708
       Y: =274
-      Width: =590
+      Width: =Parent.Width - 708 - GapPage
       Height: =26
       Items: =gblPursuit.Hyperscalers
       TemplateSize: =88
@@ -733,7 +733,7 @@
     Properties:
       X: =688
       Y: =318
-      Width: =630
+      Width: =Parent.Width - 688 - GapPage
       Height: =118
       Fill: =ClrCard
       BorderColor: =ClrBorder
@@ -762,7 +762,7 @@
     Properties:
       X: =708
       Y: =356
-      Width: =590
+      Width: =Parent.Width - 708 - GapPage
       Height: =72
       Items: =colDocs
       TemplateSize: =44
@@ -774,7 +774,7 @@
           Properties:
             X: =0
             Y: =2
-            Width: =570
+            Width: =Parent.Width - 20
             Height: =22
             Text: =ThisItem.Title
             Font: =FontUI
@@ -787,7 +787,7 @@
           Properties:
             X: =0
             Y: =22
-            Width: =570
+            Width: =Parent.Width - 20
             Height: =18
             Text: =ThisItem.'Document Type'.Value & If(ThisItem.'Include in AI Overview'.Value = "Yes", " · in overview", "")
             Font: =FontUI
@@ -800,7 +800,7 @@
     Properties:
       X: =688
       Y: =448
-      Width: =630
+      Width: =Parent.Width - 688 - GapPage
       Height: =160
       Fill: =ClrCard
       BorderColor: =ClrBorder
@@ -829,7 +829,7 @@
     Properties:
       X: =708
       Y: =486
-      Width: =590
+      Width: =Parent.Width - 708 - GapPage
       Height: =112
       Items: =colUpdates
       TemplateSize: =84
@@ -841,7 +841,7 @@
           Properties:
             X: =0
             Y: =4
-            Width: =470
+            Width: =Parent.Width - 110
             Height: =42
             Text: =ThisItem.'Update Text'
             Font: =FontUI
@@ -851,7 +851,7 @@
       - recUpdateTag:
           Control: Rectangle
           Properties:
-            X: =486
+            X: =Parent.Width - 96
             Y: =4
             Width: =76
             Height: =22
@@ -864,7 +864,7 @@
       - lblUpdateTag:
           Control: Label
           Properties:
-            X: =486
+            X: =Parent.Width - 96
             Y: =4
             Width: =76
             Height: =22
@@ -880,7 +880,7 @@
           Properties:
             X: =0
             Y: =50
-            Width: =560
+            Width: =Parent.Width - 20
             Height: =18
             Text: |
               =RelativeDay(ThisItem.'Update Date') &
@@ -904,7 +904,7 @@
     Properties:
       X: =688
       Y: =620
-      Width: =630
+      Width: =Parent.Width - 688 - GapPage
       Height: =124
       Fill: =ClrCard
       BorderColor: =ClrBorder
@@ -933,7 +933,7 @@
     Properties:
       X: =708
       Y: =658
-      Width: =590
+      Width: =Parent.Width - 708 - GapPage
       Height: =76
       Items: =colHistory
       TemplateSize: =56
