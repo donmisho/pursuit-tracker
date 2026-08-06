@@ -7,14 +7,16 @@ No explanations. Reasoning lives in `docs/01`–`08`.
 1. Go to <https://make.powerapps.com>. Confirm the environment picker (top right) says
    your default environment.
 2. **+ Create** → **Blank app** → **Blank canvas app** → **Create**.
-3. Name: `Pursuit Tracker`. Format: **Tablet**. → **Create**.
+3. Name: `Pursuit Tracker`. If the dialog offers a **Format** choice, pick **Tablet**.
+   Newer makers don't offer one and create a responsive app instead — that's fine, skip
+   it. → **Create**.
 
 ## B. Settings
 
 4. Gear icon (top right) → **Settings**.
-5. **Display** → turn **Scale to fit** OFF. **If there's no such toggle and the layout
-   already says Responsive, skip this step** — responsive and scale-to-fit are mutually
-   exclusive, so it's already off.
+5. **Display** → turn **Scale to fit** OFF. **No such toggle and the layout says
+   Responsive? Skip it** — the two are mutually exclusive, so it's already off. While
+   you're here, set **Orientation** to **Landscape** if that option is shown.
 6. **General** → **Data row limit** → `2000`.
 7. **Updates** → **New** tab → turn ON **Named formulas** and **User-defined functions**.
 8. Close Settings. **File → Save**. Reload the browser tab.
