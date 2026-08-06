@@ -85,7 +85,10 @@ ForAll(
     )
 );
 
-Set(gblPanel, "");
+// Add mode arrives from the board or list with a blank key -- open the details panel
+// straight away, since an empty workspace with nothing to fill in is a dead end.
+Set(gblPanel, If(gblNewPursuit, "pursuit", ""));
+Set(gblEditKey, "");
 ```
 
 Every filter is `'Pursuit ID' = gblPursuitKey` — text equality on a text column, which
@@ -101,18 +104,17 @@ pursuit.
 
 | Control | Property | Formula |
 |---|---|---|
-| `lblBreadcrumb` | `Text` | `="SI pursuit management / " & gblPursuit.'Account Name'` |
-| | `Size` / `Color` | `=SizeBody` / `=ClrTextFaint` |
-| `lblTitle` | `Text` | `=gblPursuit.'Pursuit Name'` |
+| `lblBreadcrumb` | `Text` | `="SI pursuit management"` — `Size = SizeMeta`, `Color = ClrTextFaint` |
+| `lblAccount` | `Text` | `=If(gblNewPursuit, "New pursuit", Clip(gblPursuit.'Account Name', 40))` |
 | | `Size` / `FontWeight` / `Color` | `=SizePageTitle` / `=FontWeight.Semibold` / `=ClrText` |
-| `lblSubtitle` | `Text` | `="Pursuit details are supplied from Salesforce."` |
-| | `Size` / `Color` | `=SizeBody` / `=ClrTextMuted` |
-| `btnAddAction` | `Text` | `="Add task"` |
-| | `Fill` / `Color` / `BorderColor` / `BorderThickness` | `=ClrCard` / `=ClrText` / `=ClrBorder` / `=1` |
-| | `OnSelect` | `=Set(gblPanel, "action"); Reset(txtActionTitle)` |
-| `btnAddUpdate` | `Text` | `="Add update"` |
-| | `Fill` / `Color` | `=ClrAccent` / `=ClrAccentText` |
-| | `OnSelect` | `=Set(gblPanel, "update"); Reset(txtUpdateBody)` |
+| `lblPursuitName` | `Text` | the prefix-stripping formula, wrapped in `Clip(..., 90)` |
+| | `Size` / `Color` | `=SizeCardTitle` / `=ClrTextMuted` |
+| `btnEditDetails` | `Text` | `=If(gblNewPursuit, "Enter details", "Edit details")` |
+| | `OnSelect` | `=Set(gblPanel, "pursuit"); Reset(txtPurAccount); …` (one `Reset` per field) |
+
+Account leads at 26pt with the pursuit name under it at 15pt, rather than one run-on
+line. Same prefix-stripping as the board and list, so "ELEVANCE HEALTH: Carelon — …"
+renders as **Elevance Health** over "Carelon - Unified Data and Analytics Platform…".
 
 ## `cardSalesforce`
 
@@ -304,116 +306,94 @@ to keep. Delete it if you'd rather the workspace showed only the current narrati
 
 ---
 
-## The Add task / Add update panels
+## The edit panel
 
-The mockups don't show these open, so this is a judgement call: a right-hand slide-over
-rather than a full-screen form, so the pursuit stays visible behind it.
+One slide-over, four modes. `gblPanel` holds which: `"pursuit"`, `"action"`, `"doc"`,
+`"update"`, or `""` for closed. `gblEditKey` holds the `ACT-nnn` / document title /
+`UPD-nnn` being edited, or `""` for a new record — that single variable drives three
+things: whether Save patches or collects, whether Delete is offered, and what the panel
+header says.
 
-Build each as a Rectangle (`Fill = ClrCard`, `X = Parent.Width - 420`, full height) with
-`Visible = gblPanel = "action"` / `= "update"`, over a dimming Rectangle
-(`Fill = ColorFade(ClrPage, -0.4)`, `Visible = gblPanel <> ""`,
-`OnSelect = Set(gblPanel, "")`).
+640 wide over a dimming scrim. The pursuit mode lays its 13 fields out in two columns;
+the three child modes use one.
 
-**Add task** — `txtActionTitle`, `drpActionStage`, `drpActionEffort`, `dteActionDue`,
-and `cmbActionOwner` (Combo box,
-`Items = Office365Users.SearchUser({searchTerm: Self.SearchText})`).
+### Getting in
 
-The choice dropdowns read from SharePoint:
-`drpActionStage.Items = Choices('pursuit-tracker-actions'.'Workflow Stage')` and
-`drpActionEffort.Items = Choices('pursuit-tracker-actions'.'Effort Size')`, both bound
-through `.Value`.
+| From | Control | Opens |
+|---|---|---|
+| Header | `btnEditDetails` | pursuit details, all fields |
+| Actions card | `btnAddAction` (+ Add) | blank action |
+| Actions gallery | `btnActionRow` — transparent, covers the row | that action |
+| Documents card | `btnAddDoc` | blank document link |
+| Documents gallery | `btnDocEdit` | that document |
+| Updates card | `btnAddUpdate` | blank update |
+| Updates gallery | `btnUpdateEdit` | that update |
 
-```powerfx
-// btnSaveAction.OnSelect
-With(
-    {
-        nextId: "ACT-" & Text(
-            Coalesce(Max(ForAll('pursuit-tracker-actions' As A, Value(Right(A.Title, 3))), Value), 0) + 1,
-            "000"
-        )
-    },
-    Collect(
-        'pursuit-tracker-actions',
-        {
-            Title:                   nextId,
-            'Pursuit ID':            gblPursuitKey,
-            'Action Title':          txtActionTitle.Text,
-            'Workflow Stage':        { Value: drpActionStage.Selected.Value },
-            'Action Owner Entra ID': cmbActionOwner.Selected.Mail,
-            Status:                  { Value: "Not started" },
-            Health:                  { Value: "On track" },
-            'Effort Size':           { Value: drpActionEffort.Selected.Value },
-            'Due Date':              dteActionDue.SelectedDate
-        }
-    )
-);
-ClearCollect(colActions, 'pursuit-tracker-actions');
-ClearCollect(
-    colActions_P,
-    AddColumns(
-        Sort(Filter('pursuit-tracker-actions', 'Pursuit ID' = gblPursuitKey), If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'), SortOrder.Ascending) As A,
-        DueWording,
-        If(!IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'), "",
-           "After " & Lower(LookUp('pursuit-tracker-actions', Title = A.'Predecessor Action ID').'Workflow Stage'.Value))
-    )
-);
-Set(gblPanel, "")
-```
+Every one of those handlers does the same three things: set the mode, set `gblEditKey`,
+set the record global (`gblEditAction` / `gblEditDoc` / `gblEditUpdate`), then `Reset()`
+every input in that mode.
 
-Because the owner is a plain text column, this writes `cmbActionOwner.Selected.Mail` and
-nothing else. The seven-field `SPListExpandedUser` record a SharePoint Person column
-demands doesn't apply here — one of the few places the spreadsheet-import schema makes
-life easier.
+**The `Reset()` calls are not optional.** A `Classic/TextInput` keeps whatever the user
+last typed even after its `Default` formula changes to a different record's value. Without
+the resets, opening action B after editing action A shows A's text. It's the single
+easiest way to build a form that silently saves the wrong record.
 
-Reloading `colActions` as well as `colActions_P` keeps the board's next-task calculation
-correct after adding an action.
+### Fields
 
-**Add update** — `txtUpdateBody` (multiline), `drpUpdateType`
-(`Items = Choices('pursuit-tracker-status-updates'.'Update Type')`), and `drpUpdateRisk`
-(`Items = Choices('pursuit-tracker-status-updates'.'Risk / Decision')`). Set
-`drpUpdateRisk.AllowEmptySelection = true` — most updates are neither a risk nor a
-decision, and a dropdown that can't be cleared forces a tag onto every one of them.
+**Pursuit** — every column in `pursuit-tracker-pursuits` except `Title`, which is
+generated: Account Name, Pursuit Name, Workflow Stage, Health, Owner email, Target
+Decision Date, Active, Salesforce Opportunity ID, Salesforce Opportunity URL, Aligned SIs,
+Hyperscalers, Estimated Fees, AI Overview Current Version.
 
-```powerfx
-// btnSaveUpdate.OnSelect
-With(
-    {
-        nextId: "UPD-" & Text(
-            Coalesce(Max(ForAll('pursuit-tracker-status-updates' As U, Value(Right(U.Title, 3))), Value), 0) + 1,
-            "000"
-        )
-    },
-    Collect(
-        'pursuit-tracker-status-updates',
-        {
-            Title:                 nextId,
-            'Pursuit ID':          gblPursuitKey,
-            'Update Date':         Now(),
-            'Update Type':         { Value: drpUpdateType.Selected.Value },
-            'Update Text':         txtUpdateBody.Text,
-            'Risk / Decision':     { Value: drpUpdateRisk.Selected.Value },
-            'Created By Entra ID': gblUser.Email
-        }
-    )
-);
-ClearCollect(colUpdates, Sort(Filter('pursuit-tracker-status-updates', 'Pursuit ID' = gblPursuitKey), 'Update Date', SortOrder.Descending));
-Reset(txtUpdateBody);
-Set(gblPanel, "")
-```
+**Action** — Action Title, Workflow Stage, Status, Health, Effort Size, Due Date, Owner
+email, Predecessor Action ID, Notes. `Completed Date` isn't a field: Save sets it to
+`Now()` when Status becomes Completed and clears it otherwise, which is one fewer thing to
+keep consistent by hand.
 
-`Title` here is the `UPD-nnn` identifier, not the update text — the schema keeps the body
-in `Update Text`, which is a Note column and takes the full thing.
+**Document** — Title, Document Type, Document URL, Include in AI Overview. `Document ID`,
+`Added Date` and `Added By Entra ID` are set on create.
 
-## New pursuit
+**Update** — Update Text, Update Type, Risk / Decision. `Update Date` and
+`Created By Entra ID` are set on create and left alone on edit, so editing a typo doesn't
+re-date the entry.
 
-`btnNewPursuit` on the board sets `gblNewPursuit` and navigates here with a blank
-`gblPursuitKey`. Guard the screen so it doesn't render a record that doesn't exist: set
-`Visible = Not(gblNewPursuit)` on both rails, and show a create panel
-(`Visible = gblNewPursuit`) with account name, pursuit name, stage, owner, target
-decision date. Generate `Title` as `"PUR-" & Text(max + 1, "000")` using the same pattern
-as above, then set `gblPursuitKey` to it and `gblNewPursuit` to false — the rails populate
-normally.
+Owner fields are plain text inputs rather than people pickers. The columns hold email
+strings, not Person values, so a combo box would mean converting between a user record and
+an address in both directions for no gain.
 
-That `Max(Value(Right(Title, 3)))` pattern appears three times across this doc, and it
-assumes the three-digit format holds. At `PUR-999` it silently starts colliding. That is a
-long way off at fourteen pursuits, but it is the kind of thing worth knowing you built.
+### Saving
+
+`btnPanelSave.OnSelect` is one `Switch`-shaped `If` over `gblPanel`. Each branch either
+`Collect`s (when `gblEditKey = ""`) or `Patch`es, then re-runs the `ClearCollect` for that
+list so the card behind the panel is correct before the panel closes.
+
+New IDs follow the existing convention —
+`"ACT-" & Text(Max(...) + 1, "000")` over the highest existing three-digit suffix. Same
+pattern for `PUR-`, `DOC-` and `UPD-`. It assumes the three-digit format holds; at 999 it
+starts colliding.
+
+`DisplayMode` on Save is bound to the one field that can't be empty in each mode — account
+and pursuit name, action title, document title, update text — so the button is dead until
+the record is viable.
+
+### Deleting
+
+`btnPanelDelete` is visible only for the three child modes and only when editing an
+existing record, so it can't appear on a new record or on the pursuit. It `Remove`s the row
+and reloads.
+
+**There is no delete for a pursuit.** Removing one would orphan its actions, documents,
+updates and AI history — SharePoint has no cascade, and a silent four-list cleanup buried
+in a button is the kind of thing you discover a month later. Delete a pursuit in the
+SharePoint list, where what else is attached is visible.
+
+### Add mode
+
+`btnAddPursuit` on the board and the list both set `gblPursuitKey` to blank and
+`gblNewPursuit` to true, then navigate here. `OnVisible` opens the details panel
+immediately, the header reads "New pursuit", and the + Add buttons on the child cards are
+disabled until the pursuit exists — there's no `Pursuit ID` to attach a child to yet.
+
+Saving generates the `PUR-nnn`, sets `gblPursuitKey`, and clears `gblNewPursuit`, at which
+point the screen behaves like any other pursuit.
+

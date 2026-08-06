@@ -33,6 +33,14 @@ Set(gblNewPursuit, false);    // workspace is in create mode
 Set(gblPanel, "");            // "" | "action" | "update" -- open slide-over
 Set(gblExporting, false);     // Excel export in flight
 Set(gblRowMenu, "");          // PUR-nnn whose ⋯ menu is open on the list
+Set(gblEditKey, "");          // ACT/DOC/UPD id open in the workspace panel; "" = new
+
+// The child record open in the workspace edit panel. Seeded the same way as the pursuit
+// globals -- an empty record of the right shape, so every input Default has something
+// typed to read before anything has been selected.
+Set(gblEditAction, LookUp('pursuit-tracker-actions', ID < 0));
+Set(gblEditDoc,    LookUp('pursuit-tracker-documents', ID < 0));
+Set(gblEditUpdate, LookUp('pursuit-tracker-status-updates', ID < 0));
 
 
 // =====================================================================

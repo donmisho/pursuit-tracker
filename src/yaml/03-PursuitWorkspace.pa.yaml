@@ -1,18 +1,18 @@
 # scrPursuitWorkspace — complete screen. Paste onto scrPursuitWorkspace.
-# Tablet (1366 x 768), "Scale to fit" OFF. See 01-PortfolioBoard.pa.yaml for paste
-# instructions and fallbacks.
+# Tablet (1366 x 768), positioned for that size and anchored to Parent.Width.
 #
-# Left rail  X 24,  W 640.   Right rail X 688, W 630.
-# The seven cards are sized to fit 768px without page scrolling — canvas screens don't
-# scroll — so each gallery scrolls inside its own card instead. If you want more room,
-# rebuild this screen from the "Scrollable screen" layout and drop these controls into
-# its Canvas; every formula below is unchanged by that.
-
 # CONTROL TYPES: buttons and inputs use the Classic/ prefix -- the unprefixed names
 # resolve to the modern Fluent controls, which have no Fill, Color or Radius properties.
 # Rounded shapes are Classic/Button with Text "" rather than Rectangle: the classic
 # Rectangle has no Radius properties at all, and Button is the only classic control that
-# does. Square shapes (rules, dividers, accent bars, the panel scrim) stay Rectangle.
+# does. Square shapes (rules, dividers, the panel scrim) stay Rectangle.
+#
+# EDITING MODEL: one slide-over panel, four modes, held in gblPanel --
+#   "pursuit" | "action" | "doc" | "update" | ""  (closed)
+# gblEditKey holds the ACT/DOC/UPD id being edited, or "" for a new record, which is
+# what drives Save between Patch and Collect and whether Delete is offered.
+# The three child records also live in gblEditAction / gblEditDoc / gblEditUpdate so the
+# input Defaults have something typed to read even before anything is selected.
 
 # ---------------------------------------------------------------- nav bar
 - navBg:
@@ -123,69 +123,64 @@
       X: =GapPage
       Y: =74
       Width: =700
-      Height: =20
-      Text: ="SI pursuit management / " & gblPursuit.'Account Name'
+      Height: =18
+      Text: ="SI pursuit management"
       Font: =FontUI
-      Size: =SizeBody
+      Size: =SizeMeta
       Color: =ClrTextFaint
 
-- lblTitle:
+- lblAccount:
     Control: Label
     Properties:
       X: =GapPage
-      Y: =96
-      Width: =1000
-      Height: =38
-      Text: =gblPursuit.'Pursuit Name'
+      Y: =92
+      Width: =800
+      Height: =36
+      Text: =If(gblNewPursuit, "New pursuit", Clip(gblPursuit.'Account Name', 40))
       Font: =FontUI
       Size: =SizePageTitle
       FontWeight: =FontWeight.Semibold
       Color: =ClrText
+      VerticalAlign: =VerticalAlign.Middle
 
-- lblSubtitle:
+- lblPursuitName:
     Control: Label
     Properties:
       X: =GapPage
-      Y: =136
-      Width: =900
-      Height: =20
-      Text: ="Pursuit details are supplied from Salesforce."
+      Y: =128
+      Width: =800
+      Height: =24
+      Text: |
+        =If(
+            gblNewPursuit,
+            "Fill in the details panel and save to create it",
+            Clip(
+                With(
+                    { n: gblPursuit.'Pursuit Name' },
+                    Trim(
+                        If(
+                            !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
+                            !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
+                            n
+                        )
+                    )
+                ),
+                90
+            )
+        )
       Font: =FontUI
-      Size: =SizeBody
+      Size: =SizeCardTitle
       Color: =ClrTextMuted
+      VerticalAlign: =VerticalAlign.Middle
 
-- btnAddAction:
-    Control: Classic/Button
-    Properties:
-      X: =btnAddUpdate.X - Self.Width - 12
-      Y: =100
-      Width: =110
-      Height: =38
-      Text: ="Add task"
-      Font: =FontUI
-      Size: =12
-      Fill: =ClrCard
-      Color: =ClrText
-      HoverFill: =ClrCardHover
-      HoverColor: =ClrText
-      PressedFill: =ClrCardHover
-      PressedColor: =ClrText
-      BorderColor: =ClrBorder
-      BorderThickness: =1
-      RadiusTopLeft: =6
-      RadiusTopRight: =6
-      RadiusBottomLeft: =6
-      RadiusBottomRight: =6
-      OnSelect: =Set(gblPanel, "action"); Reset(txtActionTitle)
-
-- btnAddUpdate:
+- btnEditDetails:
     Control: Classic/Button
     Properties:
       X: =Parent.Width - Self.Width - GapPage
       Y: =100
-      Width: =140
+      Width: =150
       Height: =38
-      Text: ="Add update"
+      Text: =If(gblNewPursuit, "Enter details", "Edit details")
       Font: =FontUI
       Size: =12
       Fill: =ClrAccent
@@ -199,10 +194,9 @@
       RadiusTopRight: =6
       RadiusBottomLeft: =6
       RadiusBottomRight: =6
-      OnSelect: =Set(gblPanel, "update"); Reset(txtUpdateBody)
+      OnSelect: =Set(gblPanel, "pursuit"); Reset(txtPurAccount); Reset(txtPurName); Reset(drpPurStage); Reset(drpPurHealth); Reset(txtPurOwner); Reset(dtePurTarget); Reset(txtPurActive); Reset(txtPurSfId); Reset(txtPurSfUrl); Reset(cmbPurSIs); Reset(cmbPurHype); Reset(txtPurFees); Reset(txtPurAiVer)
 
 # ================================================================ LEFT RAIL
-# ---- Salesforce card ------------------------------------------------------
 - cardSalesforce:
     Control: Classic/Button
     Properties:
@@ -254,11 +248,10 @@
     Control: Label
     Properties:
       X: =44
-      Y: =244
+      Y: =246
       Width: =430
-      Height: =34
-      Text: |
-        ="Synced CRM information: account, opportunity owner, amount, close date, and stage"
+      Height: =32
+      Text: ="Account, stage, health, partners and dates are all editable from Edit details."
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextFaint
@@ -320,68 +313,25 @@
     Properties:
       X: =58
       Y: =294
-      Width: =200
+      Width: =250
       Height: =16
       Text: ="PURSUIT OWNER"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- recWsAvatar:
-    Control: Classic/Button
-    Properties:
-      Text: =""
-      Fill: =ClrAvatar
-      HoverFill: =ClrAvatar
-      PressedFill: =ClrAvatar
-      OnSelect: =false
-      X: =58
-      Y: =314
-      Width: =24
-      Height: =24
-      RadiusTopLeft: =12
-      RadiusTopRight: =12
-      RadiusBottomLeft: =12
-      RadiusBottomRight: =12
-
-- lblWsInitials:
+- lblOwnerVal:
     Control: Label
     Properties:
       X: =58
       Y: =314
-      Width: =24
-      Height: =24
-      Text: =Initials(Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID'))
-      Font: =FontUI
-      Size: =SizeChip
-      Color: =ClrAvatarText
-      Align: =Align.Center
-      VerticalAlign: =VerticalAlign.Middle
-
-- lblWsOwnerName:
-    Control: Label
-    Properties:
-      X: =88
-      Y: =312
-      Width: =220
-      Height: =18
+      Width: =250
+      Height: =28
       Text: =Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID')
       Font: =FontUI
       Size: =SizeBody
       FontWeight: =FontWeight.Semibold
       Color: =ClrText
-
-- lblWsOwnerOrg:
-    Control: Label
-    Properties:
-      X: =88
-      Y: =330
-      Width: =220
-      Height: =16
-      Text: ="West Monroe · Entra ID"
-      Font: =FontUI
-      Size: =SizeMeta
-      Color: =ClrTextFaint
 
 - recCloseBox:
     Control: Classic/Button
@@ -407,27 +357,26 @@
     Properties:
       X: =359
       Y: =294
-      Width: =240
+      Width: =250
       Height: =16
       Text: ="TARGET DECISION"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- lblCloseDate:
+- lblCloseVal:
     Control: Label
     Properties:
       X: =359
       Y: =314
       Width: =250
-      Height: =26
-      Text: =If(IsBlank(gblPursuit.'Target Decision Date'), "Not set", Text(gblPursuit.'Target Decision Date', "mmmm d"))
+      Height: =28
+      Text: =If(IsBlank(gblPursuit.'Target Decision Date'), "Not set", Text(gblPursuit.'Target Decision Date', "mmmm d, yyyy"))
       Font: =FontUI
-      Size: =SizeCardTitle
+      Size: =SizeBody
       FontWeight: =FontWeight.Semibold
       Color: =ClrText
 
-# ---- AI overview card -----------------------------------------------------
 - cardOverview:
     Control: Classic/Button
     Properties:
@@ -487,7 +436,7 @@
             "",
             "Version " & gblOverview.'Version Number' &
             " · refreshed " & Lower(RelativeDay(gblOverview.'Refreshed Date')) &
-            " · prior versions retained in history"
+            " · written by SharePoint AI, read-only here"
         )
       Font: =FontUI
       Size: =SizeMeta
@@ -495,7 +444,6 @@
       Wrap: =true
       VerticalAlign: =VerticalAlign.Top
 
-# ---- Actions card ---------------------------------------------------------
 - cardActions:
     Control: Classic/Button
     Properties:
@@ -527,6 +475,31 @@
       Size: =SizeCardTitle
       FontWeight: =FontWeight.Semibold
       Color: =ClrText
+
+- btnAddAction:
+    Control: Classic/Button
+    Properties:
+      X: =572
+      Y: =584
+      Width: =64
+      Height: =26
+      Text: ="+ Add"
+      Font: =FontUI
+      Size: =11
+      Fill: =ClrColumn
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =4
+      RadiusTopRight: =4
+      RadiusBottomLeft: =4
+      RadiusBottomRight: =4
+      DisplayMode: =If(gblNewPursuit, DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Set(gblPanel, "action"); Set(gblEditKey, ""); Set(gblEditAction, LookUp('pursuit-tracker-actions', ID < 0)); Reset(txtActTitle); Reset(drpActStage); Reset(drpActStatus); Reset(drpActHealth); Reset(drpActEffort); Reset(dteActDue); Reset(txtActOwner); Reset(txtActPred); Reset(txtActNotes)
 
 - galActions:
     Control: Gallery
@@ -638,8 +611,22 @@
             Height: =1
             Fill: =ClrDivider
 
+      - btnActionRow:
+          Control: Classic/Button
+          Properties:
+            Text: =""
+            X: =0
+            Y: =0
+            Width: =Parent.Width - 20
+            Height: =Parent.TemplateHeight - 1
+            Fill: =Transparent
+            HoverFill: =RGBA(255, 255, 255, 0.04)
+            PressedFill: =RGBA(255, 255, 255, 0.07)
+            BorderThickness: =0
+            Tooltip: ="Edit this action"
+            OnSelect: =Set(gblPanel, "action"); Set(gblEditKey, ThisItem.Title); Set(gblEditAction, ThisItem); Reset(txtActTitle); Reset(drpActStage); Reset(drpActStatus); Reset(drpActHealth); Reset(drpActEffort); Reset(dteActDue); Reset(txtActOwner); Reset(txtActPred); Reset(txtActNotes)
+
 # ================================================================ RIGHT RAIL
-# ---- Alignment card -------------------------------------------------------
 - cardAlignment:
     Control: Classic/Button
     Properties:
@@ -684,6 +671,18 @@
       Size: =SizeMeta
       Color: =ClrTextMuted
 
+- lblHypeCap:
+    Control: Label
+    Properties:
+      X: =708
+      Y: =258
+      Width: =300
+      Height: =14
+      Text: ="HYPERSCALERS"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
 - galAlignSIs:
     Control: Gallery
     Variant: Horizontal
@@ -713,6 +712,7 @@
             RadiusTopRight: =RadiusChip
             RadiusBottomLeft: =RadiusChip
             RadiusBottomRight: =RadiusChip
+
       - lblAlignSIChip:
           Control: Label
           Properties:
@@ -726,18 +726,6 @@
             Color: =ClrChipText
             Align: =Align.Center
             VerticalAlign: =VerticalAlign.Middle
-
-- lblHypeCap:
-    Control: Label
-    Properties:
-      X: =708
-      Y: =258
-      Width: =300
-      Height: =14
-      Text: ="HYPERSCALERS"
-      Font: =FontUI
-      Size: =SizeMeta
-      Color: =ClrTextMuted
 
 - galAlignHype:
     Control: Gallery
@@ -768,6 +756,7 @@
             RadiusTopRight: =RadiusChip
             RadiusBottomLeft: =RadiusChip
             RadiusBottomRight: =RadiusChip
+
       - lblAlignHypeChip:
           Control: Label
           Properties:
@@ -782,7 +771,6 @@
             Align: =Align.Center
             VerticalAlign: =VerticalAlign.Middle
 
-# ---- Documents card -------------------------------------------------------
 - cardDocuments:
     Control: Classic/Button
     Properties:
@@ -815,6 +803,31 @@
       FontWeight: =FontWeight.Semibold
       Color: =ClrText
 
+- btnAddDoc:
+    Control: Classic/Button
+    Properties:
+      X: =Parent.Width - GapPage - 64
+      Y: =328
+      Width: =64
+      Height: =26
+      Text: ="+ Add"
+      Font: =FontUI
+      Size: =11
+      Fill: =ClrColumn
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =4
+      RadiusTopRight: =4
+      RadiusBottomLeft: =4
+      RadiusBottomRight: =4
+      DisplayMode: =If(gblNewPursuit, DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Set(gblPanel, "doc"); Set(gblEditKey, ""); Set(gblEditDoc, LookUp('pursuit-tracker-documents', ID < 0)); Reset(txtDocTitle); Reset(drpDocType); Reset(txtDocUrl); Reset(drpDocInc)
+
 - galDocs:
     Control: Gallery
     Variant: Vertical
@@ -833,7 +846,7 @@
           Properties:
             X: =0
             Y: =2
-            Width: =Parent.Width - 20
+            Width: =Parent.Width - 100
             Height: =22
             Text: =Clip(ThisItem.Title, 62)
             Font: =FontUI
@@ -841,19 +854,43 @@
             Color: =ClrLink
             Underline: =true
             OnSelect: =Launch(SafeUrl(ThisItem.'Document URL'))
+
       - lblDocType:
           Control: Label
           Properties:
             X: =0
             Y: =22
-            Width: =Parent.Width - 20
+            Width: =Parent.Width - 100
             Height: =18
             Text: =ThisItem.'Document Type'.Value & If(ThisItem.'Include in AI Overview'.Value = "Yes", " · in overview", "")
             Font: =FontUI
             Size: =SizeMeta
             Color: =ClrTextFaint
 
-# ---- Status updates card --------------------------------------------------
+      - btnDocEdit:
+          Control: Classic/Button
+          Properties:
+            X: =Parent.Width - 90
+            Y: =8
+            Width: =64
+            Height: =26
+            Text: ="Edit"
+            Font: =FontUI
+            Size: =11
+            Fill: =Transparent
+            Color: =ClrTextMuted
+            HoverFill: =ClrCardHover
+            HoverColor: =ClrText
+            PressedFill: =ClrCardHover
+            PressedColor: =ClrText
+            BorderColor: =ClrBorder
+            BorderThickness: =1
+            RadiusTopLeft: =4
+            RadiusTopRight: =4
+            RadiusBottomLeft: =4
+            RadiusBottomRight: =4
+            OnSelect: =Set(gblPanel, "doc"); Set(gblEditKey, ThisItem.Title); Set(gblEditDoc, ThisItem); Reset(txtDocTitle); Reset(drpDocType); Reset(txtDocUrl); Reset(drpDocInc)
+
 - cardUpdates:
     Control: Classic/Button
     Properties:
@@ -886,6 +923,31 @@
       FontWeight: =FontWeight.Semibold
       Color: =ClrText
 
+- btnAddUpdate:
+    Control: Classic/Button
+    Properties:
+      X: =Parent.Width - GapPage - 64
+      Y: =458
+      Width: =64
+      Height: =26
+      Text: ="+ Add"
+      Font: =FontUI
+      Size: =11
+      Fill: =ClrColumn
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =4
+      RadiusTopRight: =4
+      RadiusBottomLeft: =4
+      RadiusBottomRight: =4
+      DisplayMode: =If(gblNewPursuit, DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Set(gblPanel, "update"); Set(gblEditKey, ""); Set(gblEditUpdate, LookUp('pursuit-tracker-status-updates', ID < 0)); Reset(txtUpdText); Reset(drpUpdType); Reset(drpUpdRisk)
+
 - galUpdates:
     Control: Gallery
     Variant: Vertical
@@ -904,7 +966,7 @@
           Properties:
             X: =0
             Y: =4
-            Width: =Parent.Width - 110
+            Width: =Parent.Width - 200
             Height: =42
             Text: =Clip(ThisItem.'Update Text', 128)
             Font: =FontUI
@@ -912,6 +974,7 @@
             Color: =ClrText
             Wrap: =true
             VerticalAlign: =VerticalAlign.Top
+
       - recUpdateTag:
           Control: Classic/Button
           Properties:
@@ -920,7 +983,7 @@
             HoverFill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
             PressedFill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
             OnSelect: =false
-            X: =Parent.Width - 96
+            X: =Parent.Width - 186
             Y: =4
             Width: =76
             Height: =22
@@ -929,10 +992,11 @@
             RadiusTopRight: =RadiusChip
             RadiusBottomLeft: =RadiusChip
             RadiusBottomRight: =RadiusChip
+
       - lblUpdateTag:
           Control: Label
           Properties:
-            X: =Parent.Width - 96
+            X: =Parent.Width - 186
             Y: =4
             Width: =76
             Height: =22
@@ -943,12 +1007,13 @@
             Color: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskText, ClrChipText)
             Align: =Align.Center
             VerticalAlign: =VerticalAlign.Middle
+
       - lblUpdateMeta:
           Control: Label
           Properties:
             X: =0
             Y: =50
-            Width: =Parent.Width - 20
+            Width: =Parent.Width - 120
             Height: =18
             Text: |
               =RelativeDay(ThisItem.'Update Date') &
@@ -957,6 +1022,31 @@
             Font: =FontUI
             Size: =SizeMeta
             Color: =ClrTextFaint
+
+      - btnUpdateEdit:
+          Control: Classic/Button
+          Properties:
+            X: =Parent.Width - 90
+            Y: =48
+            Width: =64
+            Height: =26
+            Text: ="Edit"
+            Font: =FontUI
+            Size: =11
+            Fill: =Transparent
+            Color: =ClrTextMuted
+            HoverFill: =ClrCardHover
+            HoverColor: =ClrText
+            PressedFill: =ClrCardHover
+            PressedColor: =ClrText
+            BorderColor: =ClrBorder
+            BorderThickness: =1
+            RadiusTopLeft: =4
+            RadiusTopRight: =4
+            RadiusBottomLeft: =4
+            RadiusBottomRight: =4
+            OnSelect: =Set(gblPanel, "update"); Set(gblEditKey, ThisItem.Title); Set(gblEditUpdate, ThisItem); Reset(txtUpdText); Reset(drpUpdType); Reset(drpUpdRisk)
+
       - recUpdateDivider:
           Control: Rectangle
           Properties:
@@ -966,7 +1056,6 @@
             Height: =1
             Fill: =ClrDivider
 
-# ---- AI overview history card ---------------------------------------------
 - cardHistory:
     Control: Classic/Button
     Properties:
@@ -1025,6 +1114,7 @@
             FontWeight: =FontWeight.Semibold
             Color: =If(ThisItem.'Is Current'.Value = "Yes", ClrText, ClrTextMuted)
             OnSelect: =Set(gblOverview, ThisItem)
+
       - lblVersionMeta:
           Control: Label
           Properties:
@@ -1036,6 +1126,7 @@
             Font: =FontUI
             Size: =SizeMeta
             Color: =ClrTextFaint
+
       - recVersionDivider:
           Control: Rectangle
           Properties:
@@ -1045,7 +1136,7 @@
             Height: =1
             Fill: =ClrDivider
 
-# ================================================================ SLIDE-OVER
+# ================================================================ EDIT PANEL
 - recPanelScrim:
     Control: Rectangle
     Properties:
@@ -1060,9 +1151,9 @@
 - recPanel:
     Control: Rectangle
     Properties:
-      X: =Parent.Width - 420
+      X: =Parent.Width - 640
       Y: =0
-      Width: =420
+      Width: =640
       Height: =Parent.Height
       Visible: =gblPanel <> ""
       Fill: =ClrCard
@@ -1072,253 +1163,930 @@
 - lblPanelHead:
     Control: Label
     Properties:
-      X: =Parent.Width - 396
-      Y: =32
-      Width: =380
+      X: =Parent.Width - 616
+      Y: =24
+      Width: =592
       Height: =30
       Visible: =gblPanel <> ""
-      Text: =If(gblPanel = "action", "Add task", "Add update")
+      Text: |
+        =Switch(
+            gblPanel,
+            "pursuit", If(gblNewPursuit, "New pursuit", "Pursuit details"),
+            "action",  If(gblEditKey = "", "New action", "Edit action"),
+            "doc",     If(gblEditKey = "", "New document link", "Edit document link"),
+            "update",  If(gblEditKey = "", "New status update", "Edit status update"),
+            ""
+        )
       Font: =FontUI
       Size: =18
       FontWeight: =FontWeight.Semibold
       Color: =ClrText
 
-# ---- action fields --------------------------------------------------------
-- lblFldActionTitle:
+- lblPanelSub:
     Control: Label
     Properties:
-      X: =Parent.Width - 396
-      Y: =84
-      Width: =372
-      Height: =18
-      Visible: =gblPanel = "action"
-      Text: ="TASK"
+      X: =Parent.Width - 616
+      Y: =54
+      Width: =592
+      Height: =20
+      Visible: =gblPanel <> ""
+      Text: =If(gblEditKey = "", "", gblEditKey)
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextFaint
+
+- lblCaptxtPurAccount:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =96
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="ACCOUNT NAME"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- txtActionTitle:
+- txtPurAccount:
     Control: Classic/TextInput
     Properties:
-      X: =Parent.Width - 396
-      Y: =104
-      Width: =372
-      Height: =38
-      Visible: =gblPanel = "action"
-      Default: =""
-      HintText: ="Confirm buying committee"
+      X: =Parent.Width - 616
+      Y: =114
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
+      Default: =Coalesce(gblPursuit.'Account Name', "")
 
-- lblFldActionStage:
+- lblCaptxtPurName:
     Control: Label
     Properties:
-      X: =Parent.Width - 396
+      X: =Parent.Width - 616
+      Y: =158
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="PURSUIT NAME"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtPurName:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =176
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblPursuit.'Pursuit Name', "")
+
+- lblCapdrpPurStage:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =220
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="WORKFLOW STAGE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpPurStage:
+    Control: Classic/DropDown
+    Properties:
+      X: =Parent.Width - 616
+      Y: =238
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-pursuits'.'Workflow Stage')
+      Default: =gblPursuit.'Workflow Stage'.Value
+      AllowEmptySelection: =true
+
+- lblCapdrpPurHealth:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =282
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="HEALTH"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpPurHealth:
+    Control: Classic/DropDown
+    Properties:
+      X: =Parent.Width - 616
+      Y: =300
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-pursuits'.Health)
+      Default: =gblPursuit.Health.Value
+      AllowEmptySelection: =true
+
+- lblCaptxtPurOwner:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =344
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="PURSUIT OWNER (EMAIL)"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtPurOwner:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =362
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblPursuit.'WM Pursuit Owner Entra ID', "")
+
+- lblCapdtePurTarget:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =406
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="TARGET DECISION DATE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- dtePurTarget:
+    Control: Classic/DatePicker
+    Properties:
+      X: =Parent.Width - 616
+      Y: =424
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      DefaultDate: =gblPursuit.'Target Decision Date'
+
+- lblCaptxtPurActive:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =468
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="ACTIVE (1 = LIVE)"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtPurActive:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =486
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(Text(gblPursuit.Active), "")
+
+- lblCaptxtPurSfId:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 312
+      Y: =96
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="SALESFORCE OPPORTUNITY ID"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtPurSfId:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 312
+      Y: =114
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblPursuit.'Salesforce Opportunity ID', "")
+
+- lblCaptxtPurSfUrl:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 312
+      Y: =158
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="SALESFORCE OPPORTUNITY URL"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtPurSfUrl:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 312
+      Y: =176
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblPursuit.'Salesforce Opportunity URL', "")
+
+- lblCapcmbPurSIs:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 312
+      Y: =220
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="ALIGNED SIS"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- cmbPurSIs:
+    Control: Classic/ComboBox
+    Properties:
+      X: =Parent.Width - 312
+      Y: =238
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-pursuits'.'Aligned SIs')
+      DefaultSelectedItems: =gblPursuit.'Aligned SIs'
+      SelectMultiple: =true
+
+- lblCapcmbPurHype:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 312
+      Y: =282
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="HYPERSCALERS"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- cmbPurHype:
+    Control: Classic/ComboBox
+    Properties:
+      X: =Parent.Width - 312
+      Y: =300
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-pursuits'.Hyperscalers)
+      DefaultSelectedItems: =gblPursuit.Hyperscalers
+      SelectMultiple: =true
+
+- lblCaptxtPurFees:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 312
+      Y: =344
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="ESTIMATED FEES"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtPurFees:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 312
+      Y: =362
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(Text(gblPursuit.'Estimated Fees'), "")
+
+- lblCaptxtPurAiVer:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 312
+      Y: =406
+      Width: =280
+      Height: =16
+      Visible: =gblPanel = "pursuit"
+      Text: ="AI OVERVIEW CURRENT VERSION"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtPurAiVer:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 312
+      Y: =424
+      Width: =280
+      Height: =34
+      Visible: =gblPanel = "pursuit"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblPursuit.'AI Overview Current Version', "")
+
+- lblCaptxtActTitle:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =96
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "action"
+      Text: ="ACTION TITLE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtActTitle:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =114
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "action"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblEditAction.'Action Title', "")
+
+- lblCapdrpActStage:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
       Y: =154
-      Width: =372
-      Height: =18
+      Width: =592
+      Height: =16
       Visible: =gblPanel = "action"
       Text: ="WORKFLOW STAGE"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- drpActionStage:
+- drpActStage:
     Control: Classic/DropDown
     Properties:
-      X: =Parent.Width - 396
-      Y: =174
-      Width: =372
-      Height: =38
+      X: =Parent.Width - 616
+      Y: =172
+      Width: =592
+      Height: =34
       Visible: =gblPanel = "action"
-      Items: =Choices('pursuit-tracker-actions'.'Workflow Stage')
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-actions'.'Workflow Stage')
+      Default: =gblEditAction.'Workflow Stage'.Value
+      AllowEmptySelection: =true
 
-- lblFldActionEffort:
+- lblCapdrpActStatus:
     Control: Label
     Properties:
-      X: =Parent.Width - 396
-      Y: =224
-      Width: =372
-      Height: =18
+      X: =Parent.Width - 616
+      Y: =212
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "action"
+      Text: ="STATUS"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpActStatus:
+    Control: Classic/DropDown
+    Properties:
+      X: =Parent.Width - 616
+      Y: =230
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "action"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-actions'.Status)
+      Default: =gblEditAction.Status.Value
+      AllowEmptySelection: =true
+
+- lblCapdrpActHealth:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =270
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "action"
+      Text: ="HEALTH"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpActHealth:
+    Control: Classic/DropDown
+    Properties:
+      X: =Parent.Width - 616
+      Y: =288
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "action"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-actions'.Health)
+      Default: =gblEditAction.Health.Value
+      AllowEmptySelection: =true
+
+- lblCapdrpActEffort:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =328
+      Width: =592
+      Height: =16
       Visible: =gblPanel = "action"
       Text: ="EFFORT SIZE"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- drpActionEffort:
+- drpActEffort:
     Control: Classic/DropDown
     Properties:
-      X: =Parent.Width - 396
-      Y: =244
-      Width: =372
-      Height: =38
+      X: =Parent.Width - 616
+      Y: =346
+      Width: =592
+      Height: =34
       Visible: =gblPanel = "action"
-      Items: =Choices('pursuit-tracker-actions'.'Effort Size')
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-actions'.'Effort Size')
+      Default: =gblEditAction.'Effort Size'.Value
+      AllowEmptySelection: =true
 
-- lblFldActionDue:
+- lblCapdteActDue:
     Control: Label
     Properties:
-      X: =Parent.Width - 396
-      Y: =294
-      Width: =372
-      Height: =18
+      X: =Parent.Width - 616
+      Y: =386
+      Width: =592
+      Height: =16
       Visible: =gblPanel = "action"
       Text: ="DUE DATE"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- dteActionDue:
+- dteActDue:
     Control: Classic/DatePicker
     Properties:
-      X: =Parent.Width - 396
-      Y: =314
-      Width: =372
-      Height: =38
+      X: =Parent.Width - 616
+      Y: =404
+      Width: =592
+      Height: =34
       Visible: =gblPanel = "action"
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
+      DefaultDate: =gblEditAction.'Due Date'
 
-- lblFldActionOwner:
+- lblCaptxtActOwner:
     Control: Label
     Properties:
-      X: =Parent.Width - 396
-      Y: =364
-      Width: =372
-      Height: =18
+      X: =Parent.Width - 616
+      Y: =444
+      Width: =592
+      Height: =16
       Visible: =gblPanel = "action"
-      Text: ="OWNER"
+      Text: ="OWNER (EMAIL)"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- cmbActionOwner:
-    Control: Classic/ComboBox
+- txtActOwner:
+    Control: Classic/TextInput
     Properties:
-      X: =Parent.Width - 396
-      Y: =384
-      Width: =372
-      Height: =38
+      X: =Parent.Width - 616
+      Y: =462
+      Width: =592
+      Height: =34
       Visible: =gblPanel = "action"
-      Items: |
-        =Office365Users.SearchUser({searchTerm: Self.SearchText})
-      SelectMultiple: =false
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
+      Default: =Coalesce(gblEditAction.'Action Owner Entra ID', "")
 
-# ---- update fields --------------------------------------------------------
-- lblFldUpdateBody:
+- lblCaptxtActPred:
     Control: Label
     Properties:
-      X: =Parent.Width - 396
-      Y: =84
-      Width: =372
-      Height: =18
+      X: =Parent.Width - 616
+      Y: =502
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "action"
+      Text: ="PREDECESSOR ACTION ID"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtActPred:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =520
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "action"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblEditAction.'Predecessor Action ID', "")
+
+- lblCaptxtActNotes:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =560
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "action"
+      Text: ="NOTES"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtActNotes:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =578
+      Width: =592
+      Height: =70
+      Visible: =gblPanel = "action"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblEditAction.Notes, "")
+      Mode: =TextMode.MultiLine
+
+- lblCaptxtDocTitle:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =96
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "doc"
+      Text: ="TITLE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtDocTitle:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =114
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "doc"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblEditDoc.Title, "")
+
+- lblCapdrpDocType:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =158
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "doc"
+      Text: ="DOCUMENT TYPE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpDocType:
+    Control: Classic/DropDown
+    Properties:
+      X: =Parent.Width - 616
+      Y: =176
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "doc"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-documents'.'Document Type')
+      Default: =gblEditDoc.'Document Type'.Value
+      AllowEmptySelection: =true
+
+- lblCaptxtDocUrl:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =220
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "doc"
+      Text: ="DOCUMENT URL"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- txtDocUrl:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =238
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "doc"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblEditDoc.'Document URL', "")
+
+- lblCapdrpDocInc:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =282
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "doc"
+      Text: ="INCLUDE IN AI OVERVIEW"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+
+- drpDocInc:
+    Control: Classic/DropDown
+    Properties:
+      X: =Parent.Width - 616
+      Y: =300
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "doc"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-documents'.'Include in AI Overview')
+      Default: =gblEditDoc.'Include in AI Overview'.Value
+      AllowEmptySelection: =true
+
+- lblCaptxtUpdText:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =96
+      Width: =592
+      Height: =16
       Visible: =gblPanel = "update"
       Text: ="UPDATE"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- txtUpdateBody:
+- txtUpdText:
     Control: Classic/TextInput
     Properties:
-      X: =Parent.Width - 396
-      Y: =104
-      Width: =372
-      Height: =140
+      X: =Parent.Width - 616
+      Y: =114
+      Width: =592
+      Height: =70
       Visible: =gblPanel = "update"
-      Mode: =TextMode.MultiLine
-      Default: =""
-      HintText: ="What changed on this pursuit?"
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
+      Default: =Coalesce(gblEditUpdate.'Update Text', "")
+      Mode: =TextMode.MultiLine
 
-- lblFldUpdateType:
+- lblCapdrpUpdType:
     Control: Label
     Properties:
-      X: =Parent.Width - 396
-      Y: =256
-      Width: =372
-      Height: =18
+      X: =Parent.Width - 616
+      Y: =194
+      Width: =592
+      Height: =16
       Visible: =gblPanel = "update"
       Text: ="UPDATE TYPE"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- drpUpdateType:
+- drpUpdType:
     Control: Classic/DropDown
     Properties:
-      X: =Parent.Width - 396
-      Y: =276
-      Width: =372
-      Height: =38
+      X: =Parent.Width - 616
+      Y: =212
+      Width: =592
+      Height: =34
       Visible: =gblPanel = "update"
-      Items: =Choices('pursuit-tracker-status-updates'.'Update Type')
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-status-updates'.'Update Type')
+      Default: =gblEditUpdate.'Update Type'.Value
+      AllowEmptySelection: =true
 
-- lblFldUpdateRisk:
+- lblCapdrpUpdRisk:
     Control: Label
     Properties:
-      X: =Parent.Width - 396
-      Y: =326
-      Width: =372
-      Height: =18
+      X: =Parent.Width - 616
+      Y: =256
+      Width: =592
+      Height: =16
       Visible: =gblPanel = "update"
-      Text: ="RISK / DECISION (OPTIONAL)"
+      Text: ="RISK / DECISION"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
 
-- drpUpdateRisk:
+- drpUpdRisk:
     Control: Classic/DropDown
     Properties:
-      X: =Parent.Width - 396
-      Y: =346
-      Width: =372
-      Height: =38
+      X: =Parent.Width - 616
+      Y: =274
+      Width: =592
+      Height: =34
       Visible: =gblPanel = "update"
-      Items: =Choices('pursuit-tracker-status-updates'.'Risk / Decision')
-      AllowEmptySelection: =true
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-status-updates'.'Risk / Decision')
+      Default: =gblEditUpdate.'Risk / Decision'.Value
+      AllowEmptySelection: =true
 
-# ---- panel buttons --------------------------------------------------------
+- btnPanelDelete:
+    Control: Classic/Button
+    Properties:
+      X: =Parent.Width - 616
+      Y: =Parent.Height - 76
+      Width: =110
+      Height: =40
+      Visible: =gblPanel <> "" && gblPanel <> "pursuit" && gblEditKey <> ""
+      Text: ="Delete"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrCard
+      Color: =ClrRiskText
+      HoverFill: =ClrRiskFill
+      HoverColor: =ClrRiskText
+      PressedFill: =ClrRiskFill
+      PressedColor: =ClrRiskText
+      BorderColor: =ClrRiskFill
+      BorderThickness: =1
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: |
+        =If(
+            gblPanel = "action",
+            Remove('pursuit-tracker-actions', LookUp('pursuit-tracker-actions', Title = gblEditKey));
+            ClearCollect(colActions, 'pursuit-tracker-actions');
+        ClearCollect(
+            colActions_P,
+            AddColumns(
+                Sort(Filter('pursuit-tracker-actions', 'Pursuit ID' = gblPursuitKey), If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'), SortOrder.Ascending) As A,
+                DueWording,
+                If(!IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'), "",
+                   "After " & Lower(LookUp('pursuit-tracker-actions', Title = A.'Predecessor Action ID').'Workflow Stage'.Value))
+            )
+        ),
+        
+            gblPanel = "doc",
+            Remove('pursuit-tracker-documents', LookUp('pursuit-tracker-documents', Title = gblEditKey));
+            ClearCollect(colDocs, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), 'Added Date', SortOrder.Descending)),
+        
+            gblPanel = "update",
+            Remove('pursuit-tracker-status-updates', LookUp('pursuit-tracker-status-updates', Title = gblEditKey));
+            ClearCollect(colUpdates, Sort(Filter('pursuit-tracker-status-updates', 'Pursuit ID' = gblPursuitKey), 'Update Date', SortOrder.Descending)),
+        
+            false
+        );
+        Set(gblPanel, "")
+
 - btnPanelCancel:
     Control: Classic/Button
     Properties:
-      X: =Parent.Width - 396
+      X: =Parent.Width - 292
       Y: =Parent.Height - 76
       Width: =120
       Height: =40
@@ -1330,6 +2098,8 @@
       Color: =ClrText
       HoverFill: =ClrCardHover
       HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =6
@@ -1353,6 +2123,8 @@
       Color: =ClrAccentText
       HoverFill: =ClrAccentHover
       HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
       BorderThickness: =0
       RadiusTopLeft: =6
       RadiusTopRight: =6
@@ -1360,66 +2132,152 @@
       RadiusBottomRight: =6
       DisplayMode: |
         =If(
-            (gblPanel = "action" && !IsBlank(txtActionTitle.Text)) ||
-            (gblPanel = "update" && !IsBlank(txtUpdateBody.Text)),
+            (gblPanel = "pursuit" && !IsBlank(txtPurAccount.Text) && !IsBlank(txtPurName.Text)) ||
+            (gblPanel = "action"  && !IsBlank(txtActTitle.Text)) ||
+            (gblPanel = "doc"     && !IsBlank(txtDocTitle.Text)) ||
+            (gblPanel = "update"  && !IsBlank(txtUpdText.Text)),
             DisplayMode.Edit,
             DisplayMode.Disabled
         )
       OnSelect: |
         =If(
+            gblPanel = "pursuit",
+        
+            Set(
+                gblFields,
+                {
+                    'Account Name':               txtPurAccount.Text,
+                    'Pursuit Name':               txtPurName.Text,
+                    'Workflow Stage':             { Value: drpPurStage.Selected.Value },
+                    Health:                       { Value: drpPurHealth.Selected.Value },
+                    'WM Pursuit Owner Entra ID':  txtPurOwner.Text,
+                    'Target Decision Date':       dtePurTarget.SelectedDate,
+                    Active:                       If(IsBlank(txtPurActive.Text), 0, Value(txtPurActive.Text)),
+                    'Salesforce Opportunity ID':  txtPurSfId.Text,
+                    'Salesforce Opportunity URL': txtPurSfUrl.Text,
+                    'Aligned SIs':                cmbPurSIs.SelectedItems,
+                    Hyperscalers:                 cmbPurHype.SelectedItems,
+                    'Estimated Fees':             If(IsBlank(txtPurFees.Text), Blank(), Value(txtPurFees.Text)),
+                    'AI Overview Current Version': txtPurAiVer.Text
+                }
+            );
+            If(
+                gblNewPursuit,
+                With(
+                    { newId: "PUR-" & Text(Coalesce(Max(ForAll('pursuit-tracker-pursuits' As R, Value(Right(R.Title, 3))), Value), 0) + 1, "000") },
+                    Collect('pursuit-tracker-pursuits', Patch(gblFields, { Title: newId }));
+                    Set(gblPursuitKey, newId)
+                ),
+                Patch('pursuit-tracker-pursuits', LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey), gblFields)
+            );
+            Set(gblNewPursuit, false);
+            Set(gblPursuit, LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey));
+            ClearCollect(colActions, 'pursuit-tracker-actions'),
+        
             gblPanel = "action",
-
-            With(
-                { nextId: "ACT-" & Text(Coalesce(Max(ForAll('pursuit-tracker-actions' As A, Value(Right(A.Title, 3))), Value), 0) + 1, "000") },
+        
+            If(
+                gblEditKey = "",
                 Collect(
                     'pursuit-tracker-actions',
                     {
-                        Title:                   nextId,
+                        Title:                   "ACT-" & Text(Coalesce(Max(ForAll('pursuit-tracker-actions' As R, Value(Right(R.Title, 3))), Value), 0) + 1, "000"),
                         'Pursuit ID':            gblPursuitKey,
-                        'Action Title':          txtActionTitle.Text,
-                        'Workflow Stage':        { Value: drpActionStage.Selected.Value },
-                        'Action Owner Entra ID': cmbActionOwner.Selected.Mail,
-                        Status:                  { Value: "Not started" },
-                        Health:                  { Value: "On track" },
-                        'Effort Size':           { Value: drpActionEffort.Selected.Value },
-                        'Due Date':              dteActionDue.SelectedDate
+                        'Action Title':          txtActTitle.Text,
+                        'Workflow Stage':        { Value: drpActStage.Selected.Value },
+                        Status:                  { Value: drpActStatus.Selected.Value },
+                        Health:                  { Value: drpActHealth.Selected.Value },
+                        'Effort Size':           { Value: drpActEffort.Selected.Value },
+                        'Due Date':              dteActDue.SelectedDate,
+                        'Action Owner Entra ID': txtActOwner.Text,
+                        'Predecessor Action ID': txtActPred.Text,
+                        Notes:                   txtActNotes.Text,
+                        'Completed Date':        If(drpActStatus.Selected.Value = "Completed", Now(), Blank())
+                    }
+                ),
+                Patch(
+                    'pursuit-tracker-actions',
+                    LookUp('pursuit-tracker-actions', Title = gblEditKey),
+                    {
+                        'Action Title':          txtActTitle.Text,
+                        'Workflow Stage':        { Value: drpActStage.Selected.Value },
+                        Status:                  { Value: drpActStatus.Selected.Value },
+                        Health:                  { Value: drpActHealth.Selected.Value },
+                        'Effort Size':           { Value: drpActEffort.Selected.Value },
+                        'Due Date':              dteActDue.SelectedDate,
+                        'Action Owner Entra ID': txtActOwner.Text,
+                        'Predecessor Action ID': txtActPred.Text,
+                        Notes:                   txtActNotes.Text,
+                        'Completed Date':        If(drpActStatus.Selected.Value = "Completed", Coalesce(gblEditAction.'Completed Date', Now()), Blank())
                     }
                 )
             );
             ClearCollect(colActions, 'pursuit-tracker-actions');
-            ClearCollect(
-                colActions_P,
-                AddColumns(
-                    Sort(Filter('pursuit-tracker-actions', 'Pursuit ID' = gblPursuitKey), If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'), SortOrder.Ascending) As A,
-                    DueWording,
-                    If(
-                        !IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'),
-                        "",
-                        "After " & Lower(LookUp('pursuit-tracker-actions', Title = A.'Predecessor Action ID').'Workflow Stage'.Value)
-                    )
-                )
-            ),
-
-            With(
-                { nextId: "UPD-" & Text(Coalesce(Max(ForAll('pursuit-tracker-status-updates' As U, Value(Right(U.Title, 3))), Value), 0) + 1, "000") },
+        ClearCollect(
+            colActions_P,
+            AddColumns(
+                Sort(Filter('pursuit-tracker-actions', 'Pursuit ID' = gblPursuitKey), If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'), SortOrder.Ascending) As A,
+                DueWording,
+                If(!IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'), "",
+                   "After " & Lower(LookUp('pursuit-tracker-actions', Title = A.'Predecessor Action ID').'Workflow Stage'.Value))
+            )
+        ),
+        
+            gblPanel = "doc",
+        
+            If(
+                gblEditKey = "",
                 Collect(
-                    'pursuit-tracker-status-updates',
+                    'pursuit-tracker-documents',
                     {
-                        Title:                 nextId,
-                        'Pursuit ID':          gblPursuitKey,
-                        'Update Date':         Now(),
-                        'Update Type':         { Value: drpUpdateType.Selected.Value },
-                        'Update Text':         txtUpdateBody.Text,
-                        'Risk / Decision':     { Value: drpUpdateRisk.Selected.Value },
-                        'Created By Entra ID': gblUser.Email
+                        Title:                    txtDocTitle.Text,
+                        'Document ID':            "DOC-" & Text(Coalesce(Max(ForAll('pursuit-tracker-documents' As R, Value(Right(R.'Document ID', 3))), Value), 0) + 1, "000"),
+                        'Pursuit ID':             gblPursuitKey,
+                        'Document Type':          { Value: drpDocType.Selected.Value },
+                        'Document URL':           txtDocUrl.Text,
+                        'Added Date':             Now(),
+                        'Added By Entra ID':      gblUser.Email,
+                        'Include in AI Overview': { Value: drpDocInc.Selected.Value }
+                    }
+                ),
+                Patch(
+                    'pursuit-tracker-documents',
+                    LookUp('pursuit-tracker-documents', Title = gblEditKey),
+                    {
+                        Title:                    txtDocTitle.Text,
+                        'Document Type':          { Value: drpDocType.Selected.Value },
+                        'Document URL':           txtDocUrl.Text,
+                        'Include in AI Overview': { Value: drpDocInc.Selected.Value }
                     }
                 )
             );
-            ClearCollect(
-                colUpdates,
-                Sort(Filter('pursuit-tracker-status-updates', 'Pursuit ID' = gblPursuitKey), 'Update Date', SortOrder.Descending)
+            ClearCollect(colDocs, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), 'Added Date', SortOrder.Descending)),
+        
+            If(
+                gblEditKey = "",
+                Collect(
+                    'pursuit-tracker-status-updates',
+                    {
+                        Title:                 "UPD-" & Text(Coalesce(Max(ForAll('pursuit-tracker-status-updates' As R, Value(Right(R.Title, 3))), Value), 0) + 1, "000"),
+                        'Pursuit ID':          gblPursuitKey,
+                        'Update Date':         Now(),
+                        'Update Type':         { Value: drpUpdType.Selected.Value },
+                        'Update Text':         txtUpdText.Text,
+                        'Risk / Decision':     { Value: drpUpdRisk.Selected.Value },
+                        'Created By Entra ID': gblUser.Email
+                    }
+                ),
+                Patch(
+                    'pursuit-tracker-status-updates',
+                    LookUp('pursuit-tracker-status-updates', Title = gblEditKey),
+                    {
+                        'Update Type':     { Value: drpUpdType.Selected.Value },
+                        'Update Text':     txtUpdText.Text,
+                        'Risk / Decision': { Value: drpUpdRisk.Selected.Value }
+                    }
+                )
             );
-            Reset(txtUpdateBody)
+            ClearCollect(colUpdates, Sort(Filter('pursuit-tracker-status-updates', 'Pursuit ID' = gblPursuitKey), 'Update Date', SortOrder.Descending))
         );
         Set(gblPanel, "")
 
@@ -1428,10 +2286,4 @@
 #
 #   Fill       =ClrPage
 #   OnVisible  the block at the top of docs/05-screen-pursuit-workspace.md
-#
-# NOT INCLUDED: the "New pursuit" create panel. btnNewPursuit on the board
-# navigates here with gblPursuitKey blank and gblNewPursuit true, and this
-# screen has no branch for that yet — it renders an empty record. Either build
-# the create panel described at the foot of docs/05, or point btnNewPursuit at
-# the SharePoint list's own new-item form until you do.
 # ---------------------------------------------------------------------------

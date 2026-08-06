@@ -167,6 +167,30 @@
       # source. Until then it notifies rather than erroring on an unknown name.
       OnSelect: =Notify("Connect the PursuitTracker-ExportPortfolio flow first — see docs/06-flows.md.", NotificationType.Warning)
 
+- btnAddPursuit:
+    Control: Classic/Button
+    Properties:
+      X: =btnDownloadExcel.X - Self.Width - 12
+      Y: =96
+      Width: =150
+      Height: =40
+      Text: ="Add pursuit"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrCard
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Set(gblPursuitKey, ""); Set(gblNewPursuit, true); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+
 # ---------------------------------------------------------------- column headers
 - lblHdrAccount:
     Control: Label
