@@ -57,8 +57,10 @@ Do these three in order. For each one:
 
 21. Click the screen in the tree → property **Fill** → `=ClrPage`.
 22. Open the YAML file, select all, copy.
-23. Right-click the screen name in the tree → **Paste**. Approve the browser clipboard
-    prompt the first time.
+23. **Delete any controls already on that screen first**, then right-click the screen name
+    in the tree → **Paste**. Approve the browser clipboard prompt the first time.
+    Pasting over an existing screen adds a second copy of everything — you get doubled,
+    overlapping headers rather than a replacement.
 
 | Screen | File |
 |---|---|
@@ -123,6 +125,8 @@ that.
 | Blue squiggle under `Status.Value <> "Completed"` | Correct — ignore it |
 | "Unknown property 'Fill' for control type 'Button'" | Older YAML — re-copy. Buttons and inputs need the `Classic/` prefix |
 | "Unknown property 'RadiusTopLeft' for control type 'Rectangle'" | Same — re-copy. Rounded shapes are `Classic/Button`, not `Rectangle` |
+| "Name isn't valid" on `Transparent` | Older YAML — re-copy. It's `Color.Transparent`; the bare name isn't in scope |
+| Headers doubled / text overlapping itself | You pasted over existing controls. Delete the screen's controls and paste again |
 | A paste in step 23 is rejected | See the FALLBACKS block at the bottom of that YAML file |
 
 Full triage: `docs/08-deploy-and-test.md`.

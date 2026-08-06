@@ -336,7 +336,7 @@
                   Y: =0
                   Width: =3
                   Height: =206
-                  Fill: =If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)
+                  Fill: =If(ThisItem.Health.Value = "At risk", ClrRiskFill, Color.Transparent)
 
             - lblMoveHandle:
                 Control: Label

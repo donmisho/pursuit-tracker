@@ -173,7 +173,7 @@ labelled next action.
 | | `BorderColor` | `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrBorder)` |
 | | `BorderThickness` | `=If(gblMoving.Title = ThisItem.Title, 2, 1)` |
 | | `OnSelect` | `=Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
-| `recHealth` (Rectangle) | `Fill` | `=If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)` |
+| `recHealth` (Rectangle) | `Fill` | `=If(ThisItem.Health.Value = "At risk", ClrRiskFill, Color.Transparent)` |
 | `lblMoveHandle` | `Text` / `Color` | `="⋮⋮"` / `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)` |
 | | `OnSelect` | `=Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))` |
 | `lblCardAccount` | `Text` | `=Clip(ThisItem.'Account Name', 26)` |

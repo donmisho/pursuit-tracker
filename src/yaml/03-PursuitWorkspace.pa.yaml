@@ -619,7 +619,7 @@
             Y: =0
             Width: =Parent.Width - 20
             Height: =Parent.TemplateHeight - 1
-            Fill: =Transparent
+            Fill: =Color.Transparent
             HoverFill: =RGBA(255, 255, 255, 0.04)
             PressedFill: =RGBA(255, 255, 255, 0.07)
             BorderThickness: =0
@@ -877,7 +877,7 @@
             Text: ="Edit"
             Font: =FontUI
             Size: =11
-            Fill: =Transparent
+            Fill: =Color.Transparent
             Color: =ClrTextMuted
             HoverFill: =ClrCardHover
             HoverColor: =ClrText
@@ -1033,7 +1033,7 @@
             Text: ="Edit"
             Font: =FontUI
             Size: =11
-            Fill: =Transparent
+            Fill: =Color.Transparent
             Color: =ClrTextMuted
             HoverFill: =ClrCardHover
             HoverColor: =ClrText

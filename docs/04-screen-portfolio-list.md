@@ -137,7 +137,7 @@ MatixCare on the way to fixing it. Chip galleries are 124 wide now rather than 9
 | `Text` | `=""` |
 | `X` / `Y` | `=0` / `=0` |
 | `Width` / `Height` | `=Parent.Width - 20` / `=Parent.TemplateHeight - 1` |
-| `Fill` | `=Transparent` |
+| `Fill` | `=Color.Transparent` |
 | `HoverFill` / `PressedFill` | `=RGBA(255, 255, 255, 0.04)` / `=RGBA(255, 255, 255, 0.07)` |
 | `BorderThickness` | `=0` |
 | `OnSelect` | `=Set(gblRowMenu, ""); Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
@@ -162,7 +162,7 @@ row's controls stay hidden.
 | Control | Property | Formula |
 |---|---|---|
 | `btnRowMenu` | `Text` / `X` / `Y` | `="⋯"` / `=396` / `=12` |
-| | `Fill` / `Color` | `=Transparent` / `=ClrTextMuted` |
+| | `Fill` / `Color` | `=Color.Transparent` / `=ClrTextMuted` |
 | | `OnSelect` | `=Set(gblRowMenu, If(gblRowMenu = ThisItem.Title, "", ThisItem.Title))` |
 | `recRowMenu` | `Visible` | `=gblRowMenu = ThisItem.Title` |
 | | `X` / `Y` / `Width` / `Height` | `=396` / `=40` / `=230` / `=70` |
