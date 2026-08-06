@@ -111,7 +111,7 @@ fill-in is still enabled and the failure mode is a blank board with no error.
 
 **Multi-select is what the chip galleries bind to.** Reverting either column to
 single-select turns `ThisItem.'Aligned SIs'` from a table into a record, and every chip
-gallery on all three screens renders empty rather than erroring.
+gallery that binds to them renders empty rather than erroring.
 
 **Still open: `Active`.** A Number column reading `0` on all fourteen rows, so the app
 doesn't filter on it and the board shows everything, `Unassigned` included. Both filter

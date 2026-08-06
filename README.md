@@ -2,14 +2,15 @@
 
 A Power Apps canvas app over the five `pursuit-tracker` SharePoint lists on
 [PursuitTracking](https://westmonroepartners1.sharepoint.com/sites/PursuitTracking),
-built to the three screen mockups: portfolio board, portfolio list, pursuit workspace.
+built to the three screen mockups: portfolio board, portfolio list, pursuit workspace —
+plus a fourth screen for documents and the AI overview, split off the workspace.
 
 Everything here stays on standard connectors — SharePoint, Office 365 Users, OneDrive
 for Business — so it needs no app registration, no admin consent, no premium licence,
 and no IT involvement.
 
 The app is built, as far as anything outside Power Platform can build a canvas app.
-`src/yaml/` holds all three screens as Power Apps code-view YAML — 153 controls,
+`src/yaml/` holds all four screens as Power Apps code-view YAML — 242 controls,
 positioned, with every formula — which you paste into Studio one screen at a time. The
 theme and startup logic paste into two App properties. `docs/` carries the same thing as
 property tables, both as a fallback and as the record of why each formula is what it is.
@@ -28,7 +29,8 @@ corrupt file is worse than no file.
 | [`docs/02-app-setup.md`](docs/02-app-setup.md) | Create the app, connect the lists, paste the theme, paste the three screens |
 | [`docs/03-screen-portfolio-board.md`](docs/03-screen-portfolio-board.md) | The kanban |
 | [`docs/04-screen-portfolio-list.md`](docs/04-screen-portfolio-list.md) | The reportable table and the Excel download |
-| [`docs/05-screen-pursuit-workspace.md`](docs/05-screen-pursuit-workspace.md) | The detail page |
+| [`docs/05-screen-pursuit-workspace.md`](docs/05-screen-pursuit-workspace.md) | The detail page — opportunity details, actions, status updates |
+| [`docs/05a-screen-documents-ai.md`](docs/05a-screen-documents-ai.md) | Documents and the AI overview, and why there's no file drop target |
 | [`docs/06-flows.md`](docs/06-flows.md) | The one Power Automate flow |
 | [`docs/07-gaps-and-decisions.md`](docs/07-gaps-and-decisions.md) | Where the mockups and the platform disagree |
 | [`docs/08-deploy-and-test.md`](docs/08-deploy-and-test.md) | Publishing, sharing, and what "working" looks like on your data |
@@ -39,9 +41,10 @@ corrupt file is worse than no file.
 |---|---|
 | `src/App.Formulas.powerfx` | Dark theme as named formulas. Paste into App → Formulas |
 | `src/App.OnStart.powerfx` | Startup state and the shared portfolio load |
-| `src/yaml/01-PortfolioBoard.pa.yaml` | The kanban as code-view YAML — 30 controls. Paste onto `scrPortfolioBoard` |
-| `src/yaml/02-PortfolioList.pa.yaml` | The table and export button — 33 controls |
-| `src/yaml/03-PursuitWorkspace.pa.yaml` | The detail page, seven cards and both slide-over panels — 90 controls |
+| `src/yaml/01-PortfolioBoard.pa.yaml` | The kanban as code-view YAML — 36 controls. Paste onto `scrPortfolioBoard` |
+| `src/yaml/02-PortfolioList.pa.yaml` | The table and export button — 42 controls |
+| `src/yaml/03-PursuitWorkspace.pa.yaml` | Opportunity details, actions, status updates, and the edit panel — 119 controls |
+| `src/yaml/04-PursuitDocsAI.pa.yaml` | Documents, the current AI overview and its history — 45 controls |
 | `tools/validate-screens.py` | Structural check over the screen YAML |
 | `tools/dump-list-schema.js` | Browser-console script that dumps your real list schemas |
 

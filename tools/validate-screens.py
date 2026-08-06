@@ -35,14 +35,14 @@ KNOWN_GLOBALS = {
     "ClrAccentText", "ClrDate", "ClrLink", "ClrChip", "ClrChipText", "ClrAvatar",
     "ClrAvatarText", "ClrRiskFill", "ClrRiskText", "ClrOkFill", "ClrOkText",
     "FontUI", "SizePageTitle", "SizeCardTitle", "SizeBody", "SizeMeta", "SizeChip",
-    "GapPage", "GapCard", "RadiusCard", "RadiusChip", "BoardColWidth",
-    "StageAccent", "DueLabel", "Initials", "SafeUrl", "RelativeDay",
+    "GapPage", "GapCard", "RadiusCard", "RadiusChip", "BoardColumns",
+    "StageAccent", "DueLabel", "Initials", "SafeUrl", "RelativeDay", "Clip",
     "gblUser", "gblMoving", "gblPursuitKey", "gblNewPursuit", "gblPanel", "gblPursuit",
     "gblOverview", "gblExport", "gblExporting", "gblRowMenu", "gblEditKey",
     "gblEditAction", "gblEditDoc", "gblEditUpdate", "gblFields",
     "colActions", "colActions_P", "colPeople", "colPortfolio", "colStages", "colUpdates",
     "colDocs", "colHistory",
-    "scrPortfolioBoard", "scrPortfolioList", "scrPursuitWorkspace",
+    "scrPortfolioBoard", "scrPortfolioList", "scrPursuitWorkspace", "scrPursuitDocsAI",
     "Office365Users", "Parent", "Self", "ThisItem", "Value",
 }
 

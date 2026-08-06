@@ -1,0 +1,793 @@
+# scrPursuitDocsAI — complete screen. Create a blank screen named scrPursuitDocsAI,
+# set Fill to =ClrPage, then paste this onto it.
+#
+#   LEFT   Documents and links, newest change first, add/edit/delete
+#   RIGHT  Current AI overview (top half) over previous versions (bottom half)
+#
+# See docs/05a-screen-documents-ai.md for the OnVisible block and the note on why
+# there is no drag-and-drop file upload.
+
+- navBg:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =0
+      Width: =Parent.Width
+      Height: =64
+      Fill: =ClrNav
+
+- navRule:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =63
+      Width: =Parent.Width
+      Height: =1
+      Fill: =ClrBorder
+
+- navBrand:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =0
+      Width: =180
+      Height: =64
+      Text: ="Pursuit Tracker"
+      Font: =FontUI
+      Size: =14
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      VerticalAlign: =VerticalAlign.Middle
+
+- btnNavBoard:
+    Control: Classic/Button
+    Properties:
+      X: =210
+      Y: =14
+      Width: =170
+      Height: =36
+      Text: ="Portfolio board"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPortfolioBoard, ScreenTransition.None)
+
+- btnNavList:
+    Control: Classic/Button
+    Properties:
+      X: =390
+      Y: =14
+      Width: =160
+      Height: =36
+      Text: ="Portfolio list"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPortfolioList, ScreenTransition.None)
+
+- btnNavWorkspace:
+    Control: Classic/Button
+    Properties:
+      X: =560
+      Y: =14
+      Width: =190
+      Height: =36
+      Text: ="Pursuit workspace"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+
+- btnNavDocsAI:
+    Control: Classic/Button
+    Properties:
+      X: =760
+      Y: =14
+      Width: =200
+      Height: =36
+      Text: ="Documents & AI"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =false
+
+- lblBreadcrumb:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =74
+      Width: =700
+      Height: =18
+      Text: ="SI pursuit management"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextFaint
+
+- lblAccount:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =92
+      Width: =800
+      Height: =36
+      Text: =If(gblNewPursuit, "New pursuit", Clip(gblPursuit.'Account Name', 40))
+      Font: =FontUI
+      Size: =SizePageTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      Wrap: =false
+      VerticalAlign: =VerticalAlign.Middle
+
+- lblPursuitName:
+    Control: Label
+    Properties:
+      X: =GapPage
+      Y: =128
+      Width: =800
+      Height: =24
+      Text: |
+        =If(gblNewPursuit, "Fill in the details panel and save to create it", Clip(
+            With(
+                { n: gblPursuit.'Pursuit Name' },
+                Trim(
+                    If(
+                        !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
+                        !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
+                        n
+                    )
+                )
+            ),
+            90
+        ))
+      Font: =FontUI
+      Size: =SizeCardTitle
+      Color: =ClrTextMuted
+      Wrap: =false
+      VerticalAlign: =VerticalAlign.Middle
+
+# ================================================ LEFT — documents
+- cardDocs:
+    Control: Classic/Button
+    Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
+      X: =GapPage
+      Y: =176
+      Width: =(Parent.Width - (GapPage * 3)) / 2
+      Height: =Parent.Height - 176 - GapPage
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblDocsHead:
+    Control: Label
+    Properties:
+      X: =GapPage + 24
+      Y: =192
+      Width: =400
+      Height: =24
+      Text: ="Documents and links"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      Wrap: =false
+
+- btnAddDoc:
+    Control: Classic/Button
+    Properties:
+      X: =cardDocs.X + cardDocs.Width - 108
+      Y: =192
+      Width: =72
+      Height: =26
+      Text: ="+ Add link"
+      Font: =FontUI
+      Size: =11
+      Fill: =ClrColumn
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =4
+      RadiusTopRight: =4
+      RadiusBottomLeft: =4
+      RadiusBottomRight: =4
+      DisplayMode: =If(gblNewPursuit, DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Set(gblPanel, "doc"); Set(gblEditKey, ""); Set(gblEditDoc, LookUp('pursuit-tracker-documents', ID < 0)); Reset(txtDocTitle); Reset(drpDocType); Reset(txtDocUrl); Reset(drpDocInc)
+
+- galDocs:
+    Control: Gallery
+    Variant: Vertical
+    Properties:
+      X: =cardDocs.X + 24
+      Y: =228
+      Width: =cardDocs.Width - 48
+      Height: =cardDocs.Height - 68
+      Items: =Sort(colDocs, Modified, SortOrder.Descending)
+      TemplateSize: =72
+      TemplatePadding: =0
+      ShowScrollbar: =true
+    Children:
+      - lblDocLink:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =8
+            Width: =Parent.Width - 120
+            Height: =22
+            Text: =Clip(ThisItem.Title, 60)
+            Font: =FontUI
+            Size: =SizeBody
+            FontWeight: =FontWeight.Semibold
+            Color: =ClrLink
+            Underline: =true
+            Wrap: =false
+            OnSelect: =Launch(SafeUrl(ThisItem.'Document URL'))
+
+      - lblDocMeta:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =30
+            Width: =Parent.Width - 120
+            Height: =18
+            Text: =ThisItem.'Document Type'.Value & " · updated " & Text(ThisItem.Modified, "mmm d, yyyy · h:mm AM/PM")
+            Font: =FontUI
+            Size: =SizeMeta
+            Color: =ClrTextFaint
+            Wrap: =false
+
+      - lblDocFlag:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =48
+            Width: =Parent.Width - 120
+            Height: =16
+            Text: =If(ThisItem.'Include in AI Overview'.Value = "Yes", "Included in AI overview", "")
+            Font: =FontUI
+            Size: =SizeMeta
+            Color: =ClrOkText
+            Wrap: =false
+
+      - recDocDivider:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =Parent.TemplateHeight - 1
+            Width: =Parent.Width - 20
+            Height: =1
+            Fill: =ClrDivider
+
+      - btnDocEdit:
+          Control: Classic/Button
+          Properties:
+            X: =Parent.Width - 96
+            Y: =20
+            Width: =64
+            Height: =28
+            Text: ="Edit"
+            Font: =FontUI
+            Size: =11
+            Fill: =Color.Transparent
+            Color: =ClrTextMuted
+            HoverFill: =ClrCardHover
+            HoverColor: =ClrText
+            PressedFill: =ClrCardHover
+            PressedColor: =ClrText
+            BorderColor: =ClrBorder
+            BorderThickness: =1
+            RadiusTopLeft: =4
+            RadiusTopRight: =4
+            RadiusBottomLeft: =4
+            RadiusBottomRight: =4
+            OnSelect: =Set(gblPanel, "doc"); Set(gblEditKey, ThisItem.Title); Set(gblEditDoc, ThisItem); Reset(txtDocTitle); Reset(drpDocType); Reset(txtDocUrl); Reset(drpDocInc)
+
+# ================================================ RIGHT — AI overview
+- cardAiCurrent:
+    Control: Classic/Button
+    Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
+      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage
+      Y: =176
+      Width: =(Parent.Width - (GapPage * 3)) / 2
+      Height: =(Parent.Height - 176 - GapPage - 16) / 2
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblAiHead:
+    Control: Label
+    Properties:
+      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage + 24
+      Y: =192
+      Width: =400
+      Height: =24
+      Text: ="Current AI overview"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      Wrap: =false
+
+- lblAiStamp:
+    Control: Label
+    Properties:
+      X: =cardAiCurrent.X + 24
+      Y: =218
+      Width: =cardAiCurrent.Width - 48
+      Height: =18
+      Text: |
+        =If(
+            IsBlank(gblOverview),
+            "Nothing generated yet",
+            "Version " & gblOverview.'Version Number' & " · " & Text(gblOverview.'Refreshed Date', "mmm d, yyyy · h:mm AM/PM")
+        )
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextFaint
+      Wrap: =false
+
+- lblAiBody:
+    Control: Label
+    Properties:
+      X: =cardAiCurrent.X + 24
+      Y: =244
+      Width: =cardAiCurrent.Width - 48
+      Height: =cardAiCurrent.Height - 84
+      Text: =Clip(Coalesce(gblOverview.'Overview Text', "No overview has been generated for this pursuit yet."), 900)
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Wrap: =true
+      VerticalAlign: =VerticalAlign.Top
+
+- cardAiHistory:
+    Control: Classic/Button
+    Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
+      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage
+      Y: =176 + (Parent.Height - 176 - GapPage - 16) / 2 + 16
+      Width: =(Parent.Width - (GapPage * 3)) / 2
+      Height: =(Parent.Height - 176 - GapPage - 16) / 2
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblAiHistHead:
+    Control: Label
+    Properties:
+      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage + 24
+      Y: =cardAiHistory.Y + 16
+      Width: =400
+      Height: =24
+      Text: ="Previous versions"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      Wrap: =false
+
+- galHistory:
+    Control: Gallery
+    Variant: Vertical
+    Properties:
+      X: =cardAiHistory.X + 24
+      Y: =cardAiHistory.Y + 52
+      Width: =cardAiHistory.Width - 48
+      Height: =cardAiHistory.Height - 68
+      Items: |
+        =Sort(
+            Filter(colHistory, IsBlank(gblOverview) || Title <> gblOverview.Title),
+            'Version Number',
+            SortOrder.Descending
+        )
+      TemplateSize: =76
+      TemplatePadding: =0
+      ShowScrollbar: =true
+    Children:
+      - lblVerStamp:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =6
+            Width: =Parent.Width - 20
+            Height: =16
+            Text: ="Version " & ThisItem.'Version Number' & " · " & Text(ThisItem.'Refreshed Date', "mmm d, yyyy · h:mm AM/PM")
+            Font: =FontUI
+            Size: =SizeMeta
+            Color: =ClrTextFaint
+            Wrap: =false
+
+      - lblVerAbstract:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =24
+            Width: =Parent.Width - 20
+            Height: =40
+            Text: =Clip(ThisItem.'Overview Text', 150)
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrText
+            Wrap: =true
+            VerticalAlign: =VerticalAlign.Top
+
+      - recVerDivider:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =Parent.TemplateHeight - 1
+            Width: =Parent.Width - 20
+            Height: =1
+            Fill: =ClrDivider
+
+      - btnVerRow:
+          Control: Classic/Button
+          Properties:
+            Text: =""
+            X: =0
+            Y: =0
+            Width: =Parent.Width - 20
+            Height: =Parent.TemplateHeight - 1
+            Fill: =Color.Transparent
+            HoverFill: =RGBA(255, 255, 255, 0.04)
+            PressedFill: =RGBA(255, 255, 255, 0.07)
+            BorderThickness: =0
+            Tooltip: ="Show this version above"
+            OnSelect: =Set(gblOverview, ThisItem)
+
+# ================================================ DOCUMENT PANEL
+- recPanelScrim:
+    Control: Rectangle
+    Properties:
+      X: =0
+      Y: =0
+      Width: =Parent.Width
+      Height: =Parent.Height
+      Visible: =gblPanel <> ""
+      Fill: =RGBA(0, 0, 0, 0.55)
+      OnSelect: |
+        =Set(gblPanel, "");
+        If(
+            gblNewPursuit,
+            Set(gblNewPursuit, false);
+            Navigate(scrPortfolioBoard, ScreenTransition.None)
+        )
+
+- recPanel:
+    Control: Rectangle
+    Properties:
+      X: =Parent.Width - 640
+      Y: =0
+      Width: =640
+      Height: =Parent.Height
+      Visible: =gblPanel <> ""
+      Fill: =ClrCard
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+
+- lblPanelHead:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =24
+      Width: =592
+      Height: =30
+      Visible: =gblPanel <> ""
+      Text: =If(gblEditKey = "", "New document link", "Edit document link")
+      Font: =FontUI
+      Size: =18
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      Wrap: =false
+
+- lblPanelSub:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =54
+      Width: =592
+      Height: =20
+      Visible: =gblPanel <> ""
+      Text: =If(gblEditKey = "", "", gblEditKey)
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextFaint
+
+- lblCaptxtDocTitle:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =96
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "doc"
+      Text: ="TITLE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+      Wrap: =false
+
+- txtDocTitle:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =114
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "doc"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblEditDoc.Title, "")
+
+- lblCapdrpDocType:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =158
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "doc"
+      Text: ="DOCUMENT TYPE"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+      Wrap: =false
+
+- drpDocType:
+    Control: Classic/DropDown
+    Properties:
+      X: =Parent.Width - 616
+      Y: =176
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "doc"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-documents'.'Document Type')
+      Default: =gblEditDoc.'Document Type'.Value
+      AllowEmptySelection: =true
+
+- lblCaptxtDocUrl:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =220
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "doc"
+      Text: ="DOCUMENT URL"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+      Wrap: =false
+
+- txtDocUrl:
+    Control: Classic/TextInput
+    Properties:
+      X: =Parent.Width - 616
+      Y: =238
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "doc"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: =Coalesce(gblEditDoc.'Document URL', "")
+
+- lblCapdrpDocInc:
+    Control: Label
+    Properties:
+      X: =Parent.Width - 616
+      Y: =282
+      Width: =592
+      Height: =16
+      Visible: =gblPanel = "doc"
+      Text: ="INCLUDE IN AI OVERVIEW"
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrTextMuted
+      Wrap: =false
+
+- drpDocInc:
+    Control: Classic/DropDown
+    Properties:
+      X: =Parent.Width - 616
+      Y: =300
+      Width: =592
+      Height: =34
+      Visible: =gblPanel = "doc"
+      Font: =FontUI
+      Size: =SizeBody
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Items: =Choices('pursuit-tracker-documents'.'Include in AI Overview')
+      Default: =gblEditDoc.'Include in AI Overview'.Value
+      AllowEmptySelection: =true
+
+- btnPanelDelete:
+    Control: Classic/Button
+    Properties:
+      X: =Parent.Width - 616
+      Y: =Parent.Height - 76
+      Width: =110
+      Height: =40
+      Visible: =gblPanel = "doc" && gblEditKey <> ""
+      Text: ="Delete"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrCard
+      Color: =ClrRiskText
+      HoverFill: =ClrRiskFill
+      HoverColor: =ClrRiskText
+      PressedFill: =ClrRiskFill
+      PressedColor: =ClrRiskText
+      BorderColor: =ClrRiskFill
+      BorderThickness: =1
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: |
+        =Remove('pursuit-tracker-documents', LookUp('pursuit-tracker-documents', Title = gblEditKey));
+        ClearCollect(colDocs, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending));
+        Set(gblPanel, "")
+
+- btnPanelCancel:
+    Control: Classic/Button
+    Properties:
+      X: =Parent.Width - 292
+      Y: =Parent.Height - 76
+      Width: =120
+      Height: =40
+      Visible: =gblPanel <> ""
+      Text: ="Cancel"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrCard
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: |
+        =Set(gblPanel, "");
+        If(
+            gblNewPursuit,
+            Set(gblNewPursuit, false);
+            Navigate(scrPortfolioBoard, ScreenTransition.None)
+        )
+
+- btnPanelSave:
+    Control: Classic/Button
+    Properties:
+      X: =Parent.Width - 156
+      Y: =Parent.Height - 76
+      Width: =132
+      Height: =40
+      Visible: =gblPanel <> ""
+      Text: ="Save"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrAccent
+      Color: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      HoverColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      DisplayMode: =If(!IsBlank(txtDocTitle.Text), DisplayMode.Edit, DisplayMode.Disabled)
+      OnSelect: |
+        =If(
+            gblEditKey = "",
+            Collect('pursuit-tracker-documents', {
+                Title:                    txtDocTitle.Text,
+                'Document ID':            "DOC-" & Text(Coalesce(Max(ForAll('pursuit-tracker-documents' As R, Value(Right(R.'Document ID', 3))), Value), 0) + 1, "000"),
+                'Pursuit ID':             gblPursuitKey,
+                'Document Type':          { Value: drpDocType.Selected.Value },
+                'Document URL':           txtDocUrl.Text,
+                'Added Date':             Now(),
+                'Added By Entra ID':      gblUser.Email,
+                'Include in AI Overview': { Value: drpDocInc.Selected.Value }
+            }),
+            Patch('pursuit-tracker-documents', LookUp('pursuit-tracker-documents', Title = gblEditKey), {
+                Title:                    txtDocTitle.Text,
+                'Document Type':          { Value: drpDocType.Selected.Value },
+                'Document URL':           txtDocUrl.Text,
+                'Include in AI Overview': { Value: drpDocInc.Selected.Value }
+            })
+        );
+        If(
+            IsEmpty(Errors('pursuit-tracker-documents')),
+            ClearCollect(colDocs, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending));
+            Set(gblPanel, ""),
+            Notify("Save failed: " & First(Errors('pursuit-tracker-documents')).Message, NotificationType.Error)
+        )
+
+# ---------------------------------------------------------------------------
+# SCREEN PROPERTIES — Fill =ClrPage, OnVisible per docs/05a-screen-documents-ai.md
+# ---------------------------------------------------------------------------

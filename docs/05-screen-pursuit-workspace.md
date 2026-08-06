@@ -1,30 +1,27 @@
 # Screen — `scrPursuitWorkspace`
 
-The detail page. A wide left rail (Salesforce, AI overview, actions) and a narrower
-right rail (alignment, documents, updates, overview history).
+The detail page. Two equal columns: every pursuit field on the left, actions and status
+updates on the right.
 
 ```
 scrPursuitWorkspace
-├── nav bar
+├── nav bar (four tabs)
 ├── lblBreadcrumb / lblAccount / lblPursuitName / btnEditDetails
-├── LEFT RAIL
-│   ├── cardSalesforce   — link, linked pill, owner, target decision date
-│   ├── cardOverview     — overview text, provenance line (read-only)
-│   └── cardActions      — btnAddAction + galActions (rows open the panel)
-├── RIGHT RAIL
-│   ├── cardAlignment    — galAlignSIs, galAlignHype
-│   ├── cardDocuments    — btnAddDoc + galDocs (Edit per row)
-│   ├── cardUpdates      — btnAddUpdate + galUpdates (Edit per row)
-│   └── cardHistory      — galHistory (read-only)
-└── EDIT PANEL          ◄── recPanelScrim + recPanel + all four field sets
-                            + btnPanelDelete / btnPanelCancel / btnPanelSave
+├── LEFT  — cardDetails    every pursuit field, read-only, two per row
+└── RIGHT — cardActions    btnAddAction + galActions   (top half)
+          — cardUpdates    btnAddUpdate + galUpdates   (bottom half)
+   EDIT PANEL              recPanelScrim + recPanel + pursuit/action/update fields
+                           + btnPanelDelete / btnPanelCancel / btnPanelSave
 ```
+
+Two equal columns, each `(Parent.Width - GapPage * 3) / 2`. Documents and the AI
+overview moved to `scrPursuitDocsAI` — see `docs/05a-screen-documents-ai.md`.
 
 Every card is a `Classic/Button` with `Text` `=""` (the only classic control with radius
 properties) and a heading Label at `Size = SizeCardTitle`, `FontWeight = Semibold`.
 
-Left rail `X = GapPage`, `Width = 640`. Right rail `X = 688`, width anchored to
-`Parent.Width`. 136 controls.
+Both columns are anchored to `Parent.Width`, so the layout follows the window rather than
+assuming 1366. 119 controls.
 
 ---
 
@@ -33,18 +30,13 @@ Left rail `X = GapPage`, `Width = 640`. Right rail `X = 688`, width anchored to
 ```powerfx
 Set(gblPursuit, LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey));
 
-// This pursuit's actions, with the dependency wording the mockup shows in place of a
-// date. There's no free-text due column in the schema -- when an action has no due date
-// but does name a predecessor, "after <the predecessor's stage>" is the best available
-// rendering of "Legal review comes after the proposal".
+// This pursuit's actions, with the dependency wording used when an action has no due
+// date but does name a predecessor. Sorting happens on the gallery, not here -- the
+// two-key sort (completed last, then due date) is a display concern.
 ClearCollect(
     colActions_P,
     AddColumns(
-        Sort(
-            Filter('pursuit-tracker-actions', 'Pursuit ID' = gblPursuitKey),
-            If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'),
-            SortOrder.Ascending
-        ) As A,
+        Filter('pursuit-tracker-actions', 'Pursuit ID' = gblPursuitKey) As A,
         DueWording,
         If(
             !IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'),
@@ -60,23 +52,9 @@ ClearCollect(
     colUpdates,
     Sort(Filter('pursuit-tracker-status-updates', 'Pursuit ID' = gblPursuitKey), 'Update Date', SortOrder.Descending)
 );
-ClearCollect(
-    colDocs,
-    Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), 'Added Date', SortOrder.Descending)
-);
-ClearCollect(
-    colHistory,
-    Sort(Filter('pursuit-tracker-ai-history', 'Pursuit ID' = gblPursuitKey), 'Version Number', SortOrder.Descending)
-);
-// The app never writes this list, so nothing in it guarantees exactly one current
-// version. Prefer the flag; fall back to the highest version number when it's missing
-// or ambiguous, so the card always shows something rather than going blank.
-Set(gblOverview, LookUp(colHistory, 'Is Current'.Value = "Yes"));
-If(IsBlank(gblOverview), Set(gblOverview, First(colHistory)));
-If(IsBlank(gblOverview), Set(gblOverview, LookUp('pursuit-tracker-ai-history', ID < 0)));
 
-// Update authors are email strings too, and they aren't necessarily pursuit owners, so
-// colPeople (built at startup from owners only) won't have them. Top it up here.
+// Update authors are email strings and aren't necessarily pursuit owners, so colPeople
+// (built at startup from owners only) won't have them. Top it up here.
 ForAll(
     Distinct(colUpdates, 'Created By Entra ID') As E,
     If(
@@ -86,227 +64,70 @@ ForAll(
     )
 );
 
-// Add mode arrives from the board or list with a blank key -- open the details panel
-// straight away, since an empty workspace with nothing to fill in is a dead end.
 Set(gblPanel, If(gblNewPursuit, "pursuit", ""));
-Set(gblEditKey, "");
+Set(gblEditKey, "")
 ```
 
 Every filter is `'Pursuit ID' = gblPursuitKey` — text equality on a text column, which
-SharePoint delegates. That's the payoff of the schema keying on `PUR-001` rather than on
-list item IDs.
+SharePoint delegates.
 
-The collection is `colActions_P` rather than `colActions` because `colActions` already
-holds every action in the system, loaded by `LoadPortfolio` for the board's next-task
-calculation. Reusing the name would empty the board's data as a side effect of opening a
-pursuit.
+The collection is `colActions_P` rather than `colActions` because `colActions` holds every
+action in the system, loaded by `LoadPortfolio` for the board's next-task calculation.
+Reusing the name would empty the board's data as a side effect of opening a pursuit.
 
-## Header
+## `cardDetails` — the left column
 
-| Control | Property | Formula |
+One card, every field read-only, two per row, **in the order the columns appear in
+`pursuit-tracker-pursuits`**:
+
+| | Left | Right |
 |---|---|---|
-| `lblBreadcrumb` | `Text` | `="SI pursuit management"` — `Size = SizeMeta`, `Color = ClrTextFaint` |
-| `lblAccount` | `Text` | `=If(gblNewPursuit, "New pursuit", Clip(gblPursuit.'Account Name', 40))` |
-| | `Size` / `FontWeight` / `Color` | `=SizePageTitle` / `=FontWeight.Semibold` / `=ClrText` |
-| `lblPursuitName` | `Text` | the prefix-stripping formula, wrapped in `Clip(..., 90)` |
-| | `Size` / `Color` | `=SizeCardTitle` / `=ClrTextMuted` |
-| `btnEditDetails` | `Text` | `=If(gblNewPursuit, "Enter details", "Edit details")` |
-| | `OnSelect` | `=Set(gblPanel, "pursuit"); Reset(txtPurAccount); …` (one `Reset` per field) |
+| 1 | Pursuit ID | Account |
+| 2 | Salesforce opportunity | Opportunity link |
+| 3 | Pursuit owner | Workflow stage |
+| 4 | Health | Target decision date |
+| 5 | Aligned SIs | Hyperscalers |
+| 6 | Deal value | Active |
+| 7 | Created | Modified |
 
-Account leads at 26pt with the pursuit name under it at 15pt, rather than one run-on
-line. Same prefix-stripping as the board and list, so "ELEVANCE HEALTH: Carelon — …"
-renders as **Elevance Health** over "Carelon - Unified Data and Analytics Platform…".
+Field width is `(cardDetails.Width - 60) / 2`, so the pairs stay side by side at any
+window size. Everything is a Label — editing is the details panel's job, and a card of
+disabled inputs reads as broken rather than as read-only.
 
-## `cardSalesforce`
+Created and Modified are SharePoint's own columns; they need no schema change.
 
-| Control | Property | Formula |
-|---|---|---|
-| `lnkSfOpp` (Label) | `Text` | `=Coalesce(gblPursuit.'Salesforce Opportunity ID', "No opportunity linked")` |
-| | `Color` / `Underline` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrTextMuted, ClrLink)` / `=Not(IsBlank(gblPursuit.'Salesforce Opportunity URL'))` |
-| | `DisplayMode` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), DisplayMode.View, DisplayMode.Edit)` |
-| | `OnSelect` | `=Launch(gblPursuit.'Salesforce Opportunity URL')` |
-| `lblSfHint` | `Text` | `="Account, stage, health, partners and dates are all editable from Edit details."` |
-| | `Size` / `Color` / `Wrap` | `=SizeMeta` / `=ClrTextFaint` / `=true` |
-| `recSyncPill` | `Fill` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChip, ClrOkFill)` |
-| | all `Radius*` | `=RadiusChip` |
-| `lblSyncPill` | `Text` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), "Not linked", "Linked")` |
-| | `Color` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChipText, ClrOkText)` |
-| `lblOwnerCap` / `lblOwnerVal` | `Text` | `="PURSUIT OWNER"` / `=Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID')` |
-| `lblCloseCap` / `lblCloseVal` | `Text` | `="TARGET DECISION"` / `=If(IsBlank(gblPursuit.'Target Decision Date'), "Not set", Text(gblPursuit.'Target Decision Date', "mmmm d, yyyy"))` |
-| | `Size` / `FontWeight` / `Color` | `=SizeCardTitle` / `=FontWeight.Semibold` / `=ClrText` |
+Deal value is `Estimated Fees` formatted as currency, and reads "Not set" rather than
+`$0` when empty — every row is currently empty, and `$0` would look like a real number.
 
-The mockup's link reads "Northwind FY27 renewal" — an opportunity *name*. The schema
-carries the opportunity ID and URL but no name, so the link shows the ID
-(`006PP00000lnpSvYAI`), which is accurate but not friendly. If the label matters, add a
-`Salesforce Opportunity Name` text column and point `lnkSfOpp.Text` at it; nothing else
-changes.
+## `galActions` — sorted by status, then due date
 
-The sync pill infers from the URL rather than reading a sync-status column, because
-there isn't one. It's honest about the only fact available: whether this pursuit is
-linked to Salesforce at all. Eight of your fourteen currently aren't.
+```powerfx
+Sort(
+    Sort(colActions_P, If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'), SortOrder.Ascending),
+    If(Status.Value = "Completed", 1, 0),
+    SortOrder.Ascending
+)
+```
 
-## `cardOverview`
+Two nested `Sort` calls, inner first: due date ascending, then completed-last on top of
+it. Power Fx sorts are stable, so the inner ordering survives inside each group. There's
+no multi-key `Sort`, and `SortByColumns` can't take an expression — this is the way to get
+a compound sort out of Power Fx.
 
-| Control | Property | Formula |
-|---|---|---|
-| `lblOverviewHead` | `Text` | `="AI overview"` |
-| `lblOverviewBody` | `Text` | `=Coalesce(gblOverview.'Overview Text', "No overview has been generated for this pursuit yet.")` |
-| | `Size` / `Color` / `Wrap` / `AutoHeight` | `=SizeBody` / `=ClrText` / `=true` / `=true` |
-| `lblOverviewMeta` | `Text` | `=If(IsBlank(gblOverview), "", "Version " & gblOverview.'Version Number' & " · refreshed " & Lower(RelativeDay(gblOverview.'Refreshed Date')) & " · prior versions retained in history")` |
-| | `Size` / `Color` / `Wrap` | `=SizeMeta` / `=ClrTextFaint` / `=true` |
+Undated actions substitute `Date(2099, 12, 31)` so they sink to the bottom of the open
+group rather than floating to the top, which is what a blank date would otherwise do.
 
-**Display only — there is no Refresh button.** SharePoint's native AI populates
-`Overview Text`, `Version Number`, `Refreshed Date`, and `Is Current`; the app reads them
-and writes nothing back. That removes the one part of this build that couldn't be finished
-on standard connectors, and it removes the version-management code with it — no version
-numbering, no `Is Current` flip, no transaction ordering to worry about.
+## `galUpdates` — newest first, with the time
 
-Two consequences worth knowing:
-
-**Nothing enforces one current version per pursuit.** The app used to guarantee that by
-demoting before inserting. Now whatever populates the list owns that invariant, which is
-why `OnVisible` falls back to the highest `Version Number` when the flag is missing — the
-card degrades to "probably right" rather than to blank.
-
-**The provenance line no longer names its sources.** With `Source Summary` removed it
-reads "Version 3 · refreshed today · prior versions retained in history". The mockup's
-"from Salesforce and four attached materials" phrasing needs a column to read it from; if
-you want it back, the closest free substitute is counting documents where
-`Include in AI Overview` is `Yes`, which the workspace already loads:
-`CountRows(Filter(colDocs, 'Include in AI Overview'.Value = "Yes")) & " included documents"`.
-That counts what's flagged now, not what the overview was actually built from, so it will
-drift as documents are added — which is why it isn't the default.
-
-**One thing to check on the SharePoint side: `Overview Text` is a 255-character Text
-column** until you convert it (`docs/01-data-model.md`, required change 1). The sample row
-is 197 characters and the mockup's overview is about 430. SharePoint truncates rather than
-erroring, and since the AI is writing the column rather than the app, you'd only notice by
-reading a cut-off overview in the app.
-
-## `cardActions` — `galActions`
-
-| Property | Formula |
-|---|---|
-| `Items` | `=colActions_P` |
-| `TemplateSize` | `=56` |
-
-| Control | Property | Formula |
-|---|---|---|
-| `lblActionTitle` | `Text` | `=ThisItem.'Action Title'` — `FontWeight = Semibold`, `Color = ClrText`, `Wrap = true` |
-| | `Color` | `=If(ThisItem.Status.Value = "Completed", ClrTextFaint, ClrText)` |
-| `lblActionStage` | `Text` | `=ThisItem.'Workflow Stage'.Value` — `Color = ClrTextMuted` |
-| `lblActionEffort` | `Text` | `=ThisItem.'Effort Size'.Value` — `Color = ClrText` |
-| `recActionPill` | `Visible` | `=ThisItem.Health.Value = "At risk"` |
-| | `Fill` / all `Radius*` | `=ClrRiskFill` / `=RadiusChip` |
-| `lblActionPill` | `Text` / `Visible` | `="At risk"` / `=recActionPill.Visible` |
-| | `Color` / `Align` | `=ClrRiskText` / `=Align.Center` |
-| `lblActionDue` | `Text` | `=DueLabel(ThisItem.'Due Date', ThisItem.DueWording)` |
-| | `Visible` / `Color` | `=Not(recActionPill.Visible)` / `=ClrTextMuted` |
-| `recActionDivider` | `Y` / `Height` / `Fill` | `=Parent.TemplateHeight - 1` / `=1` / `=ClrDivider` |
-
-The pill reads `Health`, not `Status` — those are separate columns, and ACT-002 is
-`In progress` / `At risk`, which is the mockup's red pill on "Draft executive proposal".
-An earlier version of this doc had it on `Status`, which would never have fired.
-
-Pill and due date share a slot, matching the mockup where "Draft executive proposal"
-shows its pill and "Confirm buying committee" shows Aug 12. A task that is both at risk
-and dated shows the risk, the more urgent of the two.
-
-Completed actions stay in the list, greyed. ACT-003 is completed and still shows its
-dependency relationship, which is the point of the panel.
-
-## `cardAlignment`
-
-| Control | Property | Formula |
-|---|---|---|
-| `lblSICap` | `Text` | `="SYSTEMS INTEGRATORS"` — `Size = SizeMeta`, `Color = ClrTextMuted` |
-| `galAlignSIs` | `Items` | `=gblPursuit.'Aligned SIs'` |
-| `lblHypeCap` | `Text` | `="HYPERSCALERS"` |
-| `galAlignHype` | `Items` | `=gblPursuit.Hyperscalers` |
-
-Both: `Layout` Horizontal, `TemplateSize = 76`, `Height = 26`, chip template as on the
-board.
-
-The mockup's "+ Other" chips are SharePoint's fill-in-choice behaviour surfacing in the
-UI, and these columns do have it enabled — a text input that patches a new value works.
-I've left it out. Fill-in choices are how you end up with both "Proposal/Quote" and
-"Proposal / Quote" in the same system, and now that the choice lists have real values,
-adding to them deliberately in SharePoint is worth the extra thirty seconds.
-
-## `cardDocuments` — `galDocs`
-
-| Property | Formula |
-|---|---|
-| `Items` | `=colDocs` |
-| `TemplateSize` | `=44` |
-
-| Control | Property | Formula |
-|---|---|---|
-| `lblDocLink` | `Text` | `=ThisItem.Title` |
-| | `Color` / `Underline` | `=ClrLink` / `=true` |
-| | `OnSelect` | `=Launch(SafeUrl(ThisItem.'Document URL'))` |
-| `lblDocType` | `Text` | `=ThisItem.'Document Type'.Value & If(ThisItem.'Include in AI Overview'.Value = "Yes", " · in overview", "")` |
-| | `Size` / `Color` | `=SizeMeta` / `=ClrTextFaint` |
-
-`SafeUrl` prepends `https://` when the stored URL has no scheme, which DOC-001's doesn't.
-Without it `Launch()` treats the value as a relative path and opens a broken address.
-
-In the mockup the three document links run together as one wrapped block
-("Working proposal deckDiscovery notesNTT solution outline"). One gallery row per
-document gives each its own hit target, which is what that layout is reaching for.
-
-## `cardUpdates` — `galUpdates`
-
-| Property | Formula |
-|---|---|
-| `Items` | `=colUpdates` |
-| `TemplateSize` | `=96` |
-
-| Control | Property | Formula |
-|---|---|---|
-| `lblUpdateBody` | `Text` | `=ThisItem.'Update Text'` — `Color = ClrText`, `Wrap = true`, `Height = 44` |
-| `recUpdateTag` | `Visible` | `=Not(IsBlank(ThisItem.'Risk / Decision'.Value))` |
-| | `Fill` | `=If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)` |
-| `lblUpdateTag` | `Text` / `Visible` | `=ThisItem.'Risk / Decision'.Value` / `=recUpdateTag.Visible` |
-| | `Color` | `=If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskText, ClrChipText)` |
-| `lblUpdateMeta` | `Text` | `=RelativeDay(ThisItem.'Update Date') & " · " & Lower(ThisItem.'Update Type'.Value) & " · " & Coalesce(LookUp(colPeople, Email = ThisItem.'Created By Entra ID').Name, ThisItem.'Created By Entra ID')` |
-| | `Size` / `Color` | `=SizeMeta` / `=ClrTextFaint` |
-
-That byline renders UPD-001 as "Today · voice update · Don Mishory", matching the mockup
-— `Update Type` already holds "Voice update", so no special-casing is needed.
-
-`Risk / Decision` isn't in the mockups. UPD-001 is tagged `Risk`, and a status feed that
-can't show which updates are risks is a feed people skim past. Delete the two controls if
-you want the mockup exactly.
-
-## `cardHistory` — `galHistory`
-
-| Property | Formula |
-|---|---|
-| `Items` | `=colHistory` |
-| `TemplateSize` | `=64` |
-
-| Control | Property | Formula |
-|---|---|---|
-| `lblVersion` | `Text` | `="Version " & ThisItem.'Version Number' & If(ThisItem.'Is Current'.Value = "Yes", " · current", "")` |
-| | `FontWeight` / `Color` | `=FontWeight.Semibold` / `=If(ThisItem.'Is Current'.Value = "Yes", ClrText, ClrTextMuted)` |
-| `lblVersionMeta` | `Text` | `=RelativeDay(ThisItem.'Refreshed Date')` |
-| | `Size` / `Color` | `=SizeMeta` / `=ClrTextFaint` |
-| `recVersionDivider` | `Y` / `Height` / `Fill` | `=Parent.TemplateHeight - 1` / `=1` / `=ClrDivider` |
-| (template) | `OnSelect` | `=Set(gblOverview, ThisItem)` |
-
-Selecting a version displays it in the overview card. It doesn't make it current — the
-app doesn't write to this list at all. `OnVisible` resets to the current one.
-
-This whole card is read-only display over rows the AI already wrote, so it costs nothing
-to keep. Delete it if you'd rather the workspace showed only the current narrative.
-
----
+`Sort(colUpdates, 'Update Date', SortOrder.Descending)`. The stamp line shows
+`mmm d, yyyy · h:mm AM/PM` plus the update type rather than "Today" — on a feed where two
+updates can land in the same afternoon, the relative form hides the ordering it's meant to
+convey.
 
 ## The edit panel
 
-One slide-over, four modes. `gblPanel` holds which: `"pursuit"`, `"action"`, `"doc"`,
-`"update"`, or `""` for closed. `gblEditKey` holds the `ACT-nnn` / document title /
+One slide-over, three modes on this screen. `gblPanel` holds which: `"pursuit"`,
+`"action"`, `"update"`, or `""` for closed. The `"doc"` mode lives on the documents screen. `gblEditKey` holds the `ACT-nnn` / document title /
 `UPD-nnn` being edited, or `""` for a new record — that single variable drives three
 things: whether Save patches or collects, whether Delete is offered, and what the panel
 header says.
@@ -321,14 +142,12 @@ the three child modes use one.
 | Header | `btnEditDetails` | pursuit details, all fields |
 | Actions card | `btnAddAction` (+ Add) | blank action |
 | Actions gallery | `btnActionRow` — transparent, covers the row | that action |
-| Documents card | `btnAddDoc` | blank document link |
-| Documents gallery | `btnDocEdit` | that document |
 | Updates card | `btnAddUpdate` | blank update |
 | Updates gallery | `btnUpdateEdit` | that update |
 
 Every one of those handlers does the same three things: set the mode, set `gblEditKey`,
-set the record global (`gblEditAction` / `gblEditDoc` / `gblEditUpdate`), then `Reset()`
-every input in that mode.
+set the record global (`gblEditAction` / `gblEditUpdate`), then `Reset()` every input in
+that mode. The documents screen repeats the pattern with `gblEditDoc`.
 
 **The `Reset()` calls are not optional.** A `Classic/TextInput` keeps whatever the user
 last typed even after its `Default` formula changes to a different record's value. Without
@@ -346,9 +165,6 @@ Hyperscalers, Estimated Fees, AI Overview Current Version.
 email, Predecessor Action ID, Notes. `Completed Date` isn't a field: Save sets it to
 `Now()` when Status becomes Completed and clears it otherwise, which is one fewer thing to
 keep consistent by hand.
-
-**Document** — Title, Document Type, Document URL, Include in AI Overview. `Document ID`,
-`Added Date` and `Added By Entra ID` are set on create.
 
 **Update** — Update Text, Update Type, Risk / Decision. `Update Date` and
 `Created By Entra ID` are set on create and left alone on edit, so editing a typo doesn't
@@ -390,12 +206,12 @@ pattern for `PUR-`, `DOC-` and `UPD-`. It assumes the three-digit format holds; 
 starts colliding.
 
 `DisplayMode` on Save is bound to the one field that can't be empty in each mode — account
-and pursuit name, action title, document title, update text — so the button is dead until
-the record is viable.
+and pursuit name, action title, update text — so the button is dead until the record is
+viable.
 
 ### Deleting
 
-`btnPanelDelete` is visible only for the three child modes and only when editing an
+`btnPanelDelete` is visible only for the child modes and only when editing an
 existing record, so it can't appear on a new record or on the pursuit. It `Remove`s the row
 and reloads.
 

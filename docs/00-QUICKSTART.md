@@ -43,17 +43,18 @@ No explanations. Reasoning lives in `docs/01`–`08`.
 
 ## E. Screens
 
-17. **+ New screen** → **Blank**. Do this three times.
+17. **+ New screen** → **Blank**. Do this four times.
 18. Rename them (double-click the name in the tree) to exactly:
     - `scrPortfolioBoard`
     - `scrPortfolioList`
     - `scrPursuitWorkspace`
+    - `scrPursuitDocsAI`
 19. Delete the original `Screen1` if one exists.
 20. Click **App** → property **StartScreen** → `=scrPortfolioBoard`.
 
 ## F. Paste the screens
 
-Do these three in order. For each one:
+Do these four in order. For each one:
 
 21. Click the screen in the tree → property **Fill** → `=ClrPage`.
 22. Open the YAML file, select all, copy.
@@ -67,6 +68,7 @@ Do these three in order. For each one:
 | `scrPortfolioBoard` | `src/yaml/01-PortfolioBoard.pa.yaml` |
 | `scrPortfolioList` | `src/yaml/02-PortfolioList.pa.yaml` |
 | `scrPursuitWorkspace` | `src/yaml/03-PursuitWorkspace.pa.yaml` |
+| `scrPursuitDocsAI` | `src/yaml/04-PursuitDocsAI.pa.yaml` |
 
 ## G. Screen OnVisible
 
@@ -84,13 +86,16 @@ Do these three in order. For each one:
 26. `scrPursuitWorkspace` → **OnVisible** → paste the code block at the top of
     `docs/05-screen-pursuit-workspace.md` (the one under "Screen `OnVisible`").
 
+27. `scrPursuitDocsAI` → **OnVisible** → paste the code block near the top of
+    `docs/05a-screen-documents-ai.md`.
+
 ## H. Run it
 
-27. **File → Save**.
-28. **F5** to preview. On a responsive app, run the browser maximised at 1366×768 or
+28. **File → Save**.
+29. **F5** to preview. On a responsive app, run the browser maximised at 1366×768 or
     larger — the layout is positioned for that size and a smaller window clips the bottom
     of the workspace.
-29. Check against the expected results in `docs/08-deploy-and-test.md` §2.
+30. Check against the expected results in `docs/08-deploy-and-test.md` §2.
 
 **Preview writes to your real SharePoint lists.** Before testing the move handle or the
 Add task button, add a throwaway row `PUR-999` in `pursuit-tracker-pursuits` and test on
@@ -98,15 +103,15 @@ that.
 
 ## I. Excel download (optional, do it later)
 
-30. Build the flow: `docs/06-flows.md`.
-31. Back in the app: **Data → Add data** → search `PursuitTracker-ExportPortfolio`.
-32. Select `btnDownloadExcel` → **OnSelect** → replace the placeholder with the formula in
+31. Build the flow: `docs/06-flows.md`.
+32. Back in the app: **Data → Add data** → search `PursuitTracker-ExportPortfolio`.
+33. Select `btnDownloadExcel` → **OnSelect** → replace the placeholder with the formula in
     `docs/04-screen-portfolio-list.md` (under "The download").
 
 ## J. Publish
 
-33. **File → Save**, then **Publish** → **Publish this version**.
-34. App detail page in make.powerapps.com → copy the **Web link**.
+34. **File → Save**, then **Publish** → **Publish this version**.
+35. App detail page in make.powerapps.com → copy the **Web link**.
 
 ---
 
@@ -121,7 +126,8 @@ that.
 | Board has no columns | Right-click App → Run OnStart |
 | All cards say "No open actions" | Right-click App → Run OnStart |
 | Cards show email addresses | Step 12 was skipped |
-| Workspace tab greyed out | Correct — click a card on the board first |
+| Workspace or Docs & AI tab greyed out | Correct — click a card on the board first. Both need a pursuit selected |
+| Docs & AI screen empty | `scrPursuitDocsAI.OnVisible` is missing — step 27 |
 | Blue squiggle under `Status.Value <> "Completed"` | Correct — ignore it |
 | "Unknown property 'Fill' for control type 'Button'" | Older YAML — re-copy. Buttons and inputs need the `Classic/` prefix |
 | "Unknown property 'RadiusTopLeft' for control type 'Rectangle'" | Same — re-copy. Rounded shapes are `Classic/Button`, not `Rectangle` |

@@ -71,25 +71,26 @@ Then **App** → `OnStart` → paste all of `src/App.OnStart.powerfx`.
 Right-click App → **Run OnStart** so the collections exist while you build. You'll want
 to re-run it after any change to the SharePoint schema.
 
-## 5. Create the three screens
+## 5. Create the four screens
 
-Add three blank screens and rename them exactly:
+Add four blank screens and rename them exactly:
 
 | Screen | Mockup |
 |---|---|
 | `scrPortfolioBoard` | Portfolio board — the kanban |
 | `scrPortfolioList` | Portfolio list — the reportable table |
 | `scrPursuitWorkspace` | Pursuit workspace — the detail page |
+| `scrPursuitDocsAI` | Documents and the AI overview, split off the workspace |
 
 Set **App → StartScreen** to `=scrPortfolioBoard`.
 
 On each screen set `Fill` to `=ClrPage`. If the screen stays white, named formulas
 aren't switched on yet — go back to step 2.
 
-## 6. Paste the three screens
+## 6. Paste the four screens
 
 `src/yaml/` holds each screen as complete Power Apps code-view YAML — every control,
-positioned, with every formula. 153 controls across the three files.
+positioned, with every formula. 242 controls across the four files.
 
 For each screen in turn:
 
@@ -98,15 +99,16 @@ For each screen in turn:
    paste triggers a browser clipboard-permission prompt; approve it.
 3. Set the screen's `Fill` to `=ClrPage`.
 4. Set the screen's `OnVisible` — the comment block at the foot of each YAML file says
-   which one, and `docs/03`–`05` carry the formulas.
+   which one, and `docs/03`–`05a` carry the formulas.
 
 | File | Screen | Controls |
 |---|---|---|
-| `01-PortfolioBoard.pa.yaml` | `scrPortfolioBoard` | 30 |
-| `02-PortfolioList.pa.yaml` | `scrPortfolioList` | 33 |
-| `03-PursuitWorkspace.pa.yaml` | `scrPursuitWorkspace` | 90 |
+| `01-PortfolioBoard.pa.yaml` | `scrPortfolioBoard` | 36 |
+| `02-PortfolioList.pa.yaml` | `scrPortfolioList` | 42 |
+| `03-PursuitWorkspace.pa.yaml` | `scrPursuitWorkspace` | 119 |
+| `04-PursuitDocsAI.pa.yaml` | `scrPursuitDocsAI` | 45 |
 
-The nav bar is included in all three files rather than pasted separately, so each screen
+The nav bar is included in all four files rather than pasted separately, so each screen
 is one paste. The selected-tab styling is already set per screen.
 
 ### If a paste is rejected
@@ -115,7 +117,7 @@ Studio only accepts the exact YAML shape its own code view emits, and that shape
 between releases — I can't verify a paste from outside Power Apps, so treat this as an
 accelerator with a known fallback rather than a guarantee. Each file ends with a
 FALLBACKS note naming the two controls most likely to be the cause. Beyond those,
-`docs/03`–`05` carry every control and formula as property tables, which always work:
+`docs/03`–`05a` carry every control and formula as property tables, which always work:
 insert the control by hand and paste the formulas into the property box.
 
 Two things worth knowing before you paste:
@@ -124,7 +126,7 @@ Two things worth knowing before you paste:
 through a theme token — a screen pasted before the theme exists shows a wall of red
 errors that all disappear once the tokens are defined.
 
-**Create all three screens first** (step 5). The nav buttons navigate by screen name, and
+**Create all four screens first** (step 5). The nav buttons navigate by screen name, and
 a `Navigate()` to a screen that doesn't exist is an error Studio can't resolve.
 
 ## A note on how the screen docs are written
