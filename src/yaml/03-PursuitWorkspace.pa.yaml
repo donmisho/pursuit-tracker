@@ -1145,7 +1145,7 @@
       Width: =Parent.Width
       Height: =Parent.Height
       Visible: =gblPanel <> ""
-      Fill: =ColorFade(ClrPage, -0.4)
+      Fill: =RGBA(0, 0, 0, 0.55)
       OnSelect: |
         =Set(gblPanel, "");
         If(
@@ -2154,40 +2154,63 @@
       OnSelect: |
         =If(
             gblPanel = "pursuit",
-        
-            Set(
-                gblFields,
-                {
-                    'Account Name':               txtPurAccount.Text,
-                    'Pursuit Name':               txtPurName.Text,
-                    'Workflow Stage':             { Value: drpPurStage.Selected.Value },
-                    Health:                       { Value: drpPurHealth.Selected.Value },
-                    'WM Pursuit Owner Entra ID':  txtPurOwner.Text,
-                    'Target Decision Date':       dtePurTarget.SelectedDate,
-                    Active:                       If(IsBlank(txtPurActive.Text), 0, Value(txtPurActive.Text)),
-                    'Salesforce Opportunity ID':  txtPurSfId.Text,
-                    'Salesforce Opportunity URL': txtPurSfUrl.Text,
-                    'Aligned SIs':                cmbPurSIs.SelectedItems,
-                    Hyperscalers:                 cmbPurHype.SelectedItems,
-                    'Estimated Fees':             If(IsBlank(txtPurFees.Text), Blank(), Value(txtPurFees.Text)),
-                    'AI Overview Current Version': txtPurAiVer.Text
-                }
-            );
+
             If(
                 gblNewPursuit,
                 With(
                     { newId: "PUR-" & Text(Coalesce(Max(ForAll('pursuit-tracker-pursuits' As R, Value(Right(R.Title, 3))), Value), 0) + 1, "000") },
-                    Collect('pursuit-tracker-pursuits', Patch(gblFields, { Title: newId }));
+                    Collect(
+                        'pursuit-tracker-pursuits',
+                        {
+                            Title:                         newId,
+                    'Account Name':                txtPurAccount.Text,
+                    'Pursuit Name':                txtPurName.Text,
+                    'Workflow Stage':              { Value: drpPurStage.Selected.Value },
+                    Health:                        { Value: drpPurHealth.Selected.Value },
+                    'WM Pursuit Owner Entra ID':   txtPurOwner.Text,
+                    'Target Decision Date':        dtePurTarget.SelectedDate,
+                    Active:                        If(IsBlank(txtPurActive.Text), 0, Value(txtPurActive.Text)),
+                    'Salesforce Opportunity ID':   txtPurSfId.Text,
+                    'Salesforce Opportunity URL':  txtPurSfUrl.Text,
+                    'Aligned SIs':                 cmbPurSIs.SelectedItems,
+                    Hyperscalers:                  cmbPurHype.SelectedItems,
+                    'Estimated Fees':              If(IsBlank(txtPurFees.Text), Blank(), Value(txtPurFees.Text)),
+                    'AI Overview Current Version': txtPurAiVer.Text
+                        }
+                    );
                     Set(gblPursuitKey, newId)
                 ),
-                Patch('pursuit-tracker-pursuits', LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey), gblFields)
+                Patch(
+                    'pursuit-tracker-pursuits',
+                    LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey),
+                    {
+                    'Account Name':                txtPurAccount.Text,
+                    'Pursuit Name':                txtPurName.Text,
+                    'Workflow Stage':              { Value: drpPurStage.Selected.Value },
+                    Health:                        { Value: drpPurHealth.Selected.Value },
+                    'WM Pursuit Owner Entra ID':   txtPurOwner.Text,
+                    'Target Decision Date':        dtePurTarget.SelectedDate,
+                    Active:                        If(IsBlank(txtPurActive.Text), 0, Value(txtPurActive.Text)),
+                    'Salesforce Opportunity ID':   txtPurSfId.Text,
+                    'Salesforce Opportunity URL':  txtPurSfUrl.Text,
+                    'Aligned SIs':                 cmbPurSIs.SelectedItems,
+                    Hyperscalers:                  cmbPurHype.SelectedItems,
+                    'Estimated Fees':              If(IsBlank(txtPurFees.Text), Blank(), Value(txtPurFees.Text)),
+                    'AI Overview Current Version': txtPurAiVer.Text
+                    }
+                )
             );
-            Set(gblNewPursuit, false);
-            Set(gblPursuit, LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey));
-            ClearCollect(colActions, 'pursuit-tracker-actions'),
-        
+            If(
+                IsEmpty(Errors('pursuit-tracker-pursuits')),
+                Set(gblNewPursuit, false);
+                Set(gblPursuit, LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey));
+                ClearCollect(colActions, 'pursuit-tracker-actions');
+                Set(gblPanel, ""),
+                Notify("Save failed: " & First(Errors('pursuit-tracker-pursuits')).Message, NotificationType.Error)
+            ),
+
             gblPanel = "action",
-        
+
             If(
                 gblEditKey = "",
                 Collect(
@@ -2224,7 +2247,9 @@
                     }
                 )
             );
-            ClearCollect(colActions, 'pursuit-tracker-actions');
+            If(
+                IsEmpty(Errors('pursuit-tracker-actions')),
+                ClearCollect(colActions, 'pursuit-tracker-actions');
         ClearCollect(
             colActions_P,
             AddColumns(
@@ -2233,10 +2258,13 @@
                 If(!IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'), "",
                    "After " & Lower(LookUp('pursuit-tracker-actions', Title = A.'Predecessor Action ID').'Workflow Stage'.Value))
             )
-        ),
-        
+        );
+                Set(gblPanel, ""),
+                Notify("Save failed: " & First(Errors('pursuit-tracker-actions')).Message, NotificationType.Error)
+            ),
+
             gblPanel = "doc",
-        
+
             If(
                 gblEditKey = "",
                 Collect(
@@ -2263,8 +2291,13 @@
                     }
                 )
             );
-            ClearCollect(colDocs, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), 'Added Date', SortOrder.Descending)),
-        
+            If(
+                IsEmpty(Errors('pursuit-tracker-documents')),
+                ClearCollect(colDocs, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), 'Added Date', SortOrder.Descending));
+                Set(gblPanel, ""),
+                Notify("Save failed: " & First(Errors('pursuit-tracker-documents')).Message, NotificationType.Error)
+            ),
+
             If(
                 gblEditKey = "",
                 Collect(
@@ -2289,9 +2322,13 @@
                     }
                 )
             );
-            ClearCollect(colUpdates, Sort(Filter('pursuit-tracker-status-updates', 'Pursuit ID' = gblPursuitKey), 'Update Date', SortOrder.Descending))
-        );
-        Set(gblPanel, "")
+            If(
+                IsEmpty(Errors('pursuit-tracker-status-updates')),
+                ClearCollect(colUpdates, Sort(Filter('pursuit-tracker-status-updates', 'Pursuit ID' = gblPursuitKey), 'Update Date', SortOrder.Descending));
+                Set(gblPanel, ""),
+                Notify("Save failed: " & First(Errors('pursuit-tracker-status-updates')).Message, NotificationType.Error)
+            )
+        )
 
 # ---------------------------------------------------------------------------
 # SCREEN PROPERTIES — set by hand:

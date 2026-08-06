@@ -361,8 +361,28 @@ an address in both directions for no gain.
 ### Saving
 
 `btnPanelSave.OnSelect` is one `Switch`-shaped `If` over `gblPanel`. Each branch either
-`Collect`s (when `gblEditKey = ""`) or `Patch`es, then re-runs the `ClearCollect` for that
-list so the card behind the panel is correct before the panel closes.
+`Collect`s (when `gblEditKey = ""`) or `Patch`es, then checks `Errors()` on that list:
+
+```powerfx
+If(
+    IsEmpty(Errors('pursuit-tracker-pursuits')),
+    …reload, close the panel…,
+    Notify("Save failed: " & First(Errors('pursuit-tracker-pursuits')).Message, NotificationType.Error)
+)
+```
+
+**Power Apps swallows write failures.** A `Patch` that a column type rejects returns blank
+and carries on — no error, no dialog, nothing in the UI. The button looks broken when it
+isn't; it ran and the write bounced. Checking `Errors()` after every write and surfacing
+the message is the difference between a two-minute fix and an afternoon.
+
+The panel also stays open on failure, so whatever was typed isn't lost.
+
+The field record is written out inline in both the Collect and the Patch branch rather
+than built once into a variable. It's more text, but a global holding a record of control
+values loses its type binding to the data source — multi-choice columns in particular go
+through as an untyped table and the write bounces silently, which is exactly the failure
+above.
 
 New IDs follow the existing convention —
 `"ACT-" & Text(Max(...) + 1, "000")` over the highest existing three-digit suffix. Same
@@ -394,3 +414,12 @@ disabled until the pursuit exists — there's no `Pursuit ID` to attach a child 
 Saving generates the `PUR-nnn`, sets `gblPursuitKey`, and clears `gblNewPursuit`, at which
 point the screen behaves like any other pursuit.
 
+## The scrim has to be RGBA, not ColorFade
+
+`recPanelScrim` uses `=RGBA(0, 0, 0, 0.55)`.
+
+`ColorFade(ClrPage, -0.4)` looks like the obvious way to dim the page behind the panel and
+is wrong: `ColorFade` darkens a colour, it doesn't make it translucent. Applied to a page
+background that's already near-black it returns solid black at full opacity, so the screen
+behind the panel doesn't dim — it disappears. Only an alpha channel gives you a scrim, and
+only `RGBA` has one.
