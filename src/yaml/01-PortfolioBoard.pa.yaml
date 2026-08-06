@@ -267,8 +267,10 @@
                       'pursuit-tracker-pursuits' As P,
                       OwnerName,
                       Coalesce(LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name, P.'WM Pursuit Owner Entra ID'),
-                      NextAction,
-                      First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)),
+                      NextActionTitle,
+                      First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Action Title',
+                      NextActionDue,
+                      First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Due Date',
                       SIsText,  Concat(P.'Aligned SIs', Value, ", "),
                       HypeText, Concat(P.Hyperscalers, Value, ", ")
                   )
@@ -534,10 +536,10 @@
                   Y: =150
                   Width: =254
                   Height: =32
-                  Text: =Coalesce(ThisItem.NextAction.'Action Title', "No open actions")
+                  Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", ThisItem.NextActionTitle)
                   Font: =FontUI
                   Size: =SizeBody
-                  Color: =If(IsBlank(ThisItem.NextAction), ClrTextFaint, ClrText)
+                  Color: =If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)
                   Wrap: =true
 
             - lblNextTaskDue:
@@ -547,7 +549,7 @@
                   Y: =182
                   Width: =254
                   Height: =18
-                  Text: =If(IsBlank(ThisItem.NextAction), "", Text(ThisItem.NextAction.'Due Date', "mmmm d"))
+                  Text: =If(IsBlank(ThisItem.NextActionDue), "", Text(ThisItem.NextActionDue, "mmmm d"))
                   Font: =FontUI
                   Size: =SizeBody
                   Color: =ClrDate

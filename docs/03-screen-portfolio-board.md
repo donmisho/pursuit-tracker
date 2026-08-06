@@ -125,7 +125,8 @@ ClearCollect(
     AddColumns(
         'pursuit-tracker-pursuits' As P,
         OwnerName, Coalesce(LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name, P.'WM Pursuit Owner Entra ID'),
-        NextAction, First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)),
+        NextActionTitle, First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Action Title',
+        NextActionDue,   First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Due Date',
         SIsText,  Concat(P.'Aligned SIs', Value, ", "),
         HypeText, Concat(P.Hyperscalers, Value, ", ")
     )
@@ -182,9 +183,9 @@ labelled next action.
 | `lblSICap` / `lblHSCap` | `Text` | `="SI:"` / `="HS:"` |
 | | `Size` / `Color` | `=SizeMeta` / `=ClrTextMuted` |
 | `lblNextCap` | `Text` | `="NEXT ACTION"` — `Size = SizeMeta`, `Color = ClrTextMuted` |
-| `lblNextTask` | `Text` | `=Coalesce(ThisItem.NextAction.'Action Title', "No open actions")` |
-| | `Color` | `=If(IsBlank(ThisItem.NextAction), ClrTextFaint, ClrText)` |
-| `lblNextTaskDue` | `Text` | `=If(IsBlank(ThisItem.NextAction), "", Text(ThisItem.NextAction.'Due Date', "mmmm d"))` |
+| `lblNextTask` | `Text` | `=If(IsBlank(ThisItem.NextActionTitle), "No open actions", ThisItem.NextActionTitle)` |
+| | `Color` | `=If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)` |
+| `lblNextTaskDue` | `Text` | `=If(IsBlank(ThisItem.NextActionDue), "", Text(ThisItem.NextActionDue, "mmmm d"))` |
 | | `Color` | `=ClrDate` |
 
 The owner is gone from the card. Every pursuit in the data has the same owner, so the
@@ -251,3 +252,21 @@ is the most common reason a chip row renders empty.
 Fixed `TemplateSize` clips long names — "Internal/West Monroe" and "NTT Data" both
 appear in your data and only one fits. Variable-width chips need the label's rendered
 text width, which canvas doesn't expose, so the practical fix is shorter choice values.
+
+## Why the next action is two scalar columns, not one record
+
+`colPortfolio` carries `NextActionTitle` and `NextActionDue` rather than a single
+`NextAction` record column. The record version type-checks in `AddColumns` but doesn't
+survive `ClearCollect` into a collection with its type intact, and the failure is
+downstream and cryptic — `Text(ThisItem.NextAction.'Due Date', "mmmm d")` reports
+*"incorrect format specifier for 'Text'"*, because the untyped field arrives as text and
+`Text()` won't take a format string for text input. `Coalesce` on the title fails the same
+way.
+
+The cost is running the same `First(Sort(Filter(...)))` twice per row. At fourteen
+pursuits against an in-memory collection that's free.
+
+Separately: **`IsBlank()` doesn't accept a record.** `IsBlank(ThisItem.NextAction)` reports
+*"function 'If' has invalid arguments"* from the `If` that wraps it, which points at the
+wrong function. Testing `IsBlank(ThisItem.NextActionTitle)` — a scalar — is both correct
+and what the label actually cares about.

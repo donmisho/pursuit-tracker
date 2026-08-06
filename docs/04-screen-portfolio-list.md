@@ -97,9 +97,9 @@ Elevance's "Carelon…" and "Unified Data…" end up filed under C and U.
 | `recRowAvatar` / `lblRowInitials` / `lblRowOwner` | | as before, `X` `=614` / `=614` / `=646` |
 | `galRowSIs` / `galRowHype` | `X` | `=804` / `=944` |
 | | `Width` / `Height` / `TemplateSize` | `=130` / `=84` / `=28` |
-| `lblRowNextTask` | `Text` | `=Coalesce(ThisItem.NextAction.'Action Title', "No open actions")` |
-| | `Color` | `=If(IsBlank(ThisItem.NextAction), ClrTextFaint, ClrText)` |
-| `lblRowNextDue` | `Text` | `=If(IsBlank(ThisItem.NextAction), "", Text(ThisItem.NextAction.'Due Date', "mmmm d"))` |
+| `lblRowNextTask` | `Text` | `=If(IsBlank(ThisItem.NextActionTitle), "No open actions", ThisItem.NextActionTitle)` |
+| | `Color` | `=If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)` |
+| `lblRowNextDue` | `Text` | `=If(IsBlank(ThisItem.NextActionDue), "", Text(ThisItem.NextActionDue, "mmmm d"))` |
 | `recRowDivider` | `Y` / `Width` | `=Parent.TemplateHeight - 1` / `=Parent.Width - 20` |
 
 Pursuit text drops from `SizeCardTitle` to `SizeBody` — the same size as Stage. The
@@ -218,14 +218,14 @@ Set(
                     Owner,         OwnerName,
                     SIs,           SIsText,
                     Hype,          HypeText,
-                    NextActionName, Coalesce(NextAction.'Action Title', ""),
-                    NextActionDue,  If(IsBlank(NextAction), "", Text(NextAction.'Due Date', "yyyy-mm-dd")),
+                    NextName,      Coalesce(NextActionTitle, ""),
+                    NextDue,       If(IsBlank(NextActionDue), "", Text(NextActionDue, "yyyy-mm-dd")),
                     TargetDate,    Text('Target Decision Date', "yyyy-mm-dd"),
                     SfUrl,         Coalesce('Salesforce Opportunity URL', ""),
                     Fees,          Text('Estimated Fees', "[$-en-US]#,##0")
                 ),
                 PursuitId, PursuitName, Account, StageName, HealthName, Owner,
-                SIs, Hype, NextActionName, NextActionDue, TargetDate, SfUrl, Fees
+                SIs, Hype, NextName, NextDue, TargetDate, SfUrl, Fees
             ),
             JSONFormat.IgnoreUnsupportedTypes
         )
@@ -242,8 +242,7 @@ If(
 Four things worth knowing about that formula:
 
 **`ShowColumns` after `AddColumns` is not redundant.** Without it `JSON()` serialises the
-whole underlying record — the `NextAction` sub-record, the raw choice tables, and every
-SharePoint system column. The payload balloons and "Create CSV table" in the flow emits
+whole underlying record — the raw choice tables and every SharePoint system column. The payload balloons and "Create CSV table" in the flow emits
 columns nobody asked for.
 
 **`JSONFormat.IgnoreUnsupportedTypes` is required**, not decoration. Multi-choice columns

@@ -79,23 +79,30 @@ ClearCollect(
             P.'WM Pursuit Owner Entra ID'
         ),
 
-        // The next open action, whole -- cards read .'Action Title' and .'Due Date'
-        // off it without three more lookups. Actions with no due date are excluded:
-        // they can't be "next due", and including them would let an undated action
-        // win the sort and blank the date line.
-        NextAction,
+        // The next open action, as two scalar columns rather than one record column.
+        // A record-valued column doesn't survive into a collection with its type intact:
+        // ThisItem.NextAction.'Due Date' comes back untyped, so Text() rejects the date
+        // format and Coalesce() rejects the title. Scalars just work.
+        //
+        // Actions with no due date are excluded -- they can't be "next due", and
+        // including them would let an undated action win the sort and blank the date.
+        NextActionTitle,
         First(
             Sort(
-                Filter(
-                    colActions,
-                    'Pursuit ID' = P.Title,
-                    Status.Value <> "Completed",
-                    Not(IsBlank('Due Date'))
-                ),
+                Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))),
                 'Due Date',
                 SortOrder.Ascending
             )
-        ),
+        ).'Action Title',
+
+        NextActionDue,
+        First(
+            Sort(
+                Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))),
+                'Due Date',
+                SortOrder.Ascending
+            )
+        ).'Due Date',
 
         // Flattened choice values. Galleries bind to the raw multi-choice tables, but the
         // Excel export needs text, and computing it in two places invites drift.

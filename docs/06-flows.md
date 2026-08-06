@@ -41,8 +41,8 @@ Add one input:
       "Owner":           { "type": "string" },
       "SIs":             { "type": "string" },
       "Hype":            { "type": "string" },
-      "NextActionName":  { "type": "string" },
-      "NextActionDue":   { "type": "string" },
+      "NextName":        { "type": "string" },
+      "NextDue":         { "type": "string" },
       "TargetDate":      { "type": "string" },
       "SfUrl":           { "type": "string" },
       "Fees":            { "type": "string" }
@@ -70,8 +70,8 @@ has none and the app sends `""` — which is three of your fourteen rows today.
 | Owner | `item()?['Owner']` |
 | Aligned SIs | `item()?['SIs']` |
 | Hyperscalers | `item()?['Hype']` |
-| Next action | `item()?['NextActionName']` |
-| Next action due | `item()?['NextActionDue']` |
+| Next action | `item()?['NextName']` |
+| Next action due | `item()?['NextDue']` |
 | Target decision | `item()?['TargetDate']` |
 | Salesforce opportunity | `item()?['SfUrl']` |
 | Estimated fees | `item()?['Fees']` |
