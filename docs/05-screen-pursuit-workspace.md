@@ -44,7 +44,7 @@ ClearCollect(
             If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'),
             SortOrder.Ascending
         ) As A,
-        "DueWording",
+        DueWording,
         If(
             !IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'),
             "",
@@ -352,7 +352,7 @@ ClearCollect(
     colActions_P,
     AddColumns(
         Sort(Filter('pursuit-tracker-actions', 'Pursuit ID' = gblPursuitKey), If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'), SortOrder.Ascending) As A,
-        "DueWording",
+        DueWording,
         If(!IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'), "",
            "After " & Lower(LookUp('pursuit-tracker-actions', Title = A.'Predecessor Action ID').'Workflow Stage'.Value))
     )

@@ -137,22 +137,22 @@ Set(
             ShowColumns(
                 AddColumns(
                     galPortfolioList.AllItems,
-                    "PursuitId",     Title,
-                    "PursuitName",   'Pursuit Name',
-                    "Account",       'Account Name',
-                    "StageName",     'Workflow Stage'.Value,
-                    "HealthName",    Health.Value,
-                    "Owner",         OwnerName,
-                    "SIs",           SIsText,
-                    "Hype",          HypeText,
-                    "NextActionName", Coalesce(NextAction.'Action Title', ""),
-                    "NextActionDue",  If(IsBlank(NextAction), "", Text(NextAction.'Due Date', "yyyy-mm-dd")),
-                    "TargetDate",    Text('Target Decision Date', "yyyy-mm-dd"),
-                    "SfUrl",         Coalesce('Salesforce Opportunity URL', ""),
-                    "Fees",          Text('Estimated Fees', "[$-en-US]#,##0")
+                    PursuitId,     Title,
+                    PursuitName,   'Pursuit Name',
+                    Account,       'Account Name',
+                    StageName,     'Workflow Stage'.Value,
+                    HealthName,    Health.Value,
+                    Owner,         OwnerName,
+                    SIs,           SIsText,
+                    Hype,          HypeText,
+                    NextActionName, Coalesce(NextAction.'Action Title', ""),
+                    NextActionDue,  If(IsBlank(NextAction), "", Text(NextAction.'Due Date', "yyyy-mm-dd")),
+                    TargetDate,    Text('Target Decision Date', "yyyy-mm-dd"),
+                    SfUrl,         Coalesce('Salesforce Opportunity URL', ""),
+                    Fees,          Text('Estimated Fees', "[$-en-US]#,##0")
                 ),
-                "PursuitId", "PursuitName", "Account", "StageName", "HealthName", "Owner",
-                "SIs", "Hype", "NextActionName", "NextActionDue", "TargetDate", "SfUrl", "Fees"
+                PursuitId, PursuitName, Account, StageName, HealthName, Owner,
+                SIs, Hype, NextActionName, NextActionDue, TargetDate, SfUrl, Fees
             ),
             JSONFormat.IgnoreUnsupportedTypes
         )
@@ -179,8 +179,14 @@ aren't JSON-serialisable and `JSON()` throws on them outright. Flattening to tex
 left.
 
 **Every added column is renamed, never reused.** `AddColumns` fails if a name already
-exists on the record, so `"HealthName"` rather than `"Health"`, `"Account"` rather than
-`"Account Name"`.
+exists on the record, so `HealthName` rather than `Health`, `Account` rather than
+`'Account Name'`.
+
+**Column names are identifiers, not strings.** Current Power Fx wants
+`AddColumns(t, OwnerName, ...)`; older Studio versions want `AddColumns(t, "OwnerName", ...)`
+and reject the identifier form. If you hit "The function 'AddColumns' has some invalid
+arguments", put the quotes back — here, in `App.OnStart`, in the board's
+`recDropTarget.OnSelect`, and in the workspace's `colActions_P` build.
 
 **Dates are pre-formatted as text.** `JSON()` emits ISO-8601 with a timezone, which Excel
 reads as a string and left-aligns. `yyyy-mm-dd` opens as a date.

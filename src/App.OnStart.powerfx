@@ -72,7 +72,7 @@ ClearCollect(
         //     Filter('pursuit-tracker-pursuits', Active) As P         // converted to Yes/No
         'pursuit-tracker-pursuits' As P,
 
-        "OwnerName",
+        OwnerName,
         Coalesce(
             LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name,
             P.'WM Pursuit Owner Entra ID'
@@ -82,7 +82,7 @@ ClearCollect(
         // off it without three more lookups. Actions with no due date are excluded:
         // they can't be "next due", and including them would let an undated action
         // win the sort and blank the date line.
-        "NextAction",
+        NextAction,
         First(
             Sort(
                 Filter(
@@ -98,8 +98,8 @@ ClearCollect(
 
         // Flattened choice values. Galleries bind to the raw multi-choice tables, but the
         // Excel export needs text, and computing it in two places invites drift.
-        "SIsText",  Concat(P.'Aligned SIs', Value, ", "),
-        "HypeText", Concat(P.Hyperscalers, Value, ", ")
+        SIsText,  Concat(P.'Aligned SIs', Value, ", "),
+        HypeText, Concat(P.Hyperscalers, Value, ", ")
     )
 );
 
@@ -108,7 +108,10 @@ ClearCollect(
 // edit, not an app edit.
 ClearCollect(
     colStages,
-    RenameColumns(Choices('pursuit-tracker-pursuits'.'Workflow Stage'), "Value", "Stage")
+    ForAll(
+        Choices('pursuit-tracker-pursuits'.'Workflow Stage') As C,
+        { Stage: C.Value }
+    )
 );
 
 // Fallback for an empty choice list. These columns have fill-in enabled, so before the

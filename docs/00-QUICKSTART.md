@@ -115,6 +115,7 @@ that.
 | Everything red after step 14 | Step 7 toggles are off, or you didn't reload after step 8 |
 | Only the last five entries in the theme error | User-defined functions unavailable — inline them, see `docs/02-app-setup.md` |
 | "No type found for variable 'x'" | You have an older `App.OnStart.powerfx` — re-copy it, the current one seeds every global with a typed value |
+| "The function 'AddColumns' has some invalid arguments" | Same — re-copy. Column names are now identifiers (`OwnerName`), not strings (`"OwnerName"`) |
 | Board has no columns | Right-click App → Run OnStart |
 | All cards say "No open actions" | Right-click App → Run OnStart |
 | Cards show email addresses | Step 12 was skipped |

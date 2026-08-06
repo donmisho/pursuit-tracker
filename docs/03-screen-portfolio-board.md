@@ -123,10 +123,10 @@ ClearCollect(
     colPortfolio,
     AddColumns(
         'pursuit-tracker-pursuits' As P,
-        "OwnerName", Coalesce(LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name, P.'WM Pursuit Owner Entra ID'),
-        "NextAction", First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)),
-        "SIsText",  Concat(P.'Aligned SIs', Value, ", "),
-        "HypeText", Concat(P.Hyperscalers, Value, ", ")
+        OwnerName, Coalesce(LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name, P.'WM Pursuit Owner Entra ID'),
+        NextAction, First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)),
+        SIsText,  Concat(P.'Aligned SIs', Value, ", "),
+        HypeText, Concat(P.Hyperscalers, Value, ", ")
     )
 );
 Notify("Moved to " & ThisItem.Stage, NotificationType.Success, 2000)
