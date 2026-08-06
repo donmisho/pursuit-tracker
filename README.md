@@ -23,6 +23,7 @@ corrupt file is worse than no file.
 
 | | |
 |---|---|
+| [`docs/00-QUICKSTART.md`](docs/00-QUICKSTART.md) | **Numbered build steps, no commentary. Start here if you just want it running.** |
 | [`docs/01-data-model.md`](docs/01-data-model.md) | The five lists, column by column. **Start here** — it's what every formula binds to |
 | [`docs/02-app-setup.md`](docs/02-app-setup.md) | Create the app, connect the lists, paste the theme, paste the three screens |
 | [`docs/03-screen-portfolio-board.md`](docs/03-screen-portfolio-board.md) | The kanban |
