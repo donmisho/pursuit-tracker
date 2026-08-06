@@ -43,6 +43,29 @@ Set(gblEditDoc,    LookUp('pursuit-tracker-documents', ID < 0));
 Set(gblEditUpdate, LookUp('pursuit-tracker-status-updates', ID < 0));
 
 
+// The shared vocabulary behind every edit dropdown. One list, one row per allowed value,
+// keyed by Title (the "Lookup Type" column) -- so adding a workflow stage is a row in a
+// list rather than a change to five column definitions.
+//
+// Loaded once into a collection rather than read per dropdown. Neither half of this
+// delegates to SharePoint -- Active is a Choice column and 'Sort Order' is sorting a
+// filtered set -- and at 28 rows the whole list costs one call, so doing it in memory is
+// both correct and cheaper than twelve delegation warnings.
+//
+// ShowColumns down to Title and Value is what makes the dropdowns drop-in compatible with
+// what they replaced: Choices() returns a single-column table whose column is Value, and
+// so does ShowColumns(Filter(colLookups, …), Value). Every .Selected.Value in the save
+// code keeps working untouched.
+ClearCollect(
+    colLookups,
+    ShowColumns(
+        Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending),
+        Title,
+        Value
+    )
+);
+
+
 // =====================================================================
 // LoadPortfolio -- shared by the board and the list screens.
 //

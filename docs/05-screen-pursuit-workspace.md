@@ -174,6 +174,134 @@ Owner fields are plain text inputs rather than people pickers. The columns hold 
 strings, not Person values, so a combo box would mean converting between a user record and
 an address in both directions for no gain.
 
+## The lookup list
+
+`pursuit-tracker-lookups` — one row per allowed value, so adding a workflow stage is a row
+in a list rather than an edit to five column definitions.
+
+| Column | Internal | Holds |
+|---|---|---|
+| Title | `Title` | the lookup type, e.g. `Workflow Stage`. Displayed as "Lookup Type" |
+| Value | `field_1` | the value the app writes |
+| Sort Order | `field_2` | display order within a type |
+| Active | `field_3` | `Yes` to show it |
+
+**Formulas use `Title`, not "Lookup Type".** The import renamed the `LinkTitle` *display*
+column, which is what the SharePoint view shows; the underlying field is still `Title`,
+the same as `PUR-001` is in the pursuits list.
+
+It loads once in `App.OnStart`:
+
+```powerfx
+ClearCollect(
+    colLookups,
+    ShowColumns(
+        Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending),
+        Title,
+        Value
+    )
+);
+```
+
+Once, into a collection, rather than per dropdown. Neither half delegates — `Active` is a
+Choice column and `Sort Order` is sorting an already-filtered set — and at 28 rows the
+whole list is one call, so in memory is both correct and cheaper than twelve delegation
+warnings.
+
+### Why `ShowColumns(…, Value)` and not the raw filter
+
+`Choices()` returns a **single-column table whose column is named `Value`**. That's the
+shape a `Classic/DropDown` displays without being told which field to show, and it's why
+every save branch reads `drpPurStage.Selected.Value`.
+
+`ShowColumns(Filter(colLookups, Title = "Workflow Stage"), Value)` returns exactly that
+same shape. So the binding is a one-line change per control and **not a single save
+formula had to change** — which is the whole reason to project rather than hand the
+dropdown the four-column table and pick a display field.
+
+### What each dropdown binds to
+
+| Screen / mode | Control | Lookup Type |
+|---|---|---|
+| Pursuit | `drpPurStage` | `Workflow Stage` |
+| Pursuit | `drpPurHealth` | `Health` |
+| Pursuit | `cmbPurSIs` | `Systems Integrator` |
+| Pursuit | `cmbPurHype` | `Hyperscaler` |
+| Action | `drpActStage` | `Workflow Stage` |
+| Action | `drpActStatus` | `Action Status` |
+| Action | `drpActHealth` | `Health` |
+| Action | `drpActEffort` | `Effort Size` |
+| Update | `drpUpdType` | — still `Choices('pursuit-tracker-status-updates'.'Update Type')` |
+| Update | `drpUpdRisk` | — still `Choices(…'Risk / Decision')` |
+| Documents | `drpDocType` | — still `Choices('pursuit-tracker-documents'.'Document Type')` |
+| Documents | `drpDocAi` | — still `Choices(…'Include in AI Overview')` |
+
+Stage and Health are deliberately shared between the pursuit and the action rather than
+split into `Pursuit Health` / `Action Health`. An action that's off track on a pursuit
+that's on track is a comparison you want to be able to make, and it stops being one the
+moment the two vocabularies can drift.
+
+### The multi-selects needed one more change
+
+`cmbPurSIs` and `cmbPurHype` write to multi-choice columns, and they were passing
+`SelectedItems` straight into the `Patch`. That worked only because `Items` was
+`Choices()` — the records carried the column's type with them. A projected table doesn't,
+and an untyped table into a multi-choice column is the silent-bounce failure again. Both
+writes are now explicit:
+
+```powerfx
+'Aligned SIs': ForAll(cmbPurSIs.SelectedItems As S, { Value: S.Value }),
+```
+
+The record literal takes its type from the `Patch` target, which is the one place the
+binding is guaranteed. `DefaultSelectedItems` is projected the same way, so both sides of
+the combo box are `{Value}` and the existing selections still highlight.
+
+## Four dropdowns have no lookup type
+
+`Update Type`, `Risk / Decision`, `Document Type` and `Include in AI Overview` aren't in
+the list, so they stay on `Choices()` — which is what they do today, so nothing regressed.
+
+`Include in AI Overview` is a yes/no flag rather than a vocabulary and doesn't belong in a
+lookup list at all. The other three would fit; they just need rows.
+
+## The values don't match the columns yet
+
+**This is the thing to settle before anyone edits a pursuit.** The columns are still Choice
+columns, and the app still writes a text value into them. Where the lookup list and the
+column disagree, the write either bounces or — because fill-in is enabled — quietly
+succeeds and creates a second spelling of the same concept.
+
+| Lookup list says | Column / code says | What breaks |
+|---|---|---|
+| `Unassigned / Intake` | `Unassigned` | `StageAccent` falls through to grey; the pursuit lands in no board column |
+| `Proposal / Quote` | `Proposal/Quote` | same |
+| `Complete` | `Completed` | the actions sort stops sinking completed rows; the board's next-action calculation starts counting finished work |
+| `Review / Decision` | not a choice | new |
+| `Completed / Closed` | not a choice | new |
+
+`On track` / `At risk` / `Off track` and the SI and hyperscaler values all match.
+
+Three of those strings are compiled into the app, not just the data:
+`StageAccent` in `App.Formulas`, the `colStages` fallback in `App.OnStart`, and
+`Status.Value <> "Completed"` in six places across the board and the workspace.
+
+The cheapest fix is to make the **lookup list** match what's already in the columns and the
+data — change `Unassigned / Intake` to `Unassigned`, `Proposal / Quote` to
+`Proposal/Quote`, `Complete` to `Completed`. Nothing else moves.
+
+Going the other way — making the columns and the code match the list — means editing the
+choice sets, updating fourteen pursuit rows and every action row, and changing those three
+places in the app. Worth doing if the new names are the ones you actually want, but it's a
+data migration, not a settings change.
+
+### And the board only fits five columns
+
+`BoardColumns = 5`. Seven stages means two of them are off the right edge. If
+`Review / Decision` and `Completed / Closed` are real stages, either the board needs to
+divide by 7 (columns get narrow — the cards are already tight at 5) or closed pursuits need
+to drop off the board and live in the list. Say which and I'll build it.
+
 ### Saving
 
 `btnPanelSave.OnSelect` is one `Switch`-shaped `If` over `gblPanel`. Each branch either

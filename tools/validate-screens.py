@@ -67,7 +67,7 @@ KNOWN_GLOBALS = {
     "gblOverview", "gblExport", "gblExporting", "gblRowMenu", "gblEditKey",
     "gblEditAction", "gblEditDoc", "gblEditUpdate", "gblFields",
     "colActions", "colActions_P", "colPeople", "colPortfolio", "colStages", "colUpdates",
-    "colDocs", "colHistory",
+    "colDocs", "colHistory", "colLookups",
     "scrPortfolioBoard", "scrPortfolioList", "scrPursuitWorkspace", "scrPursuitDocsAI",
     "Office365Users", "Parent", "Self", "ThisItem", "Value",
 }

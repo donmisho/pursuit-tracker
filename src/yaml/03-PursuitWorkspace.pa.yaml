@@ -1096,7 +1096,7 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-pursuits'.'Workflow Stage')
+      Items: =ShowColumns(Filter(colLookups, Title = "Workflow Stage"), Value)
       Default: =gblPursuit.'Workflow Stage'.Value
       AllowEmptySelection: =true
 
@@ -1127,7 +1127,7 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-pursuits'.Health)
+      Items: =ShowColumns(Filter(colLookups, Title = "Health"), Value)
       Default: =gblPursuit.Health.Value
       AllowEmptySelection: =true
 
@@ -1303,8 +1303,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-pursuits'.'Aligned SIs')
-      DefaultSelectedItems: =gblPursuit.'Aligned SIs'
+      Items: =ShowColumns(Filter(colLookups, Title = "Systems Integrator"), Value)
+      DefaultSelectedItems: =ShowColumns(gblPursuit.'Aligned SIs', Value)
       SelectMultiple: =true
 
 - lblCapcmbPurHype:
@@ -1334,8 +1334,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-pursuits'.Hyperscalers)
-      DefaultSelectedItems: =gblPursuit.Hyperscalers
+      Items: =ShowColumns(Filter(colLookups, Title = "Hyperscaler"), Value)
+      DefaultSelectedItems: =ShowColumns(gblPursuit.Hyperscalers, Value)
       SelectMultiple: =true
 
 - lblCaptxtPurFees:
@@ -1452,7 +1452,7 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-actions'.'Workflow Stage')
+      Items: =ShowColumns(Filter(colLookups, Title = "Workflow Stage"), Value)
       Default: =gblEditAction.'Workflow Stage'.Value
       AllowEmptySelection: =true
 
@@ -1483,7 +1483,7 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-actions'.Status)
+      Items: =ShowColumns(Filter(colLookups, Title = "Action Status"), Value)
       Default: =gblEditAction.Status.Value
       AllowEmptySelection: =true
 
@@ -1514,7 +1514,7 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-actions'.Health)
+      Items: =ShowColumns(Filter(colLookups, Title = "Health"), Value)
       Default: =gblEditAction.Health.Value
       AllowEmptySelection: =true
 
@@ -1545,7 +1545,7 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-actions'.'Effort Size')
+      Items: =ShowColumns(Filter(colLookups, Title = "Effort Size"), Value)
       Default: =gblEditAction.'Effort Size'.Value
       AllowEmptySelection: =true
 
@@ -1883,8 +1883,8 @@
                             Active:                        If(IsBlank(txtPurActive.Text), 0, Value(txtPurActive.Text)),
                             'Salesforce Opportunity ID':   txtPurSfId.Text,
                             'Salesforce Opportunity URL':  txtPurSfUrl.Text,
-                            'Aligned SIs':                 cmbPurSIs.SelectedItems,
-                            Hyperscalers:                  cmbPurHype.SelectedItems,
+                            'Aligned SIs':                 ForAll(cmbPurSIs.SelectedItems As S, { Value: S.Value }),
+                            Hyperscalers:                  ForAll(cmbPurHype.SelectedItems As H, { Value: H.Value }),
                             'Estimated Fees':              If(IsBlank(txtPurFees.Text), Blank(), Value(txtPurFees.Text)),
                             'AI Overview Current Version': txtPurAiVer.Text
                     });
@@ -1900,8 +1900,8 @@
                             Active:                        If(IsBlank(txtPurActive.Text), 0, Value(txtPurActive.Text)),
                             'Salesforce Opportunity ID':   txtPurSfId.Text,
                             'Salesforce Opportunity URL':  txtPurSfUrl.Text,
-                            'Aligned SIs':                 cmbPurSIs.SelectedItems,
-                            Hyperscalers:                  cmbPurHype.SelectedItems,
+                            'Aligned SIs':                 ForAll(cmbPurSIs.SelectedItems As S, { Value: S.Value }),
+                            Hyperscalers:                  ForAll(cmbPurHype.SelectedItems As H, { Value: H.Value }),
                             'Estimated Fees':              If(IsBlank(txtPurFees.Text), Blank(), Value(txtPurFees.Text)),
                             'AI Overview Current Version': txtPurAiVer.Text
                 })
