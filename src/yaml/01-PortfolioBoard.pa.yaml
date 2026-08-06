@@ -304,7 +304,7 @@
                   If(IsBlank('Target Decision Date'), Date(2099, 12, 31), 'Target Decision Date'),
                   SortOrder.Ascending
               )
-            TemplateSize: =178
+            TemplateSize: =218
             TemplatePadding: =6
             ShowScrollbar: =true
           Children:
@@ -318,7 +318,7 @@
                   X: =0
                   Y: =0
                   Width: =282
-                  Height: =170
+                  Height: =206
                   BorderColor: =If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrBorder)
                   BorderThickness: =If(gblMoving.Title = ThisItem.Title, 2, 1)
                   RadiusTopLeft: =RadiusCard
@@ -333,7 +333,7 @@
                   X: =0
                   Y: =0
                   Width: =3
-                  Height: =170
+                  Height: =206
                   Fill: =If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)
 
             - lblMoveHandle:
@@ -352,61 +352,58 @@
                   Tooltip: ="Move to another stage"
                   OnSelect: =Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))
 
-            - lblCardTitle:
+            - lblCardAccount:
                 Control: Label
                 Properties:
                   X: =14
-                  Y: =10
+                  Y: =8
                   Width: =228
-                  Height: =46
-                  Text: =ThisItem.'Pursuit Name'
+                  Height: =24
+                  Text: =ThisItem.'Account Name'
                   Font: =FontUI
                   Size: =SizeCardTitle
                   FontWeight: =FontWeight.Semibold
                   Color: =ClrText
-                  Wrap: =true
-
-            - recAvatar:
-                Control: Classic/Button
-                Properties:
-                  Text: =""
-                  Fill: =ClrAvatar
-                  HoverFill: =ClrAvatar
-                  PressedFill: =ClrAvatar
-                  OnSelect: =false
-                  X: =14
-                  Y: =64
-                  Width: =24
-                  Height: =24
-                  RadiusTopLeft: =12
-                  RadiusTopRight: =12
-                  RadiusBottomLeft: =12
-                  RadiusBottomRight: =12
-
-            - lblInitials:
-                Control: Label
-                Properties:
-                  X: =14
-                  Y: =64
-                  Width: =24
-                  Height: =24
-                  Text: =Initials(ThisItem.OwnerName)
-                  Font: =FontUI
-                  Size: =SizeChip
-                  Color: =ClrAvatarText
-                  Align: =Align.Center
                   VerticalAlign: =VerticalAlign.Middle
 
-            - lblOwner:
+            - lblCardTitle:
                 Control: Label
                 Properties:
-                  X: =44
-                  Y: =64
-                  Width: =200
-                  Height: =24
-                  Text: =ThisItem.OwnerName
+                  X: =14
+                  Y: =32
+                  Width: =254
+                  Height: =34
+                  # The account is already on its own line above, and every pursuit name
+                  # repeats it as an ALL-CAPS prefix ("FRAZIER: MatixCare AWS Platform").
+                  # Strip that prefix rather than title-casing the whole string -- Proper()
+                  # would turn "AWS" into "Aws" and "CD&R" into "Cd&R". Two separators are
+                  # in use: "ACCOUNT: name" and "ACCOUNT - name".
+                  Text: |
+                    =With(
+                        { n: ThisItem.'Pursuit Name' },
+                        Trim(
+                            If(
+                                !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
+                                !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
+                                n
+                            )
+                        )
+                    )
                   Font: =FontUI
                   Size: =SizeBody
+                  Color: =ClrText
+                  Wrap: =true
+
+            - lblSICap:
+                Control: Label
+                Properties:
+                  X: =14
+                  Y: =70
+                  Width: =28
+                  Height: =24
+                  Text: ="SI:"
+                  Font: =FontUI
+                  Size: =SizeMeta
                   Color: =ClrTextMuted
                   VerticalAlign: =VerticalAlign.Middle
 
@@ -414,16 +411,16 @@
                 Control: Gallery
                 Variant: Horizontal
                 Properties:
-                  X: =14
-                  Y: =94
-                  Width: =256
-                  Height: =22
+                  X: =44
+                  Y: =70
+                  Width: =224
+                  Height: =24
                   Items: =ThisItem.'Aligned SIs'
                   TemplateSize: =76
                   TemplatePadding: =0
                   ShowScrollbar: =false
                 Children:
-                  - recChip:
+                  - recSIChipB:
                       Control: Classic/Button
                       Properties:
                         Text: =""
@@ -432,18 +429,74 @@
                         PressedFill: =ClrChip
                         OnSelect: =false
                         X: =0
-                        Y: =0
+                        Y: =1
                         Width: =72
                         Height: =22
                         RadiusTopLeft: =RadiusChip
                         RadiusTopRight: =RadiusChip
                         RadiusBottomLeft: =RadiusChip
                         RadiusBottomRight: =RadiusChip
-                  - lblChip:
+                  - lblSIChipB:
                       Control: Label
                       Properties:
                         X: =0
-                        Y: =0
+                        Y: =1
+                        Width: =72
+                        Height: =22
+                        Text: =ThisItem.Value
+                        Font: =FontUI
+                        Size: =SizeChip
+                        Color: =ClrChipText
+                        Align: =Align.Center
+                        VerticalAlign: =VerticalAlign.Middle
+
+            - lblHSCap:
+                Control: Label
+                Properties:
+                  X: =14
+                  Y: =98
+                  Width: =28
+                  Height: =24
+                  Text: ="HS:"
+                  Font: =FontUI
+                  Size: =SizeMeta
+                  Color: =ClrTextMuted
+                  VerticalAlign: =VerticalAlign.Middle
+
+            - galCardHype:
+                Control: Gallery
+                Variant: Horizontal
+                Properties:
+                  X: =44
+                  Y: =98
+                  Width: =224
+                  Height: =24
+                  Items: =ThisItem.Hyperscalers
+                  TemplateSize: =76
+                  TemplatePadding: =0
+                  ShowScrollbar: =false
+                Children:
+                  - recHSChipB:
+                      Control: Classic/Button
+                      Properties:
+                        Text: =""
+                        Fill: =ClrChip
+                        HoverFill: =ClrChip
+                        PressedFill: =ClrChip
+                        OnSelect: =false
+                        X: =0
+                        Y: =1
+                        Width: =72
+                        Height: =22
+                        RadiusTopLeft: =RadiusChip
+                        RadiusTopRight: =RadiusChip
+                        RadiusBottomLeft: =RadiusChip
+                        RadiusBottomRight: =RadiusChip
+                  - lblHSChipB:
+                      Control: Label
+                      Properties:
+                        X: =0
+                        Y: =1
                         Width: =72
                         Height: =22
                         Text: =ThisItem.Value
@@ -457,55 +510,44 @@
                 Control: Rectangle
                 Properties:
                   X: =14
-                  Y: =124
+                  Y: =128
                   Width: =254
                   Height: =1
                   Fill: =ClrDivider
+
+            - lblNextCap:
+                Control: Label
+                Properties:
+                  X: =14
+                  Y: =134
+                  Width: =254
+                  Height: =16
+                  Text: ="NEXT ACTION"
+                  Font: =FontUI
+                  Size: =SizeMeta
+                  Color: =ClrTextMuted
 
             - lblNextTask:
                 Control: Label
                 Properties:
                   X: =14
-                  Y: =128
+                  Y: =150
                   Width: =254
-                  Height: =20
-                  Text: |
-                    ="Next task due: " & Coalesce(ThisItem.NextAction.'Action Title', "—")
+                  Height: =32
+                  Text: =Coalesce(ThisItem.NextAction.'Action Title', "No open actions")
                   Font: =FontUI
                   Size: =SizeBody
-                  Color: =ClrText
+                  Color: =If(IsBlank(ThisItem.NextAction), ClrTextFaint, ClrText)
                   Wrap: =true
 
             - lblNextTaskDue:
                 Control: Label
                 Properties:
                   X: =14
-                  Y: =146
+                  Y: =182
                   Width: =254
                   Height: =18
-                  Text: =If(IsBlank(ThisItem.NextAction), "No open actions", Text(ThisItem.NextAction.'Due Date', "mmmm d"))
+                  Text: =If(IsBlank(ThisItem.NextAction), "", Text(ThisItem.NextAction.'Due Date', "mmmm d"))
                   Font: =FontUI
                   Size: =SizeBody
                   Color: =ClrDate
-
-# ---------------------------------------------------------------------------
-# SCREEN PROPERTIES — set these by hand, they aren't part of a control paste:
-#
-#   Fill       =ClrPage
-#   OnVisible  paste the LoadPortfolio block from src/App.OnStart.powerfx,
-#              then add:  Set(gblMoving, Blank())
-#
-# FALLBACKS — if the paste is rejected, the cause is one of these two:
-#
-#   1. galCardSIs is a gallery inside a gallery inside a gallery. If Studio
-#      refuses the depth, delete that control and replace it with a Label:
-#          X 14  Y 94  W 256  H 22
-#          Text  =Concat(ThisItem.'Aligned SIs', Value, "  ·  ")
-#          Size  =SizeChip   Color =ClrChipText
-#      You lose the chip pills and keep the information.
-#
-#   2. Gallery Variant strings move between Studio releases. If "Horizontal" or
-#      "Vertical" isn't recognised, insert a blank gallery of the right
-#      orientation by hand, then paste each child control into it and copy the
-#      gallery's own properties from docs/03-screen-portfolio-board.md.
-# ---------------------------------------------------------------------------

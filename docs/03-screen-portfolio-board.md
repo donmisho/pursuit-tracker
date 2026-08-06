@@ -15,11 +15,12 @@ scrPortfolioBoard
     └── galCards                 ◄── vertical gallery, the pursuits in this stage
         ├── recCard + recHealth
         ├── lblMoveHandle            pick up / put down
-        ├── lblCardTitle
-        ├── recAvatar + lblInitials + lblOwner
-        ├── galCardSIs           ◄── horizontal gallery of SI chips
+        ├── lblCardAccount           account, bold
+        ├── lblCardTitle             pursuit name, smaller
+        ├── lblSICap  + galCardSIs   ◄── "SI:"  + chips
+        ├── lblHSCap  + galCardHype  ◄── "HS:"  + chips
         ├── recCardDivider
-        └── lblNextTask + lblNextTaskDue
+        └── lblNextCap + lblNextTask + lblNextTaskDue
 ```
 
 Three nested galleries is the deepest canvas apps allow, and this uses all of it.
@@ -160,53 +161,84 @@ of the app does.
 
 ### Inside the card template
 
+Card is 206 tall in a 218 template — up from 170/178, to fit two partner rows and a
+labelled next action.
+
 | Control | Property | Formula |
 |---|---|---|
-| `recCard` | `Fill` | `=ClrCard` |
+| `recCard` (Classic/Button) | `Text` | `=""` |
+| | `Fill` / `HoverFill` / `PressedFill` | `=ClrCard` / `=ClrCardHover` / `=ClrCardHover` |
+| | `Height` | `=206` |
 | | `BorderColor` | `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrBorder)` |
 | | `BorderThickness` | `=If(gblMoving.Title = ThisItem.Title, 2, 1)` |
-| | all four `Radius*` | `=RadiusCard` |
 | | `OnSelect` | `=Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
-| `recHealth` (Rectangle) | `Width` / `Height` / `X` | `=3` / `=recCard.Height` / `=recCard.X` |
-| | `Fill` | `=If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)` |
-| `lblMoveHandle` (Label, text `"⋮⋮"`) | `Color` | `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)` |
-| | `X` | `=recCard.Width - Self.Width - 10` |
-| | `Tooltip` | `="Move to another stage"` |
+| `recHealth` (Rectangle) | `Fill` | `=If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)` |
+| `lblMoveHandle` | `Text` / `Color` | `="⋮⋮"` / `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)` |
 | | `OnSelect` | `=Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))` |
-| `lblCardTitle` | `Text` | `=ThisItem.'Pursuit Name'` |
+| `lblCardAccount` | `Text` | `=ThisItem.'Account Name'` |
 | | `Size` / `FontWeight` / `Color` | `=SizeCardTitle` / `=FontWeight.Semibold` / `=ClrText` |
-| | `Wrap` / `Height` | `=true` / `=44` |
-| `recAvatar` (Rectangle, all `Radius* = 12`) | `Fill` / `Width` / `Height` | `=ClrAvatar` / `=24` / `=24` |
-| `lblInitials` | `Text` | `=Initials(ThisItem.OwnerName)` |
-| | `Size` / `Color` / `Align` | `=SizeChip` / `=ClrAvatarText` / `=Align.Center` |
-| `lblOwner` | `Text` | `=ThisItem.OwnerName` |
-| | `Size` / `Color` | `=SizeBody` / `=ClrTextMuted` |
-| `recCardDivider` | `Height` / `Fill` | `=1` / `=ClrDivider` |
-| `lblNextTask` | `Text` | `="Next task due: " & Coalesce(ThisItem.NextAction.'Action Title', "—")` |
+| `lblCardTitle` | `Text` | see below |
 | | `Size` / `Color` / `Wrap` | `=SizeBody` / `=ClrText` / `=true` |
-| `lblNextTaskDue` | `Text` | `=If(IsBlank(ThisItem.NextAction), "No open actions", Text(ThisItem.NextAction.'Due Date', "mmmm d"))` |
-| | `Size` / `Color` | `=SizeBody` / `=ClrDate` |
+| `lblSICap` / `lblHSCap` | `Text` | `="SI:"` / `="HS:"` |
+| | `Size` / `Color` | `=SizeMeta` / `=ClrTextMuted` |
+| `lblNextCap` | `Text` | `="NEXT ACTION"` — `Size = SizeMeta`, `Color = ClrTextMuted` |
+| `lblNextTask` | `Text` | `=Coalesce(ThisItem.NextAction.'Action Title', "No open actions")` |
+| | `Color` | `=If(IsBlank(ThisItem.NextAction), ClrTextFaint, ClrText)` |
+| `lblNextTaskDue` | `Text` | `=If(IsBlank(ThisItem.NextAction), "", Text(ThisItem.NextAction.'Due Date', "mmmm d"))` |
+| | `Color` | `=ClrDate` |
 
-Cards identify by `Title` (`PUR-001`) rather than by list item ID, matching the join key
-the rest of the data uses.
+The owner is gone from the card. Every pursuit in the data has the same owner, so the
+avatar and name were 24 pixels of vertical space spent restating a constant. It's still
+on the workspace.
 
-`recHealth` is a thin bar down the left edge of a card whose pursuit is at risk. It
-isn't in the mockups, but `Health` is populated on every row and a board that can't show
-risk is a board people stop trusting. Set its `Fill` to `=Transparent` permanently if
-you'd rather match the mockup exactly.
+### The two title lines
 
-`Initials` and the owner name both come from `OwnerName`, resolved once per distinct
-email in `App.OnStart` — the owner column is an email string, not a Person column, so
-there's no `.DisplayName` to read off the record.
+`lblCardAccount` shows `Account Name` unchanged — that column is already properly cased
+(Frazier, Elevance Health, CD&R).
 
-### `galCardSIs` — the chips
+`lblCardTitle` shows the pursuit name with its account prefix stripped:
 
-| Property | Formula |
-|---|---|
-| `Items` | `=ThisItem.'Aligned SIs'` |
-| `Layout` | Horizontal |
-| `TemplateSize` | `=76` |
-| `Height` | `=22` |
+```powerfx
+With(
+    { n: ThisItem.'Pursuit Name' },
+    Trim(
+        If(
+            !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
+            !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
+            n
+        )
+    )
+)
+```
+
+Every pursuit name in the data repeats its account as an ALL-CAPS prefix —
+"FRAZIER: MatixCare AWS Platform Buld". With the account on its own line that prefix is
+both redundant and the only shouty text on the card, so it comes off. What's left is
+already mixed case.
+
+Stripping the prefix is deliberately not the same as title-casing. `Proper()` would fix
+"FRAZIER" but wreck "AWS" → "Aws", "SAP" → "Sap", "CD&R" → "Cd&R", and "MatixCare" →
+"Matixcare". Removing the one part that's reliably wrong beats reformatting the parts
+that are already right.
+
+Two separators are in use — `ACCOUNT: name` on twelve rows and `ACCOUNT - name` on
+NiSource — so both are handled, colon first. `Find(": ")` returns the *first* match,
+which is what you want for "ELEVANCE HEALTH: Carelon - Unified Data…": it keeps the inner
+hyphen intact.
+
+### `galCardSIs` and `galCardHype` — the chips
+
+| Property | `galCardSIs` | `galCardHype` |
+|---|---|---|
+| `Items` | `=ThisItem.'Aligned SIs'` | `=ThisItem.Hyperscalers` |
+| `X` / `Y` | `=44` / `=70` | `=44` / `=98` |
+| `Layout` | Horizontal | Horizontal |
+| `TemplateSize` | `=76` | `=76` |
+| `Width` / `Height` | `=224` / `=24` | `=224` / `=24` |
+
+Each sits to the right of its caption, so a pursuit with no partners shows a bare
+"SI:" rather than a hole in the layout — which reads as missing data instead of a
+rendering bug. Nine of your fourteen have no SI, and eleven have no hyperscaler.
 
 Inside: `recChip` (Rectangle, `Fill = ClrChip`, all `Radius* = RadiusChip`) and `lblChip`
 (`Text = ThisItem.Value`, `Size = SizeChip`, `Color = ClrChipText`,
