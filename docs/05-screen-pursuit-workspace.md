@@ -6,24 +6,25 @@ right rail (alignment, documents, updates, overview history).
 ```
 scrPursuitWorkspace
 ├── nav bar
-├── lblBreadcrumb / lblTitle / lblSubtitle
-├── btnAddAction / btnAddUpdate
+├── lblBreadcrumb / lblAccount / lblPursuitName / btnEditDetails
 ├── LEFT RAIL
 │   ├── cardSalesforce   — link, linked pill, owner, target decision date
-│   ├── cardOverview     — overview text, Refresh, provenance line
-│   └── cardActions      — galActions
-└── RIGHT RAIL
-    ├── cardAlignment    — galAlignSIs, galAlignHype
-    ├── cardDocuments    — galDocs
-    ├── cardUpdates      — galUpdates
-    └── cardHistory      — galHistory
+│   ├── cardOverview     — overview text, provenance line (read-only)
+│   └── cardActions      — btnAddAction + galActions (rows open the panel)
+├── RIGHT RAIL
+│   ├── cardAlignment    — galAlignSIs, galAlignHype
+│   ├── cardDocuments    — btnAddDoc + galDocs (Edit per row)
+│   ├── cardUpdates      — btnAddUpdate + galUpdates (Edit per row)
+│   └── cardHistory      — galHistory (read-only)
+└── EDIT PANEL          ◄── recPanelScrim + recPanel + all four field sets
+                            + btnPanelDelete / btnPanelCancel / btnPanelSave
 ```
 
-Every card is a Rectangle (`Fill = ClrCard`, `BorderColor = ClrBorder`,
-`BorderThickness = 1`, all `Radius* = RadiusCard`) with a heading Label at
-`Size = SizeCardTitle`, `FontWeight = Semibold`, `Color = ClrText`.
+Every card is a `Classic/Button` with `Text` `=""` (the only classic control with radius
+properties) and a heading Label at `Size = SizeCardTitle`, `FontWeight = Semibold`.
 
-Left rail `X = GapPage`, `Width = 640`. Right rail `X = 688`, `Width = 400`.
+Left rail `X = GapPage`, `Width = 640`. Right rail `X = 688`, width anchored to
+`Parent.Width`. 136 controls.
 
 ---
 
@@ -124,18 +125,14 @@ renders as **Elevance Health** over "Carelon - Unified Data and Analytics Platfo
 | | `Color` / `Underline` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrTextMuted, ClrLink)` / `=Not(IsBlank(gblPursuit.'Salesforce Opportunity URL'))` |
 | | `DisplayMode` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), DisplayMode.View, DisplayMode.Edit)` |
 | | `OnSelect` | `=Launch(gblPursuit.'Salesforce Opportunity URL')` |
-| `lblSfHint` | `Text` | `="Synced CRM information: account, opportunity owner, amount, close date, and stage"` |
+| `lblSfHint` | `Text` | `="Account, stage, health, partners and dates are all editable from Edit details."` |
 | | `Size` / `Color` / `Wrap` | `=SizeMeta` / `=ClrTextFaint` / `=true` |
 | `recSyncPill` | `Fill` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChip, ClrOkFill)` |
 | | all `Radius*` | `=RadiusChip` |
 | `lblSyncPill` | `Text` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), "Not linked", "Linked")` |
 | | `Color` | `=If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChipText, ClrOkText)` |
-| `lblOwnerCap` | `Text` | `="PURSUIT OWNER"` — `Size = SizeMeta`, `Color = ClrTextMuted` |
-| `recWsAvatar` (Rectangle, all `Radius* = 12`) / `lblWsInitials` | `Text` | `=Initials(Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID'))` |
-| `lblWsOwnerName` | `Text` | `=Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID')` |
-| `lblWsOwnerOrg` | `Text` | `="West Monroe · Entra ID"` — `Size = SizeMeta`, `Color = ClrTextFaint` |
-| `lblCloseCap` | `Text` | `="TARGET DECISION"` |
-| `lblCloseDate` | `Text` | `=If(IsBlank(gblPursuit.'Target Decision Date'), "Not set", Text(gblPursuit.'Target Decision Date', "mmmm d"))` |
+| `lblOwnerCap` / `lblOwnerVal` | `Text` | `="PURSUIT OWNER"` / `=Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID')` |
+| `lblCloseCap` / `lblCloseVal` | `Text` | `="TARGET DECISION"` / `=If(IsBlank(gblPursuit.'Target Decision Date'), "Not set", Text(gblPursuit.'Target Decision Date', "mmmm d, yyyy"))` |
 | | `Size` / `FontWeight` / `Color` | `=SizeCardTitle` / `=FontWeight.Semibold` / `=ClrText` |
 
 The mockup's link reads "Northwind FY27 renewal" — an opportunity *name*. The schema
