@@ -108,6 +108,7 @@ Visible only while a card is picked up, and never on the column it's already in.
 | | `Height` | `=44` |
 | `lblDropHint` | `Text` / `Visible` | `="Move here"` / `=recDropTarget.Visible` |
 | | `Color` / `Align` | `=ClrAccent` / `=Align.Center` |
+| | `OnSelect` | **the same formula as `recDropTarget`** — see below |
 
 `recDropTarget.OnSelect`:
 
@@ -134,9 +135,36 @@ ClearCollect(
 Notify("Moved to " & ThisItem.Stage, NotificationType.Success, 2000)
 ```
 
+**`lblDropHint` carries the identical handler.** The label is drawn over the rectangle
+and is declared after it, so it wins the click — canvas controls capture their own pointer
+events whether or not they do anything with them. With the handler only on the rectangle,
+"Move here" looks live and does nothing. Duplicating it is uglier than reordering but
+keeps both jobs intact: the rectangle draws the dashed border, the label draws the text,
+and either one accepts the click.
+
 There's no `BoardOrder` column in the real schema, so a move sets the stage and nothing
 else — order within a column comes from the target decision date. That's one fewer thing
 to maintain and one fewer thing to get out of sync.
+
+### `btnCardClick`
+
+The same trap sat on the card itself. `recCard` has the open-workspace handler, but every
+label on the card is declared after it and sits on top, so only the bare strips between
+labels were clickable. A transparent `Classic/Button` now covers the card and carries the
+handler:
+
+| Property | Formula |
+|---|---|
+| `Text` / `Fill` | `=""` / `=Color.Transparent` |
+| `Width` / `Height` | `=282` / `=206` |
+| `HoverFill` / `PressedFill` | `=RGBA(255, 255, 255, 0.03)` / `=RGBA(255, 255, 255, 0.06)` |
+| `OnSelect` | `=Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
+
+`lblMoveHandle` moved to the **end** of the card template so it stays above the click
+layer — otherwise picking a card up would open it instead.
+
+This is the third time this pattern has come up: any control that needs to be clickable
+has to be declared *after* everything it overlaps. Document order is z-order.
 
 ## `galCards` — the cards
 

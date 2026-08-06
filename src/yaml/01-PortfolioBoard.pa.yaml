@@ -291,6 +291,28 @@
             Color: =ClrAccent
             Align: =Align.Center
             VerticalAlign: =VerticalAlign.Middle
+            OnSelect: |
+              =Patch(
+                  'pursuit-tracker-pursuits',
+                  LookUp('pursuit-tracker-pursuits', Title = gblMoving.Title),
+                  { 'Workflow Stage': { Value: ThisItem.Stage } }
+              );
+              Set(gblMoving, Blank());
+              ClearCollect(
+                  colPortfolio,
+                  AddColumns(
+                      'pursuit-tracker-pursuits' As P,
+                      OwnerName,
+                      Coalesce(LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name, P.'WM Pursuit Owner Entra ID'),
+                      NextActionTitle,
+                      First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Action Title',
+                      NextActionDue,
+                      First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Due Date',
+                      SIsText,  Concat(P.'Aligned SIs', Value, ", "),
+                      HypeText, Concat(P.Hyperscalers, Value, ", ")
+                  )
+              );
+              Notify("Moved to " & ThisItem.Stage, NotificationType.Success, 2000)
 
       - galCards:
           Control: Gallery
@@ -337,22 +359,6 @@
                   Width: =3
                   Height: =206
                   Fill: =If(ThisItem.Health.Value = "At risk", ClrRiskFill, Color.Transparent)
-
-            - lblMoveHandle:
-                Control: Label
-                Properties:
-                  X: =246
-                  Y: =8
-                  Width: =28
-                  Height: =28
-                  Text: ="⋮⋮"
-                  Font: =FontUI
-                  Size: =12
-                  Color: =If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)
-                  Align: =Align.Center
-                  VerticalAlign: =VerticalAlign.Middle
-                  Tooltip: ="Move to another stage"
-                  OnSelect: =Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))
 
             - lblCardAccount:
                 Control: Label
@@ -558,3 +564,34 @@
                   Font: =FontUI
                   Size: =SizeBody
                   Color: =ClrDate
+
+            - btnCardClick:
+                Control: Classic/Button
+                Properties:
+                  Text: =""
+                  X: =0
+                  Y: =0
+                  Width: =282
+                  Height: =206
+                  Fill: =Color.Transparent
+                  HoverFill: =RGBA(255, 255, 255, 0.03)
+                  PressedFill: =RGBA(255, 255, 255, 0.06)
+                  BorderThickness: =0
+                  OnSelect: =Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+
+            - lblMoveHandle:
+                Control: Label
+                Properties:
+                  X: =246
+                  Y: =8
+                  Width: =28
+                  Height: =28
+                  Text: ="⋮⋮"
+                  Font: =FontUI
+                  Size: =12
+                  Color: =If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)
+                  Align: =Align.Center
+                  VerticalAlign: =VerticalAlign.Middle
+                  Tooltip: ="Move to another stage"
+                  OnSelect: =Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))
+
