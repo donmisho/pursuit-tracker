@@ -195,10 +195,9 @@ It loads once in `App.OnStart`:
 ```powerfx
 ClearCollect(
     colLookups,
-    ShowColumns(
-        Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending),
-        Title,
-        Value
+    ForAll(
+        Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending) As L,
+        { LookupType: L.Title, Value: L.Value }
     )
 );
 ```
@@ -208,16 +207,26 @@ Choice column and `Sort Order` is sorting an already-filtered set — and at 28 
 whole list is one call, so in memory is both correct and cheaper than twelve delegation
 warnings.
 
-### Why `ShowColumns(…, Value)` and not the raw filter
+### Why `ForAll` and not `ShowColumns`
 
 `Choices()` returns a **single-column table whose column is named `Value`**. That's the
 shape a `Classic/DropDown` displays without being told which field to show, and it's why
 every save branch reads `drpPurStage.Selected.Value`.
 
-`ShowColumns(Filter(colLookups, Title = "Workflow Stage"), Value)` returns exactly that
-same shape. So the binding is a one-line change per control and **not a single save
-formula had to change** — which is the whole reason to project rather than hand the
-dropdown the four-column table and pick a display field.
+`ForAll(Filter(colLookups, LookupType = "Workflow Stage") As L, { Value: L.Value })`
+returns exactly that same shape. So the binding is a one-line change per control and **not
+a single save formula had to change** — which is the whole reason to project rather than
+hand the dropdown the four-column table and pick a display field.
+
+`ShowColumns` is the obvious way to write that projection and it doesn't work here. It
+throws *"ShowColumns has some invalid arguments"* against a SharePoint source whose column
+set it can't pin down at author time, and again against the choice tables the combo boxes
+read for their default selection. `ForAll` over a record literal is the same projection
+with the shape stated explicitly, which is what makes it type cleanly — and it's the
+pattern `colStages` and `colPeople` already use.
+
+The lookup type arrives as `LookupType`, not `Title`. `Title` is a SharePoint column name
+in all five other lists and reads as the wrong thing here; `Type` is a Power Fx keyword.
 
 ### What each dropdown binds to
 

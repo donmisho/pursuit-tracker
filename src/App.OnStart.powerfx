@@ -171,10 +171,16 @@ ForAll(
 // filtered set -- and at 28 rows the whole list costs one call, so doing it in memory is
 // both correct and cheaper than twelve delegation warnings.
 //
-// ShowColumns down to Title and Value is what makes the dropdowns drop-in compatible with
-// what they replaced: Choices() returns a single-column table whose column is Value, and
-// so does ShowColumns(Filter(colLookups, ...), Value). Every .Selected.Value in the save
-// code keeps working untouched.
+// Projected with ForAll and a record literal rather than ShowColumns. ShowColumns
+// rejects a SharePoint source whose column set it can't pin down at author time -- it
+// throws "ShowColumns has some invalid arguments" -- and it does the same to the choice
+// tables the combo boxes read. ForAll over an explicit record literal is the pattern the
+// rest of this file already uses and it types cleanly in both places.
+//
+// The shape is what matters: a table whose only column is Value is exactly what Choices()
+// returns, which is what a Classic/DropDown displays and what .Selected.Value reads. The
+// lookup type comes across as LookupType rather than Title -- 'Title' is doing double duty
+// as a SharePoint column name everywhere else in this app, and Type is a Power Fx keyword.
 //
 // LAST, and wrapped. OnStart is one statement chain: a formula that throws stops every
 // statement after it, silently, and the app opens on an empty board with no error. Only
@@ -184,10 +190,9 @@ ForAll(
 IfError(
     ClearCollect(
         colLookups,
-        ShowColumns(
-            Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending),
-            Title,
-            Value
+        ForAll(
+            Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending) As L,
+            { LookupType: L.Title, Value: L.Value }
         )
     ),
     Notify("Lookup list didn't load -- edit dropdowns will be empty. " & FirstError.Message, NotificationType.Warning)

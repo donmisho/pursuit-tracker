@@ -1096,7 +1096,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =ShowColumns(Filter(colLookups, Title = "Workflow Stage"), Value)
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Workflow Stage") As L, { Value: L.Value })
       Default: =gblPursuit.'Workflow Stage'.Value
       AllowEmptySelection: =true
 
@@ -1127,7 +1128,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =ShowColumns(Filter(colLookups, Title = "Health"), Value)
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Health") As L, { Value: L.Value })
       Default: =gblPursuit.Health.Value
       AllowEmptySelection: =true
 
@@ -1303,8 +1305,10 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =ShowColumns(Filter(colLookups, Title = "Systems Integrator"), Value)
-      DefaultSelectedItems: =ShowColumns(gblPursuit.'Aligned SIs', Value)
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Systems Integrator") As L, { Value: L.Value })
+      DefaultSelectedItems: |
+        =ForAll(gblPursuit.'Aligned SIs' As S, { Value: S.Value })
       SelectMultiple: =true
 
 - lblCapcmbPurHype:
@@ -1334,8 +1338,10 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =ShowColumns(Filter(colLookups, Title = "Hyperscaler"), Value)
-      DefaultSelectedItems: =ShowColumns(gblPursuit.Hyperscalers, Value)
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Hyperscaler") As L, { Value: L.Value })
+      DefaultSelectedItems: |
+        =ForAll(gblPursuit.Hyperscalers As H, { Value: H.Value })
       SelectMultiple: =true
 
 - lblCaptxtPurFees:
@@ -1452,7 +1458,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =ShowColumns(Filter(colLookups, Title = "Workflow Stage"), Value)
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Workflow Stage") As L, { Value: L.Value })
       Default: =gblEditAction.'Workflow Stage'.Value
       AllowEmptySelection: =true
 
@@ -1483,7 +1490,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =ShowColumns(Filter(colLookups, Title = "Action Status"), Value)
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Action Status") As L, { Value: L.Value })
       Default: =gblEditAction.Status.Value
       AllowEmptySelection: =true
 
@@ -1514,7 +1522,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =ShowColumns(Filter(colLookups, Title = "Health"), Value)
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Health") As L, { Value: L.Value })
       Default: =gblEditAction.Health.Value
       AllowEmptySelection: =true
 
@@ -1545,7 +1554,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =ShowColumns(Filter(colLookups, Title = "Effort Size"), Value)
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Effort Size") As L, { Value: L.Value })
       Default: =gblEditAction.'Effort Size'.Value
       AllowEmptySelection: =true
 
