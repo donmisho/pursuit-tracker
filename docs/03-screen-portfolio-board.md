@@ -62,7 +62,7 @@ reasoning and alternatives in `docs/07-gaps-and-decisions.md`.
 |---|---|
 | `Items` | `=colStages` |
 | `Layout` | Horizontal |
-| `TemplateSize` | `=BoardColWidth` |
+| `TemplateSize` | `=(Parent.Width - (GapPage * 2)) / BoardColumns` |
 | `TemplatePadding` | `=8` |
 | `ShowScrollbar` | `=true` |
 | `X` / `Y` | `=GapPage` / `=170` |
@@ -79,8 +79,14 @@ before Proposal/Quote.
 choice list (which renders a blank board with no error) and pursuits carrying a
 typed-in stage that isn't in the list.
 
-Your five stages plus the horizontal scroll means about three and a half columns visible
-at 1366 wide. That's expected; the gallery scrolls.
+**Column width is the canvas divided by `BoardColumns` (5), not a fixed number.** All
+five stages fit at any window size and the board never scrolls sideways; widen the browser
+and the columns widen with it. A sixth stage added in SharePoint starts scrolling again —
+raise `BoardColumns` in `src/App.Formulas.powerfx` to match.
+
+That only works if nothing inside the column is fixed-width, so everything from the stage
+header down to the chips sizes off `colBg.Width` or `recCard.Width`. The one number still
+hard-coded is the card *height* (228), which doesn't depend on the column count.
 
 ### Inside the column template
 
@@ -172,7 +178,7 @@ has to be declared *after* everything it overlaps. Document order is z-order.
 |---|---|
 | `Items` | `=Sort(Filter(colPortfolio, 'Workflow Stage'.Value = ThisItem.Stage), If(IsBlank('Target Decision Date'), Date(2099, 12, 31), 'Target Decision Date'), SortOrder.Ascending)` |
 | `Layout` | Vertical |
-| `TemplateSize` | `=218` |
+| `TemplateSize` | `=240` |
 | `TemplatePadding` | `=6` |
 | `Width` | `=colBg.Width - 20` |
 | `Height` | `=colBg.Height - 60` |
@@ -190,8 +196,17 @@ of the app does.
 
 ### Inside the card template
 
-Card is 206 tall in a 218 template — up from 170/178, to fit two partner rows and a
-labelled next action.
+Card is 228 tall in a 240 template. Every horizontal measurement is relative to
+`recCard.Width`, which is relative to the column, which is the canvas divided by five —
+so a card at 1366 and a card at 2560 are the same layout at different scales.
+
+The title gets three lines rather than two: narrower columns mean the same text wraps
+further, and the `Clip` budgets came down with the width (88 characters for the title, 52
+for the next action).
+
+`Wrap` is explicitly `false` on the account line, both partner captions and the chip
+labels. Labels wrap by default, which is why "HS:" was rendering as "HS" with a stray ":"
+underneath it and "Internal/West Monroe" was breaking mid-word inside its chip.
 
 | Control | Property | Formula |
 |---|---|---|

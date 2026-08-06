@@ -52,7 +52,8 @@ GapPage        = 24;   // page gutter
 GapCard        = 16;   // inside a card
 RadiusCard     = 8;
 RadiusChip     = 10;
-BoardColWidth  = 320;
+BoardColumns   = 5;    // stage columns visible without scrolling; the board divides
+                       // the canvas by this rather than using a fixed column width
 
 // ---------------------------------------------------------------- helpers
 // Stage colour, used for the thin accent on a board column header. Stage names are the

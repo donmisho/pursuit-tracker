@@ -182,28 +182,23 @@
       Width: =Parent.Width - (GapPage * 2)
       Height: =Parent.Height - 170 - GapPage
       Items: =colStages
-      TemplateSize: =BoardColWidth
+      # Divide the canvas by BoardColumns instead of pinning a column width, so five
+      # stages fill the screen at any window size and nothing scrolls sideways. A sixth
+      # stage added in SharePoint starts scrolling again -- raise BoardColumns to match.
+      TemplateSize: =(Parent.Width - (GapPage * 2)) / BoardColumns
       TemplatePadding: =0
       ShowScrollbar: =true
     Children:
       - colBg:
-          Control: Classic/Button
+          Control: Rectangle
           Properties:
-            Text: =""
-            Fill: =ClrColumn
-            HoverFill: =ClrColumn
-            PressedFill: =ClrColumn
-            OnSelect: =false
             X: =0
             Y: =0
             Width: =Parent.TemplateWidth - 12
             Height: =Parent.Height - 8
+            Fill: =ClrColumn
             BorderColor: =ClrBorder
             BorderThickness: =1
-            RadiusTopLeft: =RadiusCard
-            RadiusTopRight: =RadiusCard
-            RadiusBottomLeft: =RadiusCard
-            RadiusBottomRight: =RadiusCard
 
       - recStageAccent:
           Control: Rectangle
@@ -219,22 +214,23 @@
           Properties:
             X: =16
             Y: =14
-            Width: =230
-            Height: =24
+            Width: =colBg.Width - 72
+            Height: =32
             Text: =ThisItem.Stage
             Font: =FontUI
             Size: =SizeBody
             FontWeight: =FontWeight.Semibold
             Color: =ClrText
+            Wrap: =true
             VerticalAlign: =VerticalAlign.Middle
 
       - lblStageCount:
           Control: Label
           Properties:
-            X: =252
+            X: =colBg.Width - 52
             Y: =14
-            Width: =40
-            Height: =24
+            Width: =36
+            Height: =32
             Text: =CountRows(Filter(colPortfolio, 'Workflow Stage'.Value = ThisItem.Stage))
             Font: =FontUI
             Size: =SizeBody
@@ -246,8 +242,8 @@
           Control: Rectangle
           Properties:
             X: =14
-            Y: =48
-            Width: =280
+            Y: =52
+            Width: =colBg.Width - 28
             Height: =44
             Visible: =Not(IsBlank(gblMoving)) && gblMoving.'Workflow Stage'.Value <> ThisItem.Stage
             Fill: =ColorFade(ClrAccent, 0.75)
@@ -281,8 +277,8 @@
           Control: Label
           Properties:
             X: =14
-            Y: =48
-            Width: =280
+            Y: =52
+            Width: =colBg.Width - 28
             Height: =44
             Visible: =recDropTarget.Visible
             Text: ="Move here"
@@ -319,16 +315,16 @@
           Variant: Vertical
           Properties:
             X: =14
-            Y: =If(recDropTarget.Visible, 100, 52)
-            Width: =288
-            Height: =Parent.Height - Self.Y - 24
+            Y: =If(recDropTarget.Visible, 104, 56)
+            Width: =colBg.Width - 28
+            Height: =colBg.Height - Self.Y - 14
             Items: |
               =Sort(
                   Filter(colPortfolio, 'Workflow Stage'.Value = ThisItem.Stage),
                   If(IsBlank('Target Decision Date'), Date(2099, 12, 31), 'Target Decision Date'),
                   SortOrder.Ascending
               )
-            TemplateSize: =218
+            TemplateSize: =240
             TemplatePadding: =6
             ShowScrollbar: =true
           Children:
@@ -341,8 +337,8 @@
                   PressedFill: =ClrCardHover
                   X: =0
                   Y: =0
-                  Width: =282
-                  Height: =206
+                  Width: =Parent.Width - 20
+                  Height: =228
                   BorderColor: =If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrBorder)
                   BorderThickness: =If(gblMoving.Title = ThisItem.Title, 2, 1)
                   RadiusTopLeft: =RadiusCard
@@ -357,7 +353,7 @@
                   X: =0
                   Y: =0
                   Width: =3
-                  Height: =206
+                  Height: =228
                   Fill: =If(ThisItem.Health.Value = "At risk", ClrRiskFill, Color.Transparent)
 
             - lblCardAccount:
@@ -365,13 +361,14 @@
                 Properties:
                   X: =14
                   Y: =8
-                  Width: =228
+                  Width: =recCard.Width - 54
                   Height: =24
                   Text: =Clip(ThisItem.'Account Name', 26)
                   Font: =FontUI
                   Size: =SizeCardTitle
                   FontWeight: =FontWeight.Semibold
                   Color: =ClrText
+                  Wrap: =false
                   VerticalAlign: =VerticalAlign.Middle
 
             - lblCardTitle:
@@ -379,13 +376,8 @@
                 Properties:
                   X: =14
                   Y: =32
-                  Width: =254
-                  Height: =36
-                  # The account is already on its own line above, and every pursuit name
-                  # repeats it as an ALL-CAPS prefix ("FRAZIER: MatixCare AWS Platform").
-                  # Strip that prefix rather than title-casing the whole string -- Proper()
-                  # would turn "AWS" into "Aws" and "CD&R" into "Cd&R". Two separators are
-                  # in use: "ACCOUNT: name" and "ACCOUNT - name".
+                  Width: =recCard.Width - 28
+                  Height: =54
                   Text: |
                     =Clip(
                         With(
@@ -398,7 +390,7 @@
                                 )
                             )
                         ),
-                        72
+                        88
                     )
                   Font: =FontUI
                   Size: =SizeBody
@@ -410,25 +402,26 @@
                 Control: Label
                 Properties:
                   X: =14
-                  Y: =70
-                  Width: =28
+                  Y: =90
+                  Width: =32
                   Height: =24
                   Text: ="SI:"
                   Font: =FontUI
                   Size: =SizeMeta
                   Color: =ClrTextMuted
+                  Wrap: =false
                   VerticalAlign: =VerticalAlign.Middle
 
             - galCardSIs:
                 Control: Gallery
                 Variant: Horizontal
                 Properties:
-                  X: =44
-                  Y: =70
-                  Width: =224
+                  X: =48
+                  Y: =90
+                  Width: =recCard.Width - 62
                   Height: =24
                   Items: =ThisItem.'Aligned SIs'
-                  TemplateSize: =76
+                  TemplateSize: =84
                   TemplatePadding: =0
                   ShowScrollbar: =false
                 Children:
@@ -442,7 +435,7 @@
                         OnSelect: =false
                         X: =0
                         Y: =1
-                        Width: =72
+                        Width: =80
                         Height: =22
                         RadiusTopLeft: =RadiusChip
                         RadiusTopRight: =RadiusChip
@@ -453,7 +446,7 @@
                       Properties:
                         X: =0
                         Y: =1
-                        Width: =72
+                        Width: =80
                         Height: =22
                         Text: =ThisItem.Value
                         Font: =FontUI
@@ -461,30 +454,32 @@
                         Color: =ClrChipText
                         Align: =Align.Center
                         VerticalAlign: =VerticalAlign.Middle
+                        Wrap: =false
 
             - lblHSCap:
                 Control: Label
                 Properties:
                   X: =14
-                  Y: =98
-                  Width: =28
+                  Y: =118
+                  Width: =32
                   Height: =24
                   Text: ="HS:"
                   Font: =FontUI
                   Size: =SizeMeta
                   Color: =ClrTextMuted
+                  Wrap: =false
                   VerticalAlign: =VerticalAlign.Middle
 
             - galCardHype:
                 Control: Gallery
                 Variant: Horizontal
                 Properties:
-                  X: =44
-                  Y: =98
-                  Width: =224
+                  X: =48
+                  Y: =118
+                  Width: =recCard.Width - 62
                   Height: =24
                   Items: =ThisItem.Hyperscalers
-                  TemplateSize: =76
+                  TemplateSize: =84
                   TemplatePadding: =0
                   ShowScrollbar: =false
                 Children:
@@ -498,7 +493,7 @@
                         OnSelect: =false
                         X: =0
                         Y: =1
-                        Width: =72
+                        Width: =80
                         Height: =22
                         RadiusTopLeft: =RadiusChip
                         RadiusTopRight: =RadiusChip
@@ -509,7 +504,7 @@
                       Properties:
                         X: =0
                         Y: =1
-                        Width: =72
+                        Width: =80
                         Height: =22
                         Text: =ThisItem.Value
                         Font: =FontUI
@@ -517,13 +512,14 @@
                         Color: =ClrChipText
                         Align: =Align.Center
                         VerticalAlign: =VerticalAlign.Middle
+                        Wrap: =false
 
             - recCardDivider:
                 Control: Rectangle
                 Properties:
                   X: =14
-                  Y: =128
-                  Width: =254
+                  Y: =150
+                  Width: =recCard.Width - 28
                   Height: =1
                   Fill: =ClrDivider
 
@@ -531,22 +527,23 @@
                 Control: Label
                 Properties:
                   X: =14
-                  Y: =134
-                  Width: =254
+                  Y: =156
+                  Width: =recCard.Width - 28
                   Height: =16
                   Text: ="NEXT ACTION"
                   Font: =FontUI
                   Size: =SizeMeta
                   Color: =ClrTextMuted
+                  Wrap: =false
 
             - lblNextTask:
                 Control: Label
                 Properties:
                   X: =14
-                  Y: =150
-                  Width: =254
+                  Y: =172
+                  Width: =recCard.Width - 28
                   Height: =32
-                  Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 68))
+                  Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 52))
                   Font: =FontUI
                   Size: =SizeBody
                   Color: =If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)
@@ -557,8 +554,8 @@
                 Control: Label
                 Properties:
                   X: =14
-                  Y: =182
-                  Width: =254
+                  Y: =204
+                  Width: =recCard.Width - 28
                   Height: =18
                   Text: =If(IsBlank(ThisItem.NextActionDue), "", Text(ThisItem.NextActionDue, "mmmm d"))
                   Font: =FontUI
@@ -571,8 +568,8 @@
                   Text: =""
                   X: =0
                   Y: =0
-                  Width: =282
-                  Height: =206
+                  Width: =recCard.Width
+                  Height: =228
                   Fill: =Color.Transparent
                   HoverFill: =RGBA(255, 255, 255, 0.03)
                   PressedFill: =RGBA(255, 255, 255, 0.06)
@@ -582,7 +579,7 @@
             - lblMoveHandle:
                 Control: Label
                 Properties:
-                  X: =246
+                  X: =recCard.Width - 36
                   Y: =8
                   Width: =28
                   Height: =28
@@ -594,4 +591,3 @@
                   VerticalAlign: =VerticalAlign.Middle
                   Tooltip: ="Move to another stage"
                   OnSelect: =Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))
-
