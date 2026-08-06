@@ -143,7 +143,7 @@ to maintain and one fewer thing to get out of sync.
 |---|---|
 | `Items` | `=Sort(Filter(colPortfolio, 'Workflow Stage'.Value = ThisItem.Stage), If(IsBlank('Target Decision Date'), Date(2099, 12, 31), 'Target Decision Date'), SortOrder.Ascending)` |
 | `Layout` | Vertical |
-| `TemplateSize` | `=178` |
+| `TemplateSize` | `=218` |
 | `TemplatePadding` | `=6` |
 | `Width` | `=colBg.Width - 20` |
 | `Height` | `=colBg.Height - 60` |
