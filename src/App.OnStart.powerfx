@@ -190,8 +190,19 @@ ForAll(
 IfError(
     ClearCollect(
         colLookups,
+        // No Active filter. The column is a Choice with an empty choice set, and a Choice
+        // column with no defined choices doesn't reach the Power Apps schema -- referencing
+        // it fails at author time with "Name isn't valid. 'Active' isn't recognized", which
+        // takes the whole ClearCollect with it. Every row is Active today, so nothing is
+        // lost until a value needs retiring.
+        //
+        // To turn retirement back on, make Active a real column in SharePoint -- either a
+        // Yes/No column, or a Choice with Yes and No actually defined -- refresh the data
+        // source in the Data pane, and wrap the source below in one of:
+        //     Filter('pursuit-tracker-lookups', Active)                  // Yes/No
+        //     Filter('pursuit-tracker-lookups', Active.Value = "Yes")    // Choice
         ForAll(
-            Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending) As L,
+            Sort('pursuit-tracker-lookups', 'Sort Order', SortOrder.Ascending) As L,
             { LookupType: L.Title, Value: L.Value }
         )
     ),

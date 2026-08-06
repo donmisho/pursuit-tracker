@@ -196,16 +196,32 @@ It loads once in `App.OnStart`:
 ClearCollect(
     colLookups,
     ForAll(
-        Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending) As L,
+        Sort('pursuit-tracker-lookups', 'Sort Order', SortOrder.Ascending) As L,
         { LookupType: L.Title, Value: L.Value }
     )
 );
 ```
 
-Once, into a collection, rather than per dropdown. Neither half delegates — `Active` is a
-Choice column and `Sort Order` is sorting an already-filtered set — and at 28 rows the
-whole list is one call, so in memory is both correct and cheaper than twelve delegation
-warnings.
+Once, into a collection, rather than per dropdown — at 28 rows the whole list is one call,
+and reading it per control would mean twelve.
+
+### `Active` isn't in the filter
+
+It can't be. The column is a Choice with an **empty choice set** and fill-in enabled, and a
+Choice column with no defined choices never reaches the Power Apps schema — referencing it
+fails at author time with *"Name isn't valid. 'Active' isn't recognized"*, and because the
+`Filter` returns an error the whole `ClearCollect` goes red with it.
+
+Every row is active today, so nothing is lost yet. To get retirement back, make `Active` a
+real column in SharePoint — a Yes/No column, or a Choice with `Yes` and `No` actually
+defined — refresh the data source in the Data pane, then wrap the source:
+
+```powerfx
+Filter('pursuit-tracker-lookups', Active)                  // Yes/No
+Filter('pursuit-tracker-lookups', Active.Value = "Yes")    // Choice
+```
+
+Until then, deleting a row is how a value is retired.
 
 ### Why `ForAll` and not `ShowColumns`
 
