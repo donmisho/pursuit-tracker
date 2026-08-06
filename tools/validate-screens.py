@@ -5,9 +5,9 @@ Structural check on the screen YAML in src/yaml/.
 This is not a Power Apps validator -- nothing outside Power Apps Studio can tell you
 whether a paste will be accepted, because Studio only takes the exact YAML shape its own
 code view emits and that shape moves between releases. What this catches is the class of
-mistake that is entirely mine to make: malformed YAML, a control with no type, a property
-value missing its leading '=', a duplicate control name, or a formula referencing a
-control that isn't on the same screen.
+mistake that is entirely mine to make: malformed YAML, a control declaring the same
+property twice, a control with no type, a property value missing its leading '=', a
+duplicate control name, or a formula referencing a control that isn't on the same screen.
 
     python3 tools/validate-screens.py
 """
@@ -21,6 +21,32 @@ except ImportError:
     sys.exit("PyYAML required:  pip install pyyaml")
 
 YAML_DIR = Path(__file__).resolve().parent.parent / "src" / "yaml"
+
+
+class StrictLoader(yaml.SafeLoader):
+    """SafeLoader that rejects duplicate keys instead of letting the last one win.
+
+    Studio does reject them -- PA1001 YamlInvalidSyntax, "Duplicate name 'Color'" -- so a
+    control carrying both a default and an override for the same property fails the paste
+    outright. PyYAML's default behaviour of silently keeping the last value is exactly
+    wrong here: it makes the one file that won't paste look clean.
+    """
+
+
+def _no_duplicate_keys(loader, node, deep=False):
+    seen = set()
+    for key_node, _ in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in seen:
+            raise yaml.constructor.ConstructorError(
+                None, None,
+                f"duplicate key {key!r}", key_node.start_mark)
+        seen.add(key)
+    return yaml.SafeLoader.construct_mapping(loader, node, deep=deep)
+
+
+StrictLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _no_duplicate_keys)
 
 # Properties whose values are designer settings rather than Power Fx formulas.
 NON_FORMULA_KEYS = {"Control", "Variant", "Layout", "MetadataKey", "IsLocked", "Group",
@@ -109,7 +135,7 @@ if not files:
 
 for path in files:
     try:
-        doc = yaml.safe_load(path.read_text())
+        doc = yaml.load(path.read_text(), Loader=StrictLoader)
     except yaml.YAMLError as exc:
         errors.append(f"{path.name}: YAML did not parse -- {exc}")
         continue

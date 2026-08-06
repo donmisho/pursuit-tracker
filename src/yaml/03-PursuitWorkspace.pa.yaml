@@ -348,7 +348,6 @@
       Text: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), "—", "Open in Salesforce")
       Font: =FontUI
       Size: =SizeBody
-      Color: =ClrText
       Wrap: =false
       Color: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrTextFaint, ClrLink)
       Underline: =Not(IsBlank(gblPursuit.'Salesforce Opportunity URL'))
