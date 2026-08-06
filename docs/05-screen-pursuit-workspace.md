@@ -72,6 +72,7 @@ ClearCollect(
 // or ambiguous, so the card always shows something rather than going blank.
 Set(gblOverview, LookUp(colHistory, 'Is Current'.Value = "Yes"));
 If(IsBlank(gblOverview), Set(gblOverview, First(colHistory)));
+If(IsBlank(gblOverview), Set(gblOverview, LookUp('pursuit-tracker-ai-history', ID < 0)));
 
 // Update authors are email strings too, and they aren't necessarily pursuit owners, so
 // colPeople (built at startup from owners only) won't have them. Top it up here.

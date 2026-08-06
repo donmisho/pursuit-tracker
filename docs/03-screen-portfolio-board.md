@@ -31,7 +31,7 @@ Three nested galleries is the deepest canvas apps allow, and this uses all of it
 | Property | Formula |
 |---|---|
 | `Fill` | `=ClrPage` |
-| `OnVisible` | paste the `LoadPortfolio` block from `src/App.OnStart.powerfx` (everything below the banner comment), then `Set(gblMoving, Blank())` |
+| `OnVisible` | paste the `LoadPortfolio` block from `src/App.OnStart.powerfx` (everything below the banner comment), then `Set(gblMoving, LookUp('pursuit-tracker-pursuits', ID < 0))` |
 
 Reloading on every visit is what makes a stage change from elsewhere in the app show up
 when you come back.

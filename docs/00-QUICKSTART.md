@@ -73,7 +73,7 @@ Do these three in order. For each one:
     new line at the end:
 
     ```
-    Set(gblMoving, Blank())
+    Set(gblMoving, LookUp('pursuit-tracker-pursuits', ID < 0))
     ```
 
 25. `scrPortfolioList` → **OnVisible** → paste the same `LoadPortfolio` block (without the
@@ -114,6 +114,7 @@ that.
 |---|---|
 | Everything red after step 14 | Step 7 toggles are off, or you didn't reload after step 8 |
 | Only the last five entries in the theme error | User-defined functions unavailable — inline them, see `docs/02-app-setup.md` |
+| "No type found for variable 'x'" | You have an older `App.OnStart.powerfx` — re-copy it, the current one seeds every global with a typed value |
 | Board has no columns | Right-click App → Run OnStart |
 | All cards say "No open actions" | Right-click App → Run OnStart |
 | Cards show email addresses | Step 12 was skipped |

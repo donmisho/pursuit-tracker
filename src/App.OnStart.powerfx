@@ -6,9 +6,32 @@
 
 Set(gblUser, User());
 
+// ---------------------------------------------------------------------
+// Seed every global with a typed value.
+//
+// Power Apps infers a variable's type from the Set() calls it can see, and it can't
+// infer anything from Blank() alone -- "No type found for variable 'x'. Ensure that it is
+// Set to a non-Blank value somewhere in the app." The record variables are seeded with a
+// LookUp that deliberately matches nothing: it returns an empty record *of the right
+// shape*, which is exactly the type information the compiler is missing.
+//
+// Without this, each variable stays untyped until the screen that assigns it a real value
+// has been pasted, so the app shows errors that depend on what you've built so far and
+// clear themselves later. Typed here, the order you build in stops mattering.
+// ---------------------------------------------------------------------
+
 // Card currently picked up for a stage move. Blank when nothing is selected.
 // Canvas apps have no drag-and-drop -- see docs/07-gaps-and-decisions.md.
-Set(gblMoving, Blank());
+Set(gblMoving, LookUp('pursuit-tracker-pursuits', ID < 0));
+
+// The pursuit open on the workspace, and its current AI overview.
+Set(gblPursuit, LookUp('pursuit-tracker-pursuits', ID < 0));
+Set(gblOverview, LookUp('pursuit-tracker-ai-history', ID < 0));
+
+Set(gblPursuitKey, "");       // PUR-nnn of the open pursuit
+Set(gblNewPursuit, false);    // workspace is in create mode
+Set(gblPanel, "");            // "" | "action" | "update" -- open slide-over
+Set(gblExporting, false);     // Excel export in flight
 
 
 // =====================================================================
