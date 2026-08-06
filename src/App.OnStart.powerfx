@@ -43,29 +43,6 @@ Set(gblEditDoc,    LookUp('pursuit-tracker-documents', ID < 0));
 Set(gblEditUpdate, LookUp('pursuit-tracker-status-updates', ID < 0));
 
 
-// The shared vocabulary behind every edit dropdown. One list, one row per allowed value,
-// keyed by Title (the "Lookup Type" column) -- so adding a workflow stage is a row in a
-// list rather than a change to five column definitions.
-//
-// Loaded once into a collection rather than read per dropdown. Neither half of this
-// delegates to SharePoint -- Active is a Choice column and 'Sort Order' is sorting a
-// filtered set -- and at 28 rows the whole list costs one call, so doing it in memory is
-// both correct and cheaper than twelve delegation warnings.
-//
-// ShowColumns down to Title and Value is what makes the dropdowns drop-in compatible with
-// what they replaced: Choices() returns a single-column table whose column is Value, and
-// so does ShowColumns(Filter(colLookups, …), Value). Every .Selected.Value in the save
-// code keeps working untouched.
-ClearCollect(
-    colLookups,
-    ShowColumns(
-        Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending),
-        Title,
-        Value
-    )
-);
-
-
 // =====================================================================
 // LoadPortfolio -- shared by the board and the list screens.
 //
@@ -181,4 +158,37 @@ ForAll(
         false,
         Collect(colStages, { Stage: S.Value })
     )
+);
+
+
+// =====================================================================
+// The shared vocabulary behind every edit dropdown. One list, one row per allowed value,
+// keyed by Title (the "Lookup Type" column) -- so adding a workflow stage is a row in a
+// list rather than a change to five column definitions.
+//
+// Loaded once into a collection rather than read per dropdown. Neither half of this
+// delegates to SharePoint -- Active is a Choice column and 'Sort Order' is sorting a
+// filtered set -- and at 28 rows the whole list costs one call, so doing it in memory is
+// both correct and cheaper than twelve delegation warnings.
+//
+// ShowColumns down to Title and Value is what makes the dropdowns drop-in compatible with
+// what they replaced: Choices() returns a single-column table whose column is Value, and
+// so does ShowColumns(Filter(colLookups, ...), Value). Every .Selected.Value in the save
+// code keeps working untouched.
+//
+// LAST, and wrapped. OnStart is one statement chain: a formula that throws stops every
+// statement after it, silently, and the app opens on an empty board with no error. Only
+// the edit dropdowns need this collection, so it goes behind the portfolio load where a
+// bad list name or a renamed column costs you a notification instead of the whole app.
+// =====================================================================
+IfError(
+    ClearCollect(
+        colLookups,
+        ShowColumns(
+            Sort(Filter('pursuit-tracker-lookups', Active.Value = "Yes"), 'Sort Order', SortOrder.Ascending),
+            Title,
+            Value
+        )
+    ),
+    Notify("Lookup list didn't load -- edit dropdowns will be empty. " & FirstError.Message, NotificationType.Warning)
 );
