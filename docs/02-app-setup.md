@@ -33,13 +33,12 @@ While you're in Settings:
 
 - **General → Data row limit: 2000** (the maximum). Default is 500, and it silently
   truncates. See the delegation note in `docs/07-gaps-and-decisions.md`.
-- **Upcoming features → Named formulas: on.** Required — the theme in
-  `src/App.Formulas.powerfx` is built on them.
-- **Upcoming features → User-defined functions: on.** Also required. The three helpers
-  at the bottom of the theme file (`StageAccent`, `DueLabel`, `RelativeDay`) take
-  parameters, which makes them user-defined functions rather than plain named formulas.
-  With the toggle off, Studio rejects the whole `Formulas` property — including the
-  colours — and it isn't obvious that three lines at the bottom are the cause.
+- **Updates → Named formulas: on**, and **User-defined functions: on**. The theme is
+  built on both.
+
+**If neither appears in the Updates list, they've gone GA in your tenant** — shipped
+features are removed from that list and are simply always on. Move on; you'll find out at
+step 4 either way.
 
 ## 3. Add the five data sources
 
@@ -160,3 +159,25 @@ annoying.
 shorter than about 800px clips the bottom card. Either keep the window reasonably tall or
 rebuild that screen on the Scrollable screen layout — the note at the top of
 `src/yaml/03-PursuitWorkspace.pa.yaml` covers it, and no formula changes.
+
+## If the user-defined functions won't take
+
+The last five entries in `src/App.Formulas.powerfx` — `StageAccent`, `DueLabel`,
+`Initials`, `SafeUrl`, `RelativeDay` — take parameters, which makes them user-defined
+functions rather than plain named formulas. If your Studio rejects them (and only them —
+the colour tokens above go in fine), delete those five definitions and inline them at
+their nine call sites:
+
+| Call | Replace with |
+|---|---|
+| `StageAccent(ThisItem.Stage)`<br>*(`recStageAccent.Fill`, board)* | `Switch(ThisItem.Stage, "Unassigned", ColorValue("#5A6474"), "WM Account Team Assimilation", ColorValue("#6B7DF2"), "Partner Introduction", ColorValue("#5AB0C9"), "Preliminary Scoping", ColorValue("#8E7BD8"), "Proposal/Quote", ColorValue("#D8A05A"), ClrTextMuted)` |
+| `Initials(X)`<br>*(3×: board card, list row, workspace owner)* | `Concat(FirstN(Split(X, " "), 2), Left(Value, 1))` |
+| `DueLabel(D, W)`<br>*(`lblActionDue`, workspace)* | `If(!IsBlank(D), Text(D, "mmmm d"), !IsBlank(W), W, "")` |
+| `SafeUrl(U)`<br>*(`lblDocLink.OnSelect`, workspace)* | `If(StartsWith(Lower(U), "http"), U, "https://" & U)` |
+| `RelativeDay(D)`<br>*(3×: overview meta, update byline, version meta)* | `Switch(DateDiff(D, Now(), TimeUnit.Days), 0, "Today", 1, "Yesterday", Text(D, "mmmm d"))` |
+
+Substitute the argument for `X` / `D` / `W` / `U` in each case — e.g. `Initials(ThisItem.OwnerName)`
+becomes `Concat(FirstN(Split(ThisItem.OwnerName, " "), 2), Left(Value, 1))`.
+
+The colour and size tokens are plain named formulas, take no parameters, and are
+unaffected. Don't delete those.

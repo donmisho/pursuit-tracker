@@ -18,7 +18,8 @@ No explanations. Reasoning lives in `docs/01`–`08`.
    Responsive? Skip it** — the two are mutually exclusive, so it's already off. While
    you're here, set **Orientation** to **Landscape** if that option is shown.
 6. **General** → **Data row limit** → `2000`.
-7. **Updates** → **New** tab → turn ON **Named formulas** and **User-defined functions**.
+7. **Updates** → turn ON **Named formulas** and **User-defined functions**. **Not listed?
+   They've gone GA and are already on — skip.**
 8. Close Settings. **File → Save**. Reload the browser tab.
 
 ## C. Connect data
@@ -112,6 +113,7 @@ that.
 | Symptom | Fix |
 |---|---|
 | Everything red after step 14 | Step 7 toggles are off, or you didn't reload after step 8 |
+| Only the last five entries in the theme error | User-defined functions unavailable — inline them, see `docs/02-app-setup.md` |
 | Board has no columns | Right-click App → Run OnStart |
 | All cards say "No open actions" | Right-click App → Run OnStart |
 | Cards show email addresses | Step 12 was skipped |
