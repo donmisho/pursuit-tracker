@@ -361,7 +361,7 @@
                   Y: =8
                   Width: =228
                   Height: =24
-                  Text: =ThisItem.'Account Name'
+                  Text: =Clip(ThisItem.'Account Name', 26)
                   Font: =FontUI
                   Size: =SizeCardTitle
                   FontWeight: =FontWeight.Semibold
@@ -374,27 +374,31 @@
                   X: =14
                   Y: =32
                   Width: =254
-                  Height: =34
+                  Height: =36
                   # The account is already on its own line above, and every pursuit name
                   # repeats it as an ALL-CAPS prefix ("FRAZIER: MatixCare AWS Platform").
                   # Strip that prefix rather than title-casing the whole string -- Proper()
                   # would turn "AWS" into "Aws" and "CD&R" into "Cd&R". Two separators are
                   # in use: "ACCOUNT: name" and "ACCOUNT - name".
                   Text: |
-                    =With(
-                        { n: ThisItem.'Pursuit Name' },
-                        Trim(
-                            If(
-                                !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
-                                !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
-                                n
+                    =Clip(
+                        With(
+                            { n: ThisItem.'Pursuit Name' },
+                            Trim(
+                                If(
+                                    !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
+                                    !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
+                                    n
+                                )
                             )
-                        )
+                        ),
+                        72
                     )
                   Font: =FontUI
                   Size: =SizeBody
                   Color: =ClrText
                   Wrap: =true
+                  VerticalAlign: =VerticalAlign.Top
 
             - lblSICap:
                 Control: Label
@@ -536,11 +540,12 @@
                   Y: =150
                   Width: =254
                   Height: =32
-                  Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", ThisItem.NextActionTitle)
+                  Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 68))
                   Font: =FontUI
                   Size: =SizeBody
                   Color: =If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)
                   Wrap: =true
+                  VerticalAlign: =VerticalAlign.Top
 
             - lblNextTaskDue:
                 Control: Label

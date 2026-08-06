@@ -85,6 +85,14 @@ DueLabel(due: DateTime, wording: Text): Text =
 Initials(name: Text): Text =
     Concat(FirstN(Split(name, " "), 2), Left(Value, 1));
 
+// Trim to a character budget with an ellipsis. Power Apps labels have no text-overflow
+// setting: a Label whose text needs more lines than its Height allows does not clip, it
+// keeps rendering, and because the default VerticalAlign is Middle the overflow spills
+// out of BOTH ends and lands on top of the controls above and below. Top-aligning stops
+// it spilling upward; this stops it spilling downward.
+Clip(s: Text, n: Number): Text =
+    If(Len(s) > n, Left(s, n - 1) & "…", s);
+
 // Document URLs are stored as plain text and some have no scheme
 // ("westmonroepartners1-my.sharepoint.com/..."), which Launch() treats as a relative
 // path and opens as a broken address.

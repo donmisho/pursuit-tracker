@@ -176,14 +176,14 @@ labelled next action.
 | `recHealth` (Rectangle) | `Fill` | `=If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)` |
 | `lblMoveHandle` | `Text` / `Color` | `="⋮⋮"` / `=If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)` |
 | | `OnSelect` | `=Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))` |
-| `lblCardAccount` | `Text` | `=ThisItem.'Account Name'` |
+| `lblCardAccount` | `Text` | `=Clip(ThisItem.'Account Name', 26)` |
 | | `Size` / `FontWeight` / `Color` | `=SizeCardTitle` / `=FontWeight.Semibold` / `=ClrText` |
 | `lblCardTitle` | `Text` | see below |
 | | `Size` / `Color` / `Wrap` | `=SizeBody` / `=ClrText` / `=true` |
 | `lblSICap` / `lblHSCap` | `Text` | `="SI:"` / `="HS:"` |
 | | `Size` / `Color` | `=SizeMeta` / `=ClrTextMuted` |
 | `lblNextCap` | `Text` | `="NEXT ACTION"` — `Size = SizeMeta`, `Color = ClrTextMuted` |
-| `lblNextTask` | `Text` | `=If(IsBlank(ThisItem.NextActionTitle), "No open actions", ThisItem.NextActionTitle)` |
+| `lblNextTask` | `Text` | `=If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 68))` |
 | | `Color` | `=If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)` |
 | `lblNextTaskDue` | `Text` | `=If(IsBlank(ThisItem.NextActionDue), "", Text(ThisItem.NextActionDue, "mmmm d"))` |
 | | `Color` | `=ClrDate` |
@@ -270,3 +270,26 @@ Separately: **`IsBlank()` doesn't accept a record.** `IsBlank(ThisItem.NextActio
 *"function 'If' has invalid arguments"* from the `If` that wraps it, which points at the
 wrong function. Testing `IsBlank(ThisItem.NextActionTitle)` — a scalar — is both correct
 and what the label actually cares about.
+
+## Why every wrapping label is clipped and top-aligned
+
+Power Apps labels have no text-overflow setting. A label whose text needs more lines than
+its `Height` allows does not clip — it keeps rendering — and because the default
+`VerticalAlign` is **Middle**, the overflow spills out of *both* ends and lands on top of
+whatever sits above and below. On the card that read as the pursuit name printing through
+the account line and down into the SI row.
+
+Two changes, both needed:
+
+**`VerticalAlign: =VerticalAlign.Top`** on every wrapping label. Stops the upward spill
+and makes the first line land where the layout expects it.
+
+**`Clip(text, n)`** — a helper in `src/App.Formulas.powerfx` that trims to `n` characters
+and appends an ellipsis. Stops the downward spill. The budgets are sized to the box: 72
+characters for the card title (254px wide at `SizeBody`, about two lines), 26 for the
+account, 68 for the next action.
+
+The budgets are character counts, not measured text, so a name in all wide characters
+will still run a line long. Power Apps exposes no way to measure rendered text, so the
+alternative is `AutoHeight` plus a variable-height template, which a fixed-position card
+layout can't use. If a title clips too eagerly, raise the number.

@@ -84,7 +84,7 @@ Elevance's "Carelon…" and "Unified Data…" end up filed under C and U.
 
 | Control | Property | Formula |
 |---|---|---|
-| `lblRowAccount` | `Text` | `=ThisItem.'Account Name'` |
+| `lblRowAccount` | `Text` | `=Clip(ThisItem.'Account Name', 40)` |
 | | `X` / `Width` / `Height` | `=0` / `=150` / `=46` |
 | | `Size` / `FontWeight` / `Color` / `Wrap` | `=SizeBody` / `=FontWeight.Semibold` / `=ClrText` / `=true` |
 | `lblRowTitle` | `Text` | the prefix-stripping formula (below) |
@@ -92,12 +92,12 @@ Elevance's "Carelon…" and "Unified Data…" end up filed under C and U.
 | | `Size` / `Color` / `Wrap` | `=SizeBody` / `=ClrText` / `=true` |
 | `lblRowSfLink` | `Text` | `=If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Salesforce opportunity linked")` |
 | | `Size` / `Color` | `=SizeMeta` / `=ClrTextFaint` |
-| `lblRowStage` | `Text` | `=ThisItem.'Workflow Stage'.Value` |
+| `lblRowStage` | `Text` | `=Clip(ThisItem.'Workflow Stage'.Value, 52)` |
 | | `X` / `Width` | `=434` / `=170` |
 | `recRowAvatar` / `lblRowInitials` / `lblRowOwner` | | as before, `X` `=614` / `=614` / `=646` |
 | `galRowSIs` / `galRowHype` | `X` | `=804` / `=944` |
 | | `Width` / `Height` / `TemplateSize` | `=130` / `=84` / `=28` |
-| `lblRowNextTask` | `Text` | `=If(IsBlank(ThisItem.NextActionTitle), "No open actions", ThisItem.NextActionTitle)` |
+| `lblRowNextTask` | `Text` | `=If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 58))` |
 | | `Color` | `=If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)` |
 | `lblRowNextDue` | `Text` | `=If(IsBlank(ThisItem.NextActionDue), "", Text(ThisItem.NextActionDue, "mmmm d"))` |
 | `recRowDivider` | `Y` / `Width` | `=Parent.TemplateHeight - 1` / `=Parent.Width - 20` |
@@ -119,6 +119,9 @@ With(
     )
 )
 ```
+
+Wrapped in `Clip(..., 96)` and top-aligned, like every wrapping label in the app — see
+the note at the end of `docs/03-screen-portfolio-board.md` for why that's necessary.
 
 Same treatment as the board card, and for the same reason: with the account in its own
 column the ALL-CAPS prefix is redundant, and `Proper()` would wreck AWS, SAP, CD&R and

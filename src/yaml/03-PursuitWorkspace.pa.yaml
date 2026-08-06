@@ -263,6 +263,7 @@
       Size: =SizeMeta
       Color: =ClrTextFaint
       Wrap: =true
+      VerticalAlign: =VerticalAlign.Top
 
 - recSyncPill:
     Control: Classic/Button
@@ -466,11 +467,12 @@
       Y: =422
       Width: =592
       Height: =96
-      Text: =Coalesce(gblOverview.'Overview Text', "No overview has been generated for this pursuit yet.")
+      Text: =Clip(Coalesce(gblOverview.'Overview Text', "No overview has been generated for this pursuit yet."), 420)
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
       Wrap: =true
+      VerticalAlign: =VerticalAlign.Top
 
 - lblOverviewMeta:
     Control: Label
@@ -491,6 +493,7 @@
       Size: =SizeMeta
       Color: =ClrTextFaint
       Wrap: =true
+      VerticalAlign: =VerticalAlign.Top
 
 # ---- Actions card ---------------------------------------------------------
 - cardActions:
@@ -545,12 +548,13 @@
             Y: =6
             Width: =230
             Height: =42
-            Text: =ThisItem.'Action Title'
+            Text: =Clip(ThisItem.'Action Title', 62)
             Font: =FontUI
             Size: =SizeBody
             FontWeight: =FontWeight.Semibold
             Color: =If(ThisItem.Status.Value = "Completed", ClrTextFaint, ClrText)
             Wrap: =true
+            VerticalAlign: =VerticalAlign.Top
 
       - lblActionStage:
           Control: Label
@@ -559,11 +563,12 @@
             Y: =6
             Width: =140
             Height: =42
-            Text: =ThisItem.'Workflow Stage'.Value
+            Text: =Clip(ThisItem.'Workflow Stage'.Value, 38)
             Font: =FontUI
             Size: =SizeBody
             Color: =ClrTextMuted
             Wrap: =true
+            VerticalAlign: =VerticalAlign.Top
 
       - lblActionEffort:
           Control: Label
@@ -830,7 +835,7 @@
             Y: =2
             Width: =Parent.Width - 20
             Height: =22
-            Text: =ThisItem.Title
+            Text: =Clip(ThisItem.Title, 62)
             Font: =FontUI
             Size: =SizeBody
             Color: =ClrLink
@@ -901,11 +906,12 @@
             Y: =4
             Width: =Parent.Width - 110
             Height: =42
-            Text: =ThisItem.'Update Text'
+            Text: =Clip(ThisItem.'Update Text', 128)
             Font: =FontUI
             Size: =SizeBody
             Color: =ClrText
             Wrap: =true
+            VerticalAlign: =VerticalAlign.Top
       - recUpdateTag:
           Control: Classic/Button
           Properties:

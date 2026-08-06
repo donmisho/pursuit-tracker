@@ -294,12 +294,13 @@
             Y: =10
             Width: =150
             Height: =46
-            Text: =ThisItem.'Account Name'
+            Text: =Clip(ThisItem.'Account Name', 40)
             Font: =FontUI
             Size: =SizeBody
             FontWeight: =FontWeight.Semibold
             Color: =ClrText
             Wrap: =true
+            VerticalAlign: =VerticalAlign.Top
 
       - lblRowTitle:
           Control: Label
@@ -313,20 +314,24 @@
             # turn AWS into Aws and CD&R into Cd&R. Both separators in the data are
             # handled: "ACCOUNT: name" and "ACCOUNT - name".
             Text: |
-              =With(
-                  { n: ThisItem.'Pursuit Name' },
-                  Trim(
-                      If(
-                          !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
-                          !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
-                          n
+              =Clip(
+                  With(
+                      { n: ThisItem.'Pursuit Name' },
+                      Trim(
+                          If(
+                              !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
+                              !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
+                              n
+                          )
                       )
-                  )
+                  ),
+                  96
               )
             Font: =FontUI
             Size: =SizeBody
             Color: =ClrText
             Wrap: =true
+            VerticalAlign: =VerticalAlign.Top
 
       - lblRowSfLink:
           Control: Label
@@ -347,11 +352,12 @@
             Y: =10
             Width: =170
             Height: =46
-            Text: =ThisItem.'Workflow Stage'.Value
+            Text: =Clip(ThisItem.'Workflow Stage'.Value, 52)
             Font: =FontUI
             Size: =SizeBody
             Color: =ClrTextMuted
             Wrap: =true
+            VerticalAlign: =VerticalAlign.Top
 
       - recRowAvatar:
           Control: Classic/Button
@@ -490,11 +496,12 @@
             Y: =10
             Width: =210
             Height: =42
-            Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", ThisItem.NextActionTitle)
+            Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 58))
             Font: =FontUI
             Size: =SizeBody
             Color: =If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)
             Wrap: =true
+            VerticalAlign: =VerticalAlign.Top
 
       - lblRowNextDue:
           Control: Label
