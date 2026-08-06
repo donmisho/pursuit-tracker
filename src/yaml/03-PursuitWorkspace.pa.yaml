@@ -8,6 +8,12 @@
 # rebuild this screen from the "Scrollable screen" layout and drop these controls into
 # its Canvas; every formula below is unchanged by that.
 
+# CONTROL TYPES: buttons and inputs use the Classic/ prefix -- the unprefixed names
+# resolve to the modern Fluent controls, which have no Fill, Color or Radius properties.
+# Rounded shapes are Classic/Button with Text "" rather than Rectangle: the classic
+# Rectangle has no Radius properties at all, and Button is the only classic control that
+# does. Square shapes (rules, dividers, accent bars, the panel scrim) stay Rectangle.
+
 # ---------------------------------------------------------------- nav bar
 - navBg:
     Control: Rectangle
@@ -42,7 +48,7 @@
       VerticalAlign: =VerticalAlign.Middle
 
 - btnNavBoard:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =210
       Y: =14
@@ -65,7 +71,7 @@
       OnSelect: =Navigate(scrPortfolioBoard, ScreenTransition.None)
 
 - btnNavList:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =390
       Y: =14
@@ -88,7 +94,7 @@
       OnSelect: =Navigate(scrPortfolioList, ScreenTransition.None)
 
 - btnNavWorkspace:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =560
       Y: =14
@@ -149,7 +155,7 @@
       Color: =ClrTextMuted
 
 - btnAddAction:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =btnAddUpdate.X - Self.Width - 12
       Y: =100
@@ -173,7 +179,7 @@
       OnSelect: =Set(gblPanel, "action"); Reset(txtActionTitle)
 
 - btnAddUpdate:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =Parent.Width - Self.Width - GapPage
       Y: =100
@@ -198,13 +204,17 @@
 # ================================================================ LEFT RAIL
 # ---- Salesforce card ------------------------------------------------------
 - cardSalesforce:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
       X: =GapPage
       Y: =176
       Width: =640
       Height: =190
-      Fill: =ClrCard
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -255,13 +265,17 @@
       Wrap: =true
 
 - recSyncPill:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChip, ClrOkFill)
+      HoverFill: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChip, ClrOkFill)
+      PressedFill: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChip, ClrOkFill)
+      OnSelect: =false
       X: =546
       Y: =220
       Width: =90
       Height: =24
-      Fill: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), ClrChip, ClrOkFill)
       RadiusTopLeft: =RadiusChip
       RadiusTopRight: =RadiusChip
       RadiusBottomLeft: =RadiusChip
@@ -282,13 +296,17 @@
       VerticalAlign: =VerticalAlign.Middle
 
 - recOwnerBox:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrColumn
+      HoverFill: =ClrColumn
+      PressedFill: =ClrColumn
+      OnSelect: =false
       X: =44
       Y: =288
       Width: =285
       Height: =62
-      Fill: =ClrColumn
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =6
@@ -309,13 +327,17 @@
       Color: =ClrTextMuted
 
 - recWsAvatar:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrAvatar
+      HoverFill: =ClrAvatar
+      PressedFill: =ClrAvatar
+      OnSelect: =false
       X: =58
       Y: =314
       Width: =24
       Height: =24
-      Fill: =ClrAvatar
       RadiusTopLeft: =12
       RadiusTopRight: =12
       RadiusBottomLeft: =12
@@ -361,13 +383,17 @@
       Color: =ClrTextFaint
 
 - recCloseBox:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrColumn
+      HoverFill: =ClrColumn
+      PressedFill: =ClrColumn
+      OnSelect: =false
       X: =345
       Y: =288
       Width: =285
       Height: =62
-      Fill: =ClrColumn
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =6
@@ -402,13 +428,17 @@
 
 # ---- AI overview card -----------------------------------------------------
 - cardOverview:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
       X: =GapPage
       Y: =378
       Width: =640
       Height: =180
-      Fill: =ClrCard
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -464,13 +494,17 @@
 
 # ---- Actions card ---------------------------------------------------------
 - cardActions:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
       X: =GapPage
       Y: =570
       Width: =640
       Height: =174
-      Fill: =ClrCard
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -544,14 +578,18 @@
             Color: =ClrText
 
       - recActionPill:
-          Control: Rectangle
+          Control: Classic/Button
           Properties:
+            Text: =""
+            Fill: =ClrRiskFill
+            HoverFill: =ClrRiskFill
+            PressedFill: =ClrRiskFill
+            OnSelect: =false
             X: =480
             Y: =8
             Width: =84
             Height: =24
             Visible: =ThisItem.Health.Value = "At risk"
-            Fill: =ClrRiskFill
             RadiusTopLeft: =RadiusChip
             RadiusTopRight: =RadiusChip
             RadiusBottomLeft: =RadiusChip
@@ -598,13 +636,17 @@
 # ================================================================ RIGHT RAIL
 # ---- Alignment card -------------------------------------------------------
 - cardAlignment:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
       X: =688
       Y: =176
       Width: =Parent.Width - 688 - GapPage
       Height: =130
-      Fill: =ClrCard
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -651,13 +693,17 @@
       ShowScrollbar: =false
     Children:
       - recAlignSIChip:
-          Control: Rectangle
+          Control: Classic/Button
           Properties:
+            Text: =""
+            Fill: =ClrChip
+            HoverFill: =ClrChip
+            PressedFill: =ClrChip
+            OnSelect: =false
             X: =0
             Y: =0
             Width: =84
             Height: =24
-            Fill: =ClrChip
             RadiusTopLeft: =RadiusChip
             RadiusTopRight: =RadiusChip
             RadiusBottomLeft: =RadiusChip
@@ -702,13 +748,17 @@
       ShowScrollbar: =false
     Children:
       - recAlignHypeChip:
-          Control: Rectangle
+          Control: Classic/Button
           Properties:
+            Text: =""
+            Fill: =ClrChip
+            HoverFill: =ClrChip
+            PressedFill: =ClrChip
+            OnSelect: =false
             X: =0
             Y: =0
             Width: =84
             Height: =24
-            Fill: =ClrChip
             RadiusTopLeft: =RadiusChip
             RadiusTopRight: =RadiusChip
             RadiusBottomLeft: =RadiusChip
@@ -729,13 +779,17 @@
 
 # ---- Documents card -------------------------------------------------------
 - cardDocuments:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
       X: =688
       Y: =318
       Width: =Parent.Width - 688 - GapPage
       Height: =118
-      Fill: =ClrCard
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -796,13 +850,17 @@
 
 # ---- Status updates card --------------------------------------------------
 - cardUpdates:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
       X: =688
       Y: =448
       Width: =Parent.Width - 688 - GapPage
       Height: =160
-      Fill: =ClrCard
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -849,14 +907,18 @@
             Color: =ClrText
             Wrap: =true
       - recUpdateTag:
-          Control: Rectangle
+          Control: Classic/Button
           Properties:
+            Text: =""
+            Fill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
+            HoverFill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
+            PressedFill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
+            OnSelect: =false
             X: =Parent.Width - 96
             Y: =4
             Width: =76
             Height: =22
             Visible: =Not(IsBlank(ThisItem.'Risk / Decision'.Value))
-            Fill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
             RadiusTopLeft: =RadiusChip
             RadiusTopRight: =RadiusChip
             RadiusBottomLeft: =RadiusChip
@@ -900,13 +962,17 @@
 
 # ---- AI overview history card ---------------------------------------------
 - cardHistory:
-    Control: Rectangle
+    Control: Classic/Button
     Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
       X: =688
       Y: =620
       Width: =Parent.Width - 688 - GapPage
       Height: =124
-      Fill: =ClrCard
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -1026,7 +1092,7 @@
       Color: =ClrTextMuted
 
 - txtActionTitle:
-    Control: TextInput
+    Control: Classic/TextInput
     Properties:
       X: =Parent.Width - 396
       Y: =104
@@ -1055,7 +1121,7 @@
       Color: =ClrTextMuted
 
 - drpActionStage:
-    Control: DropDown
+    Control: Classic/DropDown
     Properties:
       X: =Parent.Width - 396
       Y: =174
@@ -1083,7 +1149,7 @@
       Color: =ClrTextMuted
 
 - drpActionEffort:
-    Control: DropDown
+    Control: Classic/DropDown
     Properties:
       X: =Parent.Width - 396
       Y: =244
@@ -1111,7 +1177,7 @@
       Color: =ClrTextMuted
 
 - dteActionDue:
-    Control: DatePicker
+    Control: Classic/DatePicker
     Properties:
       X: =Parent.Width - 396
       Y: =314
@@ -1138,7 +1204,7 @@
       Color: =ClrTextMuted
 
 - cmbActionOwner:
-    Control: ComboBox
+    Control: Classic/ComboBox
     Properties:
       X: =Parent.Width - 396
       Y: =384
@@ -1169,7 +1235,7 @@
       Color: =ClrTextMuted
 
 - txtUpdateBody:
-    Control: TextInput
+    Control: Classic/TextInput
     Properties:
       X: =Parent.Width - 396
       Y: =104
@@ -1199,7 +1265,7 @@
       Color: =ClrTextMuted
 
 - drpUpdateType:
-    Control: DropDown
+    Control: Classic/DropDown
     Properties:
       X: =Parent.Width - 396
       Y: =276
@@ -1227,7 +1293,7 @@
       Color: =ClrTextMuted
 
 - drpUpdateRisk:
-    Control: DropDown
+    Control: Classic/DropDown
     Properties:
       X: =Parent.Width - 396
       Y: =346
@@ -1244,7 +1310,7 @@
 
 # ---- panel buttons --------------------------------------------------------
 - btnPanelCancel:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =Parent.Width - 396
       Y: =Parent.Height - 76
@@ -1267,7 +1333,7 @@
       OnSelect: =Set(gblPanel, "")
 
 - btnPanelSave:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =Parent.Width - 156
       Y: =Parent.Height - 76

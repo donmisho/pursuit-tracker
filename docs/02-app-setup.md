@@ -181,3 +181,23 @@ becomes `Concat(FirstN(Split(ThisItem.OwnerName, " "), 2), Left(Value, 1))`.
 
 The colour and size tokens are plain named formulas, take no parameters, and are
 unaffected. Don't delete those.
+
+## Classic vs modern controls
+
+Unprefixed control names in the source schema resolve to the **modern** Fluent controls,
+which have a different property set from the classic ones — no `Fill`, `Color`,
+`HoverFill` or `Radius*` on a Button, for instance. Everything here that needs those
+properties uses the `Classic/` prefix: `Classic/Button`, `Classic/TextInput`,
+`Classic/DropDown`, `Classic/ComboBox`, `Classic/DatePicker`.
+
+Rounded shapes are `Classic/Button` with `Text` set to `""`, not `Rectangle`. The classic
+Rectangle has no radius properties at all, and Button is the only classic control that
+does — so every card, chip, pill and avatar circle is a button that happens not to say
+anything. Decorative ones set `HoverFill` and `PressedFill` equal to `Fill` so they don't
+light up under the cursor; the clickable ones (`recCard`) keep a real hover colour.
+
+Square shapes — rules, dividers, stage accent bars, the health stripe, the panel scrim —
+stay `Rectangle`.
+
+`Label` and `Gallery` need no prefix: `Label` is already the classic control, and there
+is no modern gallery.

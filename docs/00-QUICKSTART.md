@@ -121,6 +121,8 @@ that.
 | Cards show email addresses | Step 12 was skipped |
 | Workspace tab greyed out | Correct — click a card on the board first |
 | Blue squiggle under `Status.Value <> "Completed"` | Correct — ignore it |
+| "Unknown property 'Fill' for control type 'Button'" | Older YAML — re-copy. Buttons and inputs need the `Classic/` prefix |
+| "Unknown property 'RadiusTopLeft' for control type 'Rectangle'" | Same — re-copy. Rounded shapes are `Classic/Button`, not `Rectangle` |
 | A paste in step 23 is rejected | See the FALLBACKS block at the bottom of that YAML file |
 
 Full triage: `docs/08-deploy-and-test.md`.

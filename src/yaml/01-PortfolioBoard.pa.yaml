@@ -9,6 +9,12 @@
 # If Studio rejects the paste, it is almost always one of two controls: see the
 # FALLBACKS note at the foot of this file. Nothing else here is exotic.
 
+# CONTROL TYPES: buttons and inputs use the Classic/ prefix -- the unprefixed names
+# resolve to the modern Fluent controls, which have no Fill, Color or Radius properties.
+# Rounded shapes are Classic/Button with Text "" rather than Rectangle: the classic
+# Rectangle has no Radius properties at all, and Button is the only classic control that
+# does. Square shapes (rules, dividers, accent bars, the panel scrim) stay Rectangle.
+
 # ---------------------------------------------------------------- nav bar
 - navBg:
     Control: Rectangle
@@ -43,7 +49,7 @@
       VerticalAlign: =VerticalAlign.Middle
 
 - btnNavBoard:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =210
       Y: =14
@@ -66,7 +72,7 @@
       OnSelect: =false
 
 - btnNavList:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =390
       Y: =14
@@ -89,7 +95,7 @@
       OnSelect: =Navigate(scrPortfolioList, ScreenTransition.None)
 
 - btnNavWorkspace:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =560
       Y: =14
@@ -144,7 +150,7 @@
       Color: =If(IsBlank(gblMoving), ClrTextMuted, ClrAccent)
 
 - btnNewPursuit:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =Parent.Width - Self.Width - GapPage
       Y: =96
@@ -181,13 +187,17 @@
       ShowScrollbar: =true
     Children:
       - colBg:
-          Control: Rectangle
+          Control: Classic/Button
           Properties:
+            Text: =""
+            Fill: =ClrColumn
+            HoverFill: =ClrColumn
+            PressedFill: =ClrColumn
+            OnSelect: =false
             X: =0
             Y: =0
             Width: =Parent.TemplateWidth - 12
             Height: =Parent.Height - 8
-            Fill: =ClrColumn
             BorderColor: =ClrBorder
             BorderThickness: =1
             RadiusTopLeft: =RadiusCard
@@ -203,8 +213,6 @@
             Width: =colBg.Width
             Height: =3
             Fill: =StageAccent(ThisItem.Stage)
-            RadiusTopLeft: =RadiusCard
-            RadiusTopRight: =RadiusCard
 
       - lblStageName:
           Control: Label
@@ -246,10 +254,6 @@
             BorderColor: =ClrAccent
             BorderStyle: =BorderStyle.Dashed
             BorderThickness: =1
-            RadiusTopLeft: =RadiusCard
-            RadiusTopRight: =RadiusCard
-            RadiusBottomLeft: =RadiusCard
-            RadiusBottomRight: =RadiusCard
             OnSelect: |
               =Patch(
                   'pursuit-tracker-pursuits',
@@ -305,13 +309,16 @@
             ShowScrollbar: =true
           Children:
             - recCard:
-                Control: Rectangle
+                Control: Classic/Button
                 Properties:
+                  Text: =""
+                  Fill: =ClrCard
+                  HoverFill: =ClrCardHover
+                  PressedFill: =ClrCardHover
                   X: =0
                   Y: =0
                   Width: =282
                   Height: =170
-                  Fill: =ClrCard
                   BorderColor: =If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrBorder)
                   BorderThickness: =If(gblMoving.Title = ThisItem.Title, 2, 1)
                   RadiusTopLeft: =RadiusCard
@@ -328,8 +335,6 @@
                   Width: =3
                   Height: =170
                   Fill: =If(ThisItem.Health.Value = "At risk", ClrRiskFill, Transparent)
-                  RadiusTopLeft: =RadiusCard
-                  RadiusBottomLeft: =RadiusCard
 
             - lblMoveHandle:
                 Control: Label
@@ -362,13 +367,17 @@
                   Wrap: =true
 
             - recAvatar:
-                Control: Rectangle
+                Control: Classic/Button
                 Properties:
+                  Text: =""
+                  Fill: =ClrAvatar
+                  HoverFill: =ClrAvatar
+                  PressedFill: =ClrAvatar
+                  OnSelect: =false
                   X: =14
                   Y: =64
                   Width: =24
                   Height: =24
-                  Fill: =ClrAvatar
                   RadiusTopLeft: =12
                   RadiusTopRight: =12
                   RadiusBottomLeft: =12
@@ -415,13 +424,17 @@
                   ShowScrollbar: =false
                 Children:
                   - recChip:
-                      Control: Rectangle
+                      Control: Classic/Button
                       Properties:
+                        Text: =""
+                        Fill: =ClrChip
+                        HoverFill: =ClrChip
+                        PressedFill: =ClrChip
+                        OnSelect: =false
                         X: =0
                         Y: =0
                         Width: =72
                         Height: =22
-                        Fill: =ClrChip
                         RadiusTopLeft: =RadiusChip
                         RadiusTopRight: =RadiusChip
                         RadiusBottomLeft: =RadiusChip

@@ -2,6 +2,12 @@
 # Tablet (1366 x 768), "Scale to fit" OFF. See 01-PortfolioBoard.pa.yaml for paste
 # instructions and fallbacks.
 
+# CONTROL TYPES: buttons and inputs use the Classic/ prefix -- the unprefixed names
+# resolve to the modern Fluent controls, which have no Fill, Color or Radius properties.
+# Rounded shapes are Classic/Button with Text "" rather than Rectangle: the classic
+# Rectangle has no Radius properties at all, and Button is the only classic control that
+# does. Square shapes (rules, dividers, accent bars, the panel scrim) stay Rectangle.
+
 # ---------------------------------------------------------------- nav bar
 - navBg:
     Control: Rectangle
@@ -36,7 +42,7 @@
       VerticalAlign: =VerticalAlign.Middle
 
 - btnNavBoard:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =210
       Y: =14
@@ -59,7 +65,7 @@
       OnSelect: =Navigate(scrPortfolioBoard, ScreenTransition.None)
 
 - btnNavList:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =390
       Y: =14
@@ -82,7 +88,7 @@
       OnSelect: =false
 
 - btnNavWorkspace:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =560
       Y: =14
@@ -132,7 +138,7 @@
       Color: =ClrTextMuted
 
 - btnDownloadExcel:
-    Control: Button
+    Control: Classic/Button
     Properties:
       X: =Parent.Width - Self.Width - GapPage
       Y: =96
@@ -294,13 +300,17 @@
             Wrap: =true
 
       - recRowAvatar:
-          Control: Rectangle
+          Control: Classic/Button
           Properties:
+            Text: =""
+            Fill: =ClrAvatar
+            HoverFill: =ClrAvatar
+            PressedFill: =ClrAvatar
+            OnSelect: =false
             X: =430
             Y: =10
             Width: =24
             Height: =24
-            Fill: =ClrAvatar
             RadiusTopLeft: =12
             RadiusTopRight: =12
             RadiusBottomLeft: =12
@@ -347,13 +357,17 @@
             ShowScrollbar: =false
           Children:
             - recSIChip:
-                Control: Rectangle
+                Control: Classic/Button
                 Properties:
+                  Text: =""
+                  Fill: =ClrChip
+                  HoverFill: =ClrChip
+                  PressedFill: =ClrChip
+                  OnSelect: =false
                   X: =0
                   Y: =0
                   Width: =92
                   Height: =22
-                  Fill: =ClrChip
                   RadiusTopLeft: =RadiusChip
                   RadiusTopRight: =RadiusChip
                   RadiusBottomLeft: =RadiusChip
@@ -386,13 +400,17 @@
             ShowScrollbar: =false
           Children:
             - recHypeChip:
-                Control: Rectangle
+                Control: Classic/Button
                 Properties:
+                  Text: =""
+                  Fill: =ClrChip
+                  HoverFill: =ClrChip
+                  PressedFill: =ClrChip
+                  OnSelect: =false
                   X: =0
                   Y: =0
                   Width: =92
                   Height: =22
-                  Fill: =ClrChip
                   RadiusTopLeft: =RadiusChip
                   RadiusTopRight: =RadiusChip
                   RadiusBottomLeft: =RadiusChip
