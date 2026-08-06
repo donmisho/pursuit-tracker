@@ -7,14 +7,17 @@ scrPortfolioList
 ├── nav bar
 ├── lblPageTitle / lblPageSub
 ├── btnDownloadExcel
-├── recHeaderRule + six column-header labels
+├── recHeaderRule + seven column-header labels
 ├── galPortfolioList             ◄── one row per pursuit
+│   ├── recRowDivider
+│   ├── lblRowAccount
 │   ├── lblRowTitle / lblRowSfLink
 │   ├── lblRowStage
 │   ├── recRowAvatar + lblRowInitials + lblRowOwner
 │   ├── galRowSIs / galRowHype   ◄── chips
 │   ├── lblRowNextTask + lblRowNextDue
-│   └── recRowDivider
+│   ├── btnRowClick              ◄── transparent, on top: whole row navigates
+│   └── btnRowMenu + recRowMenu + btnMenuWorkspace + btnMenuSalesforce
 └── lblFooterNote
 ```
 
@@ -23,7 +26,7 @@ scrPortfolioList
 | Property | Formula |
 |---|---|
 | `Fill` | `=ClrPage` |
-| `OnVisible` | the same `LoadPortfolio` block the board uses (from `src/App.OnStart.powerfx`) |
+| `OnVisible` | the same `LoadPortfolio` block the board uses (from `src/App.OnStart.powerfx`), then `Set(gblRowMenu, "")` |
 
 ## Header
 
@@ -39,75 +42,145 @@ scrPortfolioList
 
 ## Column headers
 
-Six labels at `Y = 218`, `Size = SizeMeta`, `Color = ClrTextMuted`, all-caps, above a
+Seven labels at `Y = 218`, `Size = SizeMeta`, `Color = ClrTextMuted`, all-caps, above a
 1px `recHeaderRule` (`Fill = ClrBorder`).
 
 | Label | Text | X | Width |
 |---|---|---|---|
-| `lblHdrPursuit` | `="PURSUIT"` | 24 | 210 |
-| `lblHdrStage` | `="STAGE"` | 244 | 200 |
-| `lblHdrOwner` | `="OWNER"` | 454 | 190 |
-| `lblHdrSIs` | `="ALIGNED SIS"` | 654 | 150 |
-| `lblHdrHype` | `="HYPERSCALERS"` | 814 | 150 |
-| `lblHdrNext` | `="NEXT TASK"` | 974 | 200 |
+| `lblHdrAccount` | `="ACCOUNT"` | 24 | 150 |
+| `lblHdrPursuit` | `="PURSUIT"` | 184 | 230 |
+| `lblHdrStage` | `="STAGE"` | 458 | 170 |
+| `lblHdrOwner` | `="OWNER"` | 638 | 180 |
+| `lblHdrSIs` | `="SI"` | 828 | 130 |
+| `lblHdrHype` | `="HS"` | 968 | 130 |
+| `lblHdrNext` | `="NEXT ACTION"` | 1108 | 210 |
 
-Those six fit a 1366-wide tablet layout. The mockup's horizontal scrollbar implies more
-columns off-screen; galleries can't scroll horizontally, so that column set lives in the
-export instead, which already carries account, health, target date, Salesforce, and fees.
+The `⋯` column between Pursuit and Stage has no header — a header over a control that's
+the same on every row is noise.
+
+Partner headers shortened to `SI` and `HS` to match the board card captions, which buys
+back the width the account column needs.
 
 ## `galPortfolioList`
 
 | Property | Formula |
 |---|---|
-| `Items` | `=Sort(colPortfolio, 'Pursuit Name', SortOrder.Ascending)` |
+| `Items` | `=Sort(colPortfolio, 'Account Name' & " " & 'Pursuit Name', SortOrder.Ascending)` |
 | `Layout` | Vertical |
 | `TemplateSize` | `=110` |
-| `X` / `Y` | `=GapPage` / `=248` |
+| `X` / `Y` | `=GapPage` / `=250` |
 | `Width` | `=Parent.Width - (GapPage * 2)` |
-| `Height` | `=Parent.Height - Self.Y - 56` |
+| `Height` | `=Parent.Height - 250 - 56` |
 | `ShowScrollbar` | `=true` |
 
-Sorting on `Pursuit Name` groups by account for free, because every name in your data is
-prefixed with it — "ELEVANCE HEALTH: Carelon…" and "ELEVANCE HEALTH: Unified Data…" land
-together.
+Sorting on account-then-name rather than name alone. Sorting on the pursuit name used to
+group an account's pursuits for free, because the name carried the account as a prefix.
+Now that the prefix is stripped for display the sort has to say so explicitly — otherwise
+Elevance's "Carelon…" and "Unified Data…" end up filed under C and U.
 
 ### Row template
 
-Each control's `X` and `Width` match its column header.
+`X` and `Width` on each control match its column header, minus the gallery's own `X`.
 
 | Control | Property | Formula |
 |---|---|---|
-| `lblRowTitle` | `Text` | `=ThisItem.'Pursuit Name'` |
-| | `Size` / `FontWeight` / `Color` / `Wrap` | `=SizeCardTitle` / `=FontWeight.Semibold` / `=ClrText` / `=true` |
-| | `Height` | `=64` |
-| | `OnSelect` | `=Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
+| `lblRowAccount` | `Text` | `=ThisItem.'Account Name'` |
+| | `X` / `Width` / `Height` | `=0` / `=150` / `=46` |
+| | `Size` / `FontWeight` / `Color` / `Wrap` | `=SizeBody` / `=FontWeight.Semibold` / `=ClrText` / `=true` |
+| `lblRowTitle` | `Text` | the prefix-stripping formula (below) |
+| | `X` / `Width` / `Height` | `=160` / `=230` / `=54` |
+| | `Size` / `Color` / `Wrap` | `=SizeBody` / `=ClrText` / `=true` |
 | `lblRowSfLink` | `Text` | `=If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Salesforce opportunity linked")` |
 | | `Size` / `Color` | `=SizeMeta` / `=ClrTextFaint` |
 | `lblRowStage` | `Text` | `=ThisItem.'Workflow Stage'.Value` |
-| | `Size` / `Color` / `Wrap` | `=SizeBody` / `=ClrTextMuted` / `=true` |
-| `recRowAvatar` (Rectangle, all `Radius* = 12`) | `Fill` / `Width` / `Height` | `=ClrAvatar` / `=24` / `=24` |
-| `lblRowInitials` | `Text` | `=Initials(ThisItem.OwnerName)` |
-| | `Size` / `Color` / `Align` | `=SizeChip` / `=ClrAvatarText` / `=Align.Center` |
-| `lblRowOwner` | `Text` | `=ThisItem.OwnerName` |
-| | `Size` / `Color` | `=SizeBody` / `=ClrText` |
-| `lblRowNextTask` | `Text` | `=Coalesce(ThisItem.NextAction.'Action Title', "—")` |
-| | `Size` / `Color` / `Wrap` | `=SizeBody` / `=ClrText` / `=true` |
+| | `X` / `Width` | `=434` / `=170` |
+| `recRowAvatar` / `lblRowInitials` / `lblRowOwner` | | as before, `X` `=614` / `=614` / `=646` |
+| `galRowSIs` / `galRowHype` | `X` | `=804` / `=944` |
+| | `Width` / `Height` / `TemplateSize` | `=130` / `=84` / `=28` |
+| `lblRowNextTask` | `Text` | `=Coalesce(ThisItem.NextAction.'Action Title', "No open actions")` |
+| | `Color` | `=If(IsBlank(ThisItem.NextAction), ClrTextFaint, ClrText)` |
 | `lblRowNextDue` | `Text` | `=If(IsBlank(ThisItem.NextAction), "", Text(ThisItem.NextAction.'Due Date', "mmmm d"))` |
-| | `Size` / `Color` | `=SizeBody` / `=ClrDate` |
-| `recRowDivider` | `Y` / `Height` / `Fill` | `=Parent.TemplateHeight - 1` / `=1` / `=ClrDivider` |
+| `recRowDivider` | `Y` / `Width` | `=Parent.TemplateHeight - 1` / `=Parent.Width - 20` |
 
-`lblRowSfLink` tests the URL rather than a sync-status column — there's no sync status
-in the real schema, and eight of your fourteen pursuits have no Salesforce URL, so the
-distinction is worth drawing.
+Pursuit text drops from `SizeCardTitle` to `SizeBody` — the same size as Stage. The
+account carries the emphasis now, so two competing bold columns would just fight.
 
-### Chip galleries
+`lblRowTitle.Text`:
 
-`galRowSIs` (`Items = ThisItem.'Aligned SIs'`) and `galRowHype`
-(`Items = ThisItem.Hyperscalers`), both `Layout` Vertical, `TemplateSize = 26`,
-`Height = 78`, chip template as on the board.
+```powerfx
+With(
+    { n: ThisItem.'Pursuit Name' },
+    Trim(
+        If(
+            !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
+            !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
+            n
+        )
+    )
+)
+```
 
-Vertical rather than horizontal: the mockup stacks NiSource's two SIs rather than
-running them across, and stacking degrades better at three partners.
+Same treatment as the board card, and for the same reason: with the account in its own
+column the ALL-CAPS prefix is redundant, and `Proper()` would wreck AWS, SAP, CD&R and
+MatixCare on the way to fixing it. Chip galleries are 124 wide now rather than 92, so
+"Internal/West Monroe" and "Databricks" stop clipping.
+
+## Whole-row click
+
+`btnRowClick` is a transparent `Classic/Button` covering the row:
+
+| Property | Formula |
+|---|---|
+| `Text` | `=""` |
+| `X` / `Y` | `=0` / `=0` |
+| `Width` / `Height` | `=Parent.Width - 20` / `=Parent.TemplateHeight - 1` |
+| `Fill` | `=Transparent` |
+| `HoverFill` / `PressedFill` | `=RGBA(255, 255, 255, 0.04)` / `=RGBA(255, 255, 255, 0.07)` |
+| `BorderThickness` | `=0` |
+| `OnSelect` | `=Set(gblRowMenu, ""); Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
+
+**It sits on top of the row content, not behind it.** That's the part worth understanding:
+canvas controls capture their own pointer events, so a click target underneath the labels
+would only fire in the gaps between them — and the gaps are exactly where nobody clicks.
+Transparent fill means it paints nothing; the hover fill is a 4%-white wash that reads as
+a row highlight.
+
+Z-order in the source file is document order, so anything that must stay clickable has to
+appear *after* `btnRowClick`. That's the `⋯` button and its menu, and nothing else.
+
+`lblRowTitle` no longer carries its own `OnSelect` — the click layer covers it.
+
+## The `⋯` menu
+
+A per-row popover rather than a real context menu, which canvas doesn't have. `gblRowMenu`
+holds the `PUR-nnn` of the open row, so at most one menu is open at a time and every other
+row's controls stay hidden.
+
+| Control | Property | Formula |
+|---|---|---|
+| `btnRowMenu` | `Text` / `X` / `Y` | `="⋯"` / `=396` / `=12` |
+| | `Fill` / `Color` | `=Transparent` / `=ClrTextMuted` |
+| | `OnSelect` | `=Set(gblRowMenu, If(gblRowMenu = ThisItem.Title, "", ThisItem.Title))` |
+| `recRowMenu` | `Visible` | `=gblRowMenu = ThisItem.Title` |
+| | `X` / `Y` / `Width` / `Height` | `=396` / `=40` / `=230` / `=70` |
+| | `Fill` / `BorderColor` | `=ClrColumn` / `=ClrBorder` |
+| `btnMenuWorkspace` | `Text` | `="Open pursuit workspace"` |
+| | `Visible` | `=gblRowMenu = ThisItem.Title` |
+| | `OnSelect` | `=Set(gblRowMenu, ""); Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
+| `btnMenuSalesforce` | `Text` | `=If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Open Salesforce opportunity")` |
+| | `Visible` | `=gblRowMenu = ThisItem.Title` |
+| | `DisplayMode` | `=If(IsBlank(ThisItem.'Salesforce Opportunity URL'), DisplayMode.Disabled, DisplayMode.Edit)` |
+| | `OnSelect` | `=Set(gblRowMenu, ""); Launch(ThisItem.'Salesforce Opportunity URL')` |
+
+The Salesforce entry is disabled rather than hidden when a pursuit has no URL, and says so
+— eight of your fourteen have none, and a menu that changes height depending on the row is
+harder to use than one that greys an option out.
+
+Two behaviours worth knowing. The menu opens *downward inside the row*, so it's 110px of
+vertical space at most; at 70px it fits. And it closes on any row click, because
+`btnRowClick.OnSelect` clears `gblRowMenu` before it navigates — there's no click-away
+handler on the screen itself, so a menu left open while you scroll stays open until you
+click something.
 
 ## Footer
 

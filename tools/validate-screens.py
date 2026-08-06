@@ -38,7 +38,7 @@ KNOWN_GLOBALS = {
     "GapPage", "GapCard", "RadiusCard", "RadiusChip", "BoardColWidth",
     "StageAccent", "DueLabel", "Initials", "SafeUrl", "RelativeDay",
     "gblUser", "gblMoving", "gblPursuitKey", "gblNewPursuit", "gblPanel", "gblPursuit",
-    "gblOverview", "gblExport", "gblExporting",
+    "gblOverview", "gblExport", "gblExporting", "gblRowMenu",
     "colActions", "colActions_P", "colPeople", "colPortfolio", "colStages", "colUpdates",
     "colDocs", "colHistory",
     "scrPortfolioBoard", "scrPortfolioList", "scrPursuitWorkspace",

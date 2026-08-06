@@ -32,6 +32,7 @@ Set(gblPursuitKey, "");       // PUR-nnn of the open pursuit
 Set(gblNewPursuit, false);    // workspace is in create mode
 Set(gblPanel, "");            // "" | "action" | "update" -- open slide-over
 Set(gblExporting, false);     // Excel export in flight
+Set(gblRowMenu, "");          // PUR-nnn whose ⋯ menu is open on the list
 
 
 // =====================================================================
