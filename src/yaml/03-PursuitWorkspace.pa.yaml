@@ -1146,7 +1146,13 @@
       Height: =Parent.Height
       Visible: =gblPanel <> ""
       Fill: =ColorFade(ClrPage, -0.4)
-      OnSelect: =Set(gblPanel, "")
+      OnSelect: |
+        =Set(gblPanel, "");
+        If(
+            gblNewPursuit,
+            Set(gblNewPursuit, false);
+            Navigate(scrPortfolioBoard, ScreenTransition.None)
+        )
 
 - recPanel:
     Control: Rectangle
@@ -2106,7 +2112,13 @@
       RadiusTopRight: =6
       RadiusBottomLeft: =6
       RadiusBottomRight: =6
-      OnSelect: =Set(gblPanel, "")
+      OnSelect: |
+        =Set(gblPanel, "");
+        If(
+            gblNewPursuit,
+            Set(gblNewPursuit, false);
+            Navigate(scrPortfolioBoard, ScreenTransition.None)
+        )
 
 - btnPanelSave:
     Control: Classic/Button

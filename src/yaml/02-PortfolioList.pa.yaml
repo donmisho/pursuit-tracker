@@ -113,7 +113,7 @@
       RadiusBottomLeft: =6
       RadiusBottomRight: =6
       DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
-      OnSelect: =Navigate(scrPursuitWorkspace, ScreenTransition.None)
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
 
 # ---------------------------------------------------------------- page header
 - lblPageTitle:

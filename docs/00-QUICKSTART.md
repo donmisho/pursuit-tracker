@@ -127,6 +127,8 @@ that.
 | "Unknown property 'RadiusTopLeft' for control type 'Rectangle'" | Same — re-copy. Rounded shapes are `Classic/Button`, not `Rectangle` |
 | "Name isn't valid" on `Transparent` | Older YAML — re-copy. It's `Color.Transparent`; the bare name isn't in scope |
 | Headers doubled / text overlapping itself | You pasted over existing controls. Delete the screen's controls and paste again |
+| Workspace opens blank after clicking a card | `scrPursuitWorkspace.OnVisible` is missing or stale — step 26. Check `gblPursuitKey` in View → Variables: if it holds `PUR-nnn`, the navigation worked and OnVisible is the problem |
+| Workspace always says "New pursuit" | `gblNewPursuit` stuck true from a cancelled Add pursuit. Fixed in current YAML; re-copy all three screens |
 | A paste in step 23 is rejected | See the FALLBACKS block at the bottom of that YAML file |
 
 Full triage: `docs/08-deploy-and-test.md`.
