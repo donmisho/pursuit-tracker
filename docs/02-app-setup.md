@@ -90,7 +90,7 @@ aren't switched on yet — go back to step 2.
 ## 6. Paste the four screens
 
 `src/yaml/` holds each screen as complete Power Apps code-view YAML — every control,
-positioned, with every formula. 242 controls across the four files.
+positioned, with every formula. 240 controls across the four files.
 
 For each screen in turn:
 
@@ -104,7 +104,7 @@ For each screen in turn:
 | File | Screen | Controls |
 |---|---|---|
 | `01-PortfolioBoard.pa.yaml` | `scrPortfolioBoard` | 36 |
-| `02-PortfolioList.pa.yaml` | `scrPortfolioList` | 42 |
+| `02-PortfolioList.pa.yaml` | `scrPortfolioList` | 40 |
 | `03-PursuitWorkspace.pa.yaml` | `scrPursuitWorkspace` | 119 |
 | `04-PursuitDocsAI.pa.yaml` | `scrPursuitDocsAI` | 45 |
 
@@ -173,7 +173,7 @@ their nine call sites:
 | Call | Replace with |
 |---|---|
 | `StageAccent(ThisItem.Stage)`<br>*(`recStageAccent.Fill`, board)* | `Switch(ThisItem.Stage, "Unassigned", ColorValue("#5A6474"), "WM Account Team Assimilation", ColorValue("#6B7DF2"), "Partner Introduction", ColorValue("#5AB0C9"), "Preliminary Scoping", ColorValue("#8E7BD8"), "Proposal/Quote", ColorValue("#D8A05A"), ClrTextMuted)` |
-| `Initials(X)`<br>*(3×: board card, list row, workspace owner)* | `Concat(FirstN(Split(X, " "), 2), Left(Value, 1))` |
+| `Initials(X)`<br>*(unused since the list row's avatar was removed; kept for reuse)* | `Concat(FirstN(Split(X, " "), 2), Left(Value, 1))` |
 | `DueLabel(D, W)`<br>*(`lblActionDue`, workspace)* | `If(!IsBlank(D), Text(D, "mmmm d"), !IsBlank(W), W, "")` |
 | `SafeUrl(U)`<br>*(`lblDocLink.OnSelect`, workspace)* | `If(StartsWith(Lower(U), "http"), U, "https://" & U)` |
 | `RelativeDay(D)`<br>*(3×: overview meta, update byline, version meta)* | `Switch(DateDiff(D, Now(), TimeUnit.Days), 0, "Today", 1, "Yesterday", Text(D, "mmmm d"))` |

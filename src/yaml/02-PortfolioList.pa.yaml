@@ -2,6 +2,9 @@
 # Tablet (1366 x 768), "Scale to fit" OFF. See 01-PortfolioBoard.pa.yaml for paste
 # instructions and fallbacks.
 #
+# Round-tripped out of Studio, so this matches what's on the canvas. Control versions
+# (@2.5.1 etc.) are Studio's own and are kept verbatim.
+#
 # CONTROL TYPES: buttons and inputs use the Classic/ prefix -- the unprefixed names
 # resolve to the modern Fluent controls, which have no Fill, Color or Radius properties.
 # Rounded shapes are Classic/Button with Text "" rather than Rectangle: the classic
@@ -9,358 +12,317 @@
 # does. Square shapes (rules, dividers) stay Rectangle.
 #
 # COLUMNS (X relative to the gallery, +24 for the header labels above it):
-#   Account 0/150 · Pursuit 160/230 · ⋯ 396/28 · Stage 434/170 · Owner 614/180
-#   SIs 804/130 · Hyperscalers 944/130 · Next task 1084/210
+#   Account 0/150 · Pursuit 160/230 · ⋯ 396/28 · Stage 434/170 · Owner 646/180
+#   SIs 804/130 · Hyperscalers 944/130 · Next action 1084/210
+#
+# No owner avatar. The initials circle (recRowAvatar + lblRowInitials) was removed --
+# a 24px disc repeating down a reporting table is decoration, and the name is already
+# spelled out beside it.
+#
+# Z-ORDER: btnRowClick is declared AFTER the row content it covers and BEFORE the ⋯
+# menu, so the whole row is clickable but the menu still receives its own clicks.
+# Anything clickable must come after everything it overlaps.
 
-# ---------------------------------------------------------------- nav bar
 - navBg:
-    Control: Rectangle
+    Control: Rectangle@2.3.0
     Properties:
-      X: =0
-      Y: =0
-      Width: =Parent.Width
-      Height: =64
       Fill: =ClrNav
-
-- navRule:
-    Control: Rectangle
-    Properties:
-      X: =0
-      Y: =63
-      Width: =Parent.Width
-      Height: =1
-      Fill: =ClrBorder
-
-- navBrand:
-    Control: Label
-    Properties:
-      X: =GapPage
-      Y: =0
-      Width: =180
       Height: =64
-      Text: ="Pursuit Tracker"
-      Font: =FontUI
-      Size: =14
-      FontWeight: =FontWeight.Semibold
-      Color: =ClrText
-      VerticalAlign: =VerticalAlign.Middle
-
-- btnNavBoard:
-    Control: Classic/Button
+      Width: =Parent.Width
+- navRule:
+    Control: Rectangle@2.3.0
     Properties:
+      Fill: =ClrBorder
+      Height: =1
+      Width: =Parent.Width
+      Y: =63
+- navBrand:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrText
+      Font: =FontUI
+      FontWeight: =FontWeight.Semibold
+      Height: =64
+      Size: =14
+      Text: ="Pursuit Tracker"
+      Width: =180
+      X: =GapPage
+- btnNavBoard:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderThickness: =0
+      Color: =ClrTextMuted
+      Fill: =ClrNav
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Navigate(scrPortfolioBoard, ScreenTransition.None)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="Portfolio board"
+      Width: =170
       X: =210
       Y: =14
-      Width: =170
-      Height: =36
-      Text: ="Portfolio board"
-      Font: =FontUI
-      Size: =12
-      Fill: =ClrNav
-      Color: =ClrTextMuted
-      HoverFill: =ClrCardHover
-      HoverColor: =ClrText
-      PressedFill: =ClrCardHover
-      PressedColor: =ClrText
+- btnNavList:
+    Control: Classic/Button@2.2.0
+    Properties:
       BorderThickness: =0
-      RadiusTopLeft: =6
-      RadiusTopRight: =6
+      Color: =ClrAccentText
+      Fill: =ClrAccent
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
       RadiusBottomLeft: =6
       RadiusBottomRight: =6
-      OnSelect: =Navigate(scrPortfolioBoard, ScreenTransition.None)
-
-- btnNavList:
-    Control: Classic/Button
-    Properties:
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="Portfolio list"
       X: =390
       Y: =14
-      Width: =160
-      Height: =36
-      Text: ="Portfolio list"
-      Font: =FontUI
-      Size: =12
-      Fill: =ClrAccent
-      Color: =ClrAccentText
-      HoverFill: =ClrAccentHover
-      HoverColor: =ClrAccentText
-      PressedFill: =ClrAccentHover
-      PressedColor: =ClrAccentText
+- btnNavWorkspace:
+    Control: Classic/Button@2.2.0
+    Properties:
       BorderThickness: =0
-      RadiusTopLeft: =6
-      RadiusTopRight: =6
+      Color: =ClrTextMuted
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      Fill: =ClrNav
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
       RadiusBottomLeft: =6
       RadiusBottomRight: =6
-      OnSelect: =false
-
-- btnNavWorkspace:
-    Control: Classic/Button
-    Properties:
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="Pursuit workspace"
+      Width: =190
       X: =560
       Y: =14
-      Width: =190
-      Height: =36
-      Text: ="Pursuit workspace"
-      Font: =FontUI
-      Size: =12
-      Fill: =ClrNav
-      Color: =ClrTextMuted
-      HoverFill: =ClrCardHover
-      HoverColor: =ClrText
-      PressedFill: =ClrCardHover
-      PressedColor: =ClrText
+- btnNavDocsAI:
+    Control: Classic/Button@2.2.0
+    Properties:
       BorderThickness: =0
-      RadiusTopLeft: =6
-      RadiusTopRight: =6
+      Color: =ClrTextMuted
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      Fill: =ClrNav
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitDocsAI, ScreenTransition.None)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
       RadiusBottomLeft: =6
       RadiusBottomRight: =6
-      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
-      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
-
-- btnNavDocsAI:
-    Control: Classic/Button
-    Properties:
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="Documents & AI"
+      Width: =200
       X: =760
       Y: =14
-      Width: =200
-      Height: =36
-      Text: ="Documents & AI"
-      Font: =FontUI
-      Size: =12
-      Fill: =ClrNav
-      Color: =ClrTextMuted
-      HoverFill: =ClrCardHover
-      HoverColor: =ClrText
-      PressedFill: =ClrCardHover
-      PressedColor: =ClrText
-      BorderThickness: =0
-      RadiusTopLeft: =6
-      RadiusTopRight: =6
-      RadiusBottomLeft: =6
-      RadiusBottomRight: =6
-      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
-      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitDocsAI, ScreenTransition.None)
-
-# ---------------------------------------------------------------- page header
 - lblPageTitle:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
+      Color: =ClrText
+      Font: =FontUI
+      FontWeight: =FontWeight.Semibold
+      Height: =36
+      Size: =SizePageTitle
+      Text: ="SI Pursuit Management"
+      Width: =700
       X: =GapPage
       Y: =88
-      Width: =700
-      Height: =36
-      Text: ="SI pursuit management"
-      Font: =FontUI
-      Size: =SizePageTitle
-      FontWeight: =FontWeight.Semibold
-      Color: =ClrText
-
 - lblPageSub:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =24
+      Size: =SizeBody
+      Text: ="A reportable view of the same portfolio shown on the board."
+      Width: =900
       X: =GapPage
       Y: =126
-      Width: =900
-      Height: =24
-      Text: ="A reportable view of the same portfolio shown on the board."
-      Font: =FontUI
-      Size: =SizeBody
-      Color: =ClrTextMuted
-
 - btnDownloadExcel:
-    Control: Classic/Button
+    Control: Classic/Button@2.2.0
     Properties:
+      BorderThickness: =0
+      Color: =ClrAccentText
+      DisplayMode: =If(gblExporting || CountRows(galPortfolioList.AllItems) = 0, DisplayMode.Disabled, DisplayMode.Edit)
+      Fill: =ClrAccent
+      Font: =FontUI
+      HoverColor: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      OnSelect: =Notify("Connect the PursuitTracker-ExportPortfolio flow first — see docs/06-flows.md.", NotificationType.Warning)
+      PressedColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: =If(gblExporting, "Preparing…", "Download Excel")
+      Width: =170
       X: =Parent.Width - Self.Width - GapPage
       Y: =96
-      Width: =170
-      Height: =40
-      Text: =If(gblExporting, "Preparing…", "Download Excel")
-      Font: =FontUI
-      Size: =12
-      Fill: =ClrAccent
-      Color: =ClrAccentText
-      HoverFill: =ClrAccentHover
-      HoverColor: =ClrAccentText
-      PressedFill: =ClrAccentHover
-      PressedColor: =ClrAccentText
-      BorderThickness: =0
-      RadiusTopLeft: =6
-      RadiusTopRight: =6
-      RadiusBottomLeft: =6
-      RadiusBottomRight: =6
-      DisplayMode: =If(gblExporting || CountRows(galPortfolioList.AllItems) = 0, DisplayMode.Disabled, DisplayMode.Edit)
-      # Wire this AFTER creating the flow (docs/06-flows.md) and adding it as a data
-      # source. Until then it notifies rather than erroring on an unknown name.
-      OnSelect: =Notify("Connect the PursuitTracker-ExportPortfolio flow first — see docs/06-flows.md.", NotificationType.Warning)
-
 - btnAddPursuit:
-    Control: Classic/Button
+    Control: Classic/Button@2.2.0
     Properties:
-      X: =btnDownloadExcel.X - Self.Width - 12
-      Y: =96
-      Width: =150
-      Height: =40
-      Text: ="Add pursuit"
-      Font: =FontUI
-      Size: =12
-      Fill: =ClrCard
-      Color: =ClrText
-      HoverFill: =ClrCardHover
-      HoverColor: =ClrText
-      PressedFill: =ClrCardHover
-      PressedColor: =ClrText
       BorderColor: =ClrBorder
       BorderThickness: =1
-      RadiusTopLeft: =6
-      RadiusTopRight: =6
+      Color: =ClrText
+      Fill: =ClrCard
+      Font: =FontUI
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Set(gblPursuitKey, ""); Set(gblNewPursuit, true); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
       RadiusBottomLeft: =6
       RadiusBottomRight: =6
-      OnSelect: =Set(gblPursuitKey, ""); Set(gblNewPursuit, true); Navigate(scrPursuitWorkspace, ScreenTransition.None)
-
-# ---------------------------------------------------------------- column headers
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="Add pursuit"
+      Width: =150
+      X: =btnDownloadExcel.X - Self.Width - 12
+      Y: =96
 - lblHdrAccount:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="ACCOUNT"
       X: =GapPage
       Y: =218
-      Width: =150
-      Height: =20
-      Text: ="ACCOUNT"
-      Font: =FontUI
-      Size: =SizeMeta
-      Color: =ClrTextMuted
-
 - lblHdrPursuit:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="PURSUIT"
+      Width: =230
       X: =184
       Y: =218
-      Width: =230
-      Height: =20
-      Text: ="PURSUIT"
-      Font: =FontUI
-      Size: =SizeMeta
-      Color: =ClrTextMuted
-
 - lblHdrStage:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="STAGE"
+      Width: =170
       X: =458
       Y: =218
-      Width: =170
-      Height: =20
-      Text: ="STAGE"
-      Font: =FontUI
-      Size: =SizeMeta
-      Color: =ClrTextMuted
-
 - lblHdrOwner:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
-      X: =638
-      Y: =218
-      Width: =180
-      Height: =20
-      Text: ="OWNER"
-      Font: =FontUI
-      Size: =SizeMeta
       Color: =ClrTextMuted
-
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="OWNER"
+      Width: =180
+      X: =670
+      Y: =218
 - lblHdrSIs:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="SI"
+      Width: =130
       X: =828
       Y: =218
-      Width: =130
-      Height: =20
-      Text: ="SI"
-      Font: =FontUI
-      Size: =SizeMeta
-      Color: =ClrTextMuted
-
 - lblHdrHype:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="HS"
+      Width: =130
       X: =968
       Y: =218
-      Width: =130
-      Height: =20
-      Text: ="HS"
-      Font: =FontUI
-      Size: =SizeMeta
-      Color: =ClrTextMuted
-
 - lblHdrNext:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="NEXT ACTION"
+      Width: =210
       X: =1108
       Y: =218
-      Width: =210
-      Height: =20
-      Text: ="NEXT ACTION"
-      Font: =FontUI
-      Size: =SizeMeta
-      Color: =ClrTextMuted
-
 - recHeaderRule:
-    Control: Rectangle
+    Control: Rectangle@2.3.0
     Properties:
+      Fill: =ClrBorder
+      Height: =1
+      Width: =Parent.Width - (GapPage * 2)
       X: =GapPage
       Y: =242
-      Width: =Parent.Width - (GapPage * 2)
-      Height: =1
-      Fill: =ClrBorder
-
-# ---------------------------------------------------------------- the table
 - galPortfolioList:
-    Control: Gallery
+    Control: Gallery@2.15.0
     Variant: Vertical
     Properties:
+      Height: =Parent.Height - 250 - 56
+      Items: =Sort(colPortfolio, 'Account Name' & " " & 'Pursuit Name', SortOrder.Ascending)
+      TemplatePadding: =0
+      TemplateSize: =110
+      Width: =Parent.Width - (GapPage * 2)
       X: =GapPage
       Y: =250
-      Width: =Parent.Width - (GapPage * 2)
-      Height: =Parent.Height - 250 - 56
-      # Account first, then pursuit -- groups an account's pursuits together, which
-      # sorting on the pursuit name alone no longer does now that the name has its
-      # account prefix stripped for display.
-      Items: =Sort(colPortfolio, 'Account Name' & " " & 'Pursuit Name', SortOrder.Ascending)
-      TemplateSize: =110
-      TemplatePadding: =0
-      ShowScrollbar: =true
     Children:
       - recRowDivider:
-          Control: Rectangle
+          Control: Rectangle@2.3.0
           Properties:
-            X: =0
-            Y: =Parent.TemplateHeight - 1
-            Width: =Parent.Width - 20
-            Height: =1
             Fill: =ClrDivider
-
+            Height: =1
+            Width: =Parent.Width - 20
+            Y: =Parent.TemplateHeight - 1
       - lblRowAccount:
-          Control: Label
+          Control: Label@2.5.1
           Properties:
-            X: =0
-            Y: =10
-            Width: =150
-            Height: =46
-            Text: =Clip(ThisItem.'Account Name', 40)
-            Font: =FontUI
-            Size: =SizeBody
-            FontWeight: =FontWeight.Semibold
             Color: =ClrText
-            Wrap: =true
+            Font: =FontUI
+            FontWeight: =FontWeight.Semibold
+            Height: =46
+            Size: =SizeBody
+            Text: =Clip(ThisItem.'Account Name', 40)
             VerticalAlign: =VerticalAlign.Top
-
-      - lblRowTitle:
-          Control: Label
-          Properties:
-            X: =160
             Y: =10
-            Width: =230
+      - lblRowTitle:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrText
+            Font: =FontUI
             Height: =54
-            # Account has its own column now, so drop the ALL-CAPS account prefix that
-            # every pursuit name repeats. Proper() is deliberately not used -- it would
-            # turn AWS into Aws and CD&R into Cd&R. Both separators in the data are
-            # handled: "ACCOUNT: name" and "ACCOUNT - name".
+            Size: =SizeBody
             Text: |
               =Clip(
                   With(
@@ -375,330 +337,262 @@
                   ),
                   96
               )
-            Font: =FontUI
-            Size: =SizeBody
-            Color: =ClrText
-            Wrap: =true
             VerticalAlign: =VerticalAlign.Top
-
+            Width: =230
+            X: =160
+            Y: =10
       - lblRowSfLink:
-          Control: Label
+          Control: Label@2.5.1
           Properties:
+            Color: =ClrTextFaint
+            Font: =FontUI
+            Height: =18
+            Size: =SizeMeta
+            Text: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Salesforce opportunity linked")
+            Width: =230
             X: =160
             Y: =66
-            Width: =230
-            Height: =18
-            Text: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Salesforce opportunity linked")
-            Font: =FontUI
-            Size: =SizeMeta
-            Color: =ClrTextFaint
-
       - lblRowStage:
-          Control: Label
+          Control: Label@2.5.1
           Properties:
+            Color: =ClrTextMuted
+            Font: =FontUI
+            Height: =46
+            Size: =SizeBody
+            Text: =Clip(ThisItem.'Workflow Stage'.Value, 52)
+            VerticalAlign: =VerticalAlign.Top
+            Width: =170
             X: =434
             Y: =10
-            Width: =170
-            Height: =46
-            Text: =Clip(ThisItem.'Workflow Stage'.Value, 52)
+      - lblRowNextTask:
+          Control: Label@2.5.1
+          Properties:
+            Color: =If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)
             Font: =FontUI
+            Height: =42
             Size: =SizeBody
-            Color: =ClrTextMuted
-            Wrap: =true
+            Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 58))
             VerticalAlign: =VerticalAlign.Top
-
-      - recRowAvatar:
-          Control: Classic/Button
+            Width: =210
+            X: =1084
+            Y: =10
+      - btnRowMenu:
+          Control: Classic/Button@2.2.0
           Properties:
-            Text: =""
-            Fill: =ClrAvatar
-            HoverFill: =ClrAvatar
-            PressedFill: =ClrAvatar
-            OnSelect: =false
-            X: =614
-            Y: =12
-            Width: =24
-            Height: =24
-            RadiusTopLeft: =12
-            RadiusTopRight: =12
-            RadiusBottomLeft: =12
-            RadiusBottomRight: =12
-
-      - lblRowInitials:
-          Control: Label
-          Properties:
-            X: =614
-            Y: =12
-            Width: =24
-            Height: =24
-            Text: =Initials(ThisItem.OwnerName)
+            BorderThickness: =0
+            Color: =ClrTextMuted
+            Fill: =Color.Transparent
             Font: =FontUI
-            Size: =SizeChip
-            Color: =ClrAvatarText
-            Align: =Align.Center
-            VerticalAlign: =VerticalAlign.Middle
-
+            Height: =28
+            HoverColor: =ClrText
+            HoverFill: =ClrCardHover
+            OnSelect: =Set(gblRowMenu, If(gblRowMenu = ThisItem.Title, "", ThisItem.Title))
+            PressedColor: =ClrText
+            PressedFill: =ClrCardHover
+            RadiusBottomLeft: =6
+            RadiusBottomRight: =6
+            RadiusTopLeft: =6
+            RadiusTopRight: =6
+            Size: =14
+            Text: ="⋯"
+            Tooltip: ="More actions"
+            Width: =28
+            X: =396
+            Y: =12
       - lblRowOwner:
-          Control: Label
+          Control: Label@2.5.1
           Properties:
+            Color: =ClrText
+            Font: =FontUI
+            Height: =24
+            Size: =SizeBody
+            Text: =ThisItem.OwnerName
             X: =646
             Y: =12
-            Width: =150
-            Height: =24
-            Text: =ThisItem.OwnerName
-            Font: =FontUI
-            Size: =SizeBody
-            Color: =ClrText
-            VerticalAlign: =VerticalAlign.Middle
-
       - galRowSIs:
-          Control: Gallery
+          Control: Gallery@2.15.0
           Variant: Vertical
           Properties:
-            X: =804
-            Y: =10
-            Width: =130
             Height: =84
             Items: =ThisItem.'Aligned SIs'
-            TemplateSize: =28
-            TemplatePadding: =0
             ShowScrollbar: =false
+            TemplatePadding: =0
+            TemplateSize: =28
+            Width: =130
+            X: =804
+            Y: =10
           Children:
             - recSIChip:
-                Control: Classic/Button
+                Control: Classic/Button@2.2.0
                 Properties:
-                  Text: =""
                   Fill: =ClrChip
+                  Height: =22
                   HoverFill: =ClrChip
                   PressedFill: =ClrChip
-                  OnSelect: =false
-                  X: =0
-                  Y: =2
-                  Width: =124
-                  Height: =22
-                  RadiusTopLeft: =RadiusChip
-                  RadiusTopRight: =RadiusChip
                   RadiusBottomLeft: =RadiusChip
                   RadiusBottomRight: =RadiusChip
-            - lblSIChip:
-                Control: Label
-                Properties:
-                  X: =0
-                  Y: =2
+                  RadiusTopLeft: =RadiusChip
+                  RadiusTopRight: =RadiusChip
+                  Text: =""
                   Width: =124
-                  Height: =22
-                  Text: =ThisItem.Value
-                  Font: =FontUI
-                  Size: =SizeChip
-                  Color: =ClrChipText
+                  Y: =2
+            - lblSIChip:
+                Control: Label@2.5.1
+                Properties:
                   Align: =Align.Center
-                  VerticalAlign: =VerticalAlign.Middle
-
+                  Color: =ClrChipText
+                  Font: =FontUI
+                  Height: =22
+                  Size: =SizeChip
+                  Text: =ThisItem.Value
+                  Width: =124
+                  Y: =2
       - galRowHype:
-          Control: Gallery
+          Control: Gallery@2.15.0
           Variant: Vertical
           Properties:
-            X: =944
-            Y: =10
-            Width: =130
             Height: =84
             Items: =ThisItem.Hyperscalers
-            TemplateSize: =28
-            TemplatePadding: =0
             ShowScrollbar: =false
+            TemplatePadding: =0
+            TemplateSize: =28
+            Width: =130
+            X: =944
+            Y: =10
           Children:
             - recHypeChip:
-                Control: Classic/Button
+                Control: Classic/Button@2.2.0
                 Properties:
-                  Text: =""
                   Fill: =ClrChip
+                  Height: =22
                   HoverFill: =ClrChip
                   PressedFill: =ClrChip
-                  OnSelect: =false
-                  X: =0
-                  Y: =2
-                  Width: =124
-                  Height: =22
-                  RadiusTopLeft: =RadiusChip
-                  RadiusTopRight: =RadiusChip
                   RadiusBottomLeft: =RadiusChip
                   RadiusBottomRight: =RadiusChip
-            - lblHypeChip:
-                Control: Label
-                Properties:
-                  X: =0
-                  Y: =2
+                  RadiusTopLeft: =RadiusChip
+                  RadiusTopRight: =RadiusChip
+                  Text: =""
                   Width: =124
-                  Height: =22
-                  Text: =ThisItem.Value
-                  Font: =FontUI
-                  Size: =SizeChip
-                  Color: =ClrChipText
+                  Y: =2
+            - lblHypeChip:
+                Control: Label@2.5.1
+                Properties:
                   Align: =Align.Center
-                  VerticalAlign: =VerticalAlign.Middle
-
-      - lblRowNextTask:
-          Control: Label
-          Properties:
-            X: =1084
-            Y: =10
-            Width: =210
-            Height: =42
-            Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 58))
-            Font: =FontUI
-            Size: =SizeBody
-            Color: =If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)
-            Wrap: =true
-            VerticalAlign: =VerticalAlign.Top
-
+                  Color: =ClrChipText
+                  Font: =FontUI
+                  Height: =22
+                  Size: =SizeChip
+                  Text: =ThisItem.Value
+                  Width: =124
+                  Y: =2
       - lblRowNextDue:
-          Control: Label
+          Control: Label@2.5.1
           Properties:
+            Color: =ClrDate
+            Font: =FontUI
+            Height: =20
+            Size: =SizeBody
+            Text: =If(IsBlank(ThisItem.NextActionDue), "", Text(ThisItem.NextActionDue, "mmmm d"))
+            Width: =210
             X: =1084
             Y: =54
-            Width: =210
-            Height: =20
-            Text: =If(IsBlank(ThisItem.NextActionDue), "", Text(ThisItem.NextActionDue, "mmmm d"))
-            Font: =FontUI
-            Size: =SizeBody
-            Color: =ClrDate
-
-      # ---- row click layer --------------------------------------------------
-      # Transparent, and ON TOP of the row's content rather than behind it. Canvas
-      # controls capture their own pointer events, so a click target underneath the
-      # labels would only fire in the gaps between them. Everything below this line in
-      # the file sits above it and stays clickable.
       - btnRowClick:
-          Control: Classic/Button
+          Control: Classic/Button@2.2.0
           Properties:
-            Text: =""
-            X: =0
-            Y: =0
-            Width: =Parent.Width - 20
+            BorderThickness: =0
+            Fill: =Color.Transparent
             Height: =Parent.TemplateHeight - 1
-            Fill: =Color.Transparent
             HoverFill: =RGBA(255, 255, 255, 0.04)
-            PressedFill: =RGBA(255, 255, 255, 0.07)
-            BorderThickness: =0
             OnSelect: =Set(gblRowMenu, ""); Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
-
-      # ---- per-row ⋯ menu ---------------------------------------------------
-      - btnRowMenu:
-          Control: Classic/Button
-          Properties:
-            X: =396
-            Y: =12
-            Width: =28
-            Height: =28
-            Text: ="⋯"
-            Font: =FontUI
-            Size: =14
-            Fill: =Color.Transparent
-            Color: =ClrTextMuted
-            HoverFill: =ClrCardHover
-            HoverColor: =ClrText
-            PressedFill: =ClrCardHover
-            PressedColor: =ClrText
-            BorderThickness: =0
-            RadiusTopLeft: =6
-            RadiusTopRight: =6
-            RadiusBottomLeft: =6
-            RadiusBottomRight: =6
-            Tooltip: ="More actions"
-            OnSelect: =Set(gblRowMenu, If(gblRowMenu = ThisItem.Title, "", ThisItem.Title))
-
-      - recRowMenu:
-          Control: Classic/Button
-          Properties:
+            PressedFill: =RGBA(255, 255, 255, 0.07)
             Text: =""
-            X: =396
-            Y: =40
-            Width: =230
-            Height: =70
-            Visible: =gblRowMenu = ThisItem.Title
-            Fill: =ClrColumn
-            HoverFill: =ClrColumn
-            PressedFill: =ClrColumn
-            OnSelect: =false
+            Width: =Parent.Width - 20
+      - recRowMenu:
+          Control: Classic/Button@2.2.0
+          Properties:
             BorderColor: =ClrBorder
             BorderThickness: =1
-            RadiusTopLeft: =6
-            RadiusTopRight: =6
+            Fill: =ClrColumn
+            Height: =70
+            HoverFill: =ClrColumn
+            PressedFill: =ClrColumn
             RadiusBottomLeft: =6
             RadiusBottomRight: =6
-
+            RadiusTopLeft: =6
+            RadiusTopRight: =6
+            Text: =""
+            Visible: =gblRowMenu = ThisItem.Title
+            Width: =230
+            X: =396
+            Y: =40
       - btnMenuWorkspace:
-          Control: Classic/Button
+          Control: Classic/Button@2.2.0
           Properties:
+            Align: =Align.Left
+            BorderThickness: =0
+            Color: =ClrText
+            Fill: =ClrColumn
+            Font: =FontUI
+            Height: =30
+            HoverColor: =ClrText
+            HoverFill: =ClrCardHover
+            OnSelect: =Set(gblRowMenu, ""); Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+            PressedColor: =ClrText
+            PressedFill: =ClrCardHover
+            RadiusBottomLeft: =4
+            RadiusBottomRight: =4
+            RadiusTopLeft: =4
+            RadiusTopRight: =4
+            Size: =11
+            Text: ="Open pursuit workspace"
+            Visible: =gblRowMenu = ThisItem.Title
+            Width: =220
             X: =401
             Y: =45
-            Width: =220
-            Height: =30
-            Visible: =gblRowMenu = ThisItem.Title
-            Text: ="Open pursuit workspace"
-            Font: =FontUI
-            Size: =11
+      - btnMenuSalesforce:
+          Control: Classic/Button@2.2.0
+          Properties:
             Align: =Align.Left
-            Fill: =ClrColumn
-            Color: =ClrText
-            HoverFill: =ClrCardHover
-            HoverColor: =ClrText
-            PressedFill: =ClrCardHover
-            PressedColor: =ClrText
             BorderThickness: =0
-            RadiusTopLeft: =4
-            RadiusTopRight: =4
+            Color: =ClrLink
+            DisabledColor: =ClrTextFaint
+            DisabledFill: =ClrColumn
+            DisplayMode: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =ClrColumn
+            Font: =FontUI
+            Height: =30
+            HoverColor: =ClrLink
+            HoverFill: =ClrCardHover
+            OnSelect: =Set(gblRowMenu, ""); Launch(ThisItem.'Salesforce Opportunity URL')
+            PressedColor: =ClrLink
+            PressedFill: =ClrCardHover
             RadiusBottomLeft: =4
             RadiusBottomRight: =4
-            OnSelect: =Set(gblRowMenu, ""); Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
-
-      - btnMenuSalesforce:
-          Control: Classic/Button
-          Properties:
+            RadiusTopLeft: =4
+            RadiusTopRight: =4
+            Size: =11
+            Text: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Open Salesforce opportunity")
+            Visible: =gblRowMenu = ThisItem.Title
+            Width: =220
             X: =401
             Y: =75
-            Width: =220
-            Height: =30
-            Visible: =gblRowMenu = ThisItem.Title
-            Text: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Open Salesforce opportunity")
-            Font: =FontUI
-            Size: =11
-            Align: =Align.Left
-            Fill: =ClrColumn
-            Color: =ClrLink
-            HoverFill: =ClrCardHover
-            HoverColor: =ClrLink
-            PressedFill: =ClrCardHover
-            PressedColor: =ClrLink
-            DisabledFill: =ClrColumn
-            DisabledColor: =ClrTextFaint
-            BorderThickness: =0
-            RadiusTopLeft: =4
-            RadiusTopRight: =4
-            RadiusBottomLeft: =4
-            RadiusBottomRight: =4
-            DisplayMode: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), DisplayMode.Disabled, DisplayMode.Edit)
-            OnSelect: =Set(gblRowMenu, ""); Launch(ThisItem.'Salesforce Opportunity URL')
-
-# ---------------------------------------------------------------- footer
 - lblFooterNote:
-    Control: Label
+    Control: Label@2.5.1
     Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =24
+      Size: =SizeBody
+      Text: ="The download follows the visible list and is designed for offline review, reporting, and follow-up analysis."
+      Width: =1100
       X: =GapPage
       Y: =Parent.Height - 40
-      Width: =1100
-      Height: =24
-      Text: ="The download follows the visible list and is designed for offline review, reporting, and follow-up analysis."
-      Font: =FontUI
-      Size: =SizeBody
-      Color: =ClrTextMuted
 
 # ---------------------------------------------------------------------------
 # SCREEN PROPERTIES — set by hand:
 #
 #   Fill       =ClrPage
-#   OnVisible  the LoadPortfolio block from src/App.OnStart.powerfx, then:
-#                  Set(gblRowMenu, "")
+#   OnVisible  src/screens/scrPortfolioList.OnVisible.powerfx, pasted whole
 #
 # AFTER BUILDING THE FLOW: replace btnDownloadExcel.OnSelect with the full
 # export formula in docs/04-screen-portfolio-list.md.

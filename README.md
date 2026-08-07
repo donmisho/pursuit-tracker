@@ -10,7 +10,7 @@ for Business — so it needs no app registration, no admin consent, no premium l
 and no IT involvement.
 
 The app is built, as far as anything outside Power Platform can build a canvas app.
-`src/yaml/` holds all four screens as Power Apps code-view YAML — 242 controls,
+`src/yaml/` holds all four screens as Power Apps code-view YAML — 240 controls,
 positioned, with every formula — which you paste into Studio one screen at a time. The
 theme and startup logic paste into two App properties. `docs/` carries the same thing as
 property tables, both as a fallback and as the record of why each formula is what it is.
@@ -43,7 +43,7 @@ corrupt file is worse than no file.
 | `src/App.OnStart.powerfx` | Startup state, the shared portfolio load, the lookup vocabulary |
 | `src/screens/*.OnVisible.powerfx` | One file per screen's OnVisible — pasted as-is, no editing |
 | `src/yaml/01-PortfolioBoard.pa.yaml` | The kanban as code-view YAML — 36 controls. Paste onto `scrPortfolioBoard` |
-| `src/yaml/02-PortfolioList.pa.yaml` | The table and export button — 42 controls |
+| `src/yaml/02-PortfolioList.pa.yaml` | The table and export button — 40 controls |
 | `src/yaml/03-PursuitWorkspace.pa.yaml` | Opportunity details, actions, status updates, and the edit panel — 119 controls |
 | `src/yaml/04-PursuitDocsAI.pa.yaml` | Documents, the current AI overview and its history — 45 controls |
 | `tools/validate-screens.py` | Structural check over the screen YAML |

@@ -13,7 +13,7 @@ scrPortfolioList
 │   ├── lblRowAccount
 │   ├── lblRowTitle / lblRowSfLink
 │   ├── lblRowStage
-│   ├── recRowAvatar + lblRowInitials + lblRowOwner
+│   ├── lblRowOwner
 │   ├── galRowSIs / galRowHype   ◄── chips
 │   ├── lblRowNextTask + lblRowNextDue
 │   ├── btnRowClick              ◄── transparent, on top: whole row navigates
@@ -94,7 +94,7 @@ Elevance's "Carelon…" and "Unified Data…" end up filed under C and U.
 | | `Size` / `Color` | `=SizeMeta` / `=ClrTextFaint` |
 | `lblRowStage` | `Text` | `=Clip(ThisItem.'Workflow Stage'.Value, 52)` |
 | | `X` / `Width` | `=434` / `=170` |
-| `recRowAvatar` / `lblRowInitials` / `lblRowOwner` | | as before, `X` `=614` / `=614` / `=646` |
+| `lblRowOwner` | | `X` `=646`. No initials circle — a 24px disc repeating down a reporting table is decoration, and the name is spelled out next to it |
 | `galRowSIs` / `galRowHype` | `X` | `=804` / `=944` |
 | | `Width` / `Height` / `TemplateSize` | `=130` / `=84` / `=28` |
 | `lblRowNextTask` | `Text` | `=If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 58))` |
