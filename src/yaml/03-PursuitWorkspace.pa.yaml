@@ -1736,7 +1736,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-status-updates'.'Update Type')
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Update Type") As L, { Value: L.Value })
       Default: =gblEditUpdate.'Update Type'.Value
       AllowEmptySelection: =true
 
@@ -1767,7 +1768,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-status-updates'.'Risk / Decision')
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Risk / Decision") As L, { Value: L.Value })
       Default: =gblEditUpdate.'Risk / Decision'.Value
       AllowEmptySelection: =true
 

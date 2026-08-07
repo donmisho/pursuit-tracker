@@ -615,7 +615,8 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Items: =Choices('pursuit-tracker-documents'.'Document Type')
+      Items: |
+        =ForAll(Filter(colLookups, LookupType = "Document Type") As L, { Value: L.Value })
       Default: =gblEditDoc.'Document Type'.Value
       AllowEmptySelection: =true
 
