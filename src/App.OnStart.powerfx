@@ -119,38 +119,27 @@ ClearCollect(
     )
 );
 
-// Board columns, read from the Workflow Stage choice list. Board order is whatever order
-// the choices are in on the SharePoint column, so adding or reordering a stage is a list
-// edit, not an app edit.
+// Board columns. A literal table, in board order, matching the Workflow Stage choice set
+// in the list exactly -- casing, spacing and all. Add or reorder a stage here and in the
+// SharePoint column, in all three copies of this block.
+//
+// This used to read the column with Choices(), which is the better design and is why the
+// commented version is kept below: board order would be a list setting rather than an app
+// edit. It's a literal because the record Choices() returns doesn't type as text on this
+// column, so Text(C.Value) raised "Expected text or number" and the whole collection
+// resolved to Error -- which is a blank board with no columns and no message. A stage list
+// that has changed twice in a month isn't worth a screen that can't render.
+//
+//  ClearCollect(colStages, ForAll(Choices('pursuit-tracker-pursuits'.'Workflow Stage') As C, { Stage: C.Value }));
 ClearCollect(
     colStages,
-    ForAll(
-        Choices('pursuit-tracker-pursuits'.'Workflow Stage') As C,
-        // Text() is load-bearing. colStages is written three times -- here, the literal
-        // fallback below, and the fill-in append after it -- and a collection has one type
-        // for all of them. C.Value carries the choice column's type rather than plain text,
-        // so without this the three writes disagree and the whole collection resolves to
-        // Error: "Incompatible type", then "'Stage' isn't recognized" everywhere it's read.
-        { Stage: Text(C.Value) }
-    )
-);
-
-// Fallback for an empty choice list. These columns have fill-in enabled, so before the
-// choice values were defined Choices() returned nothing and the board rendered zero
-// columns -- a blank screen with no error to explain it. Keep this until you're sure the
-// choice list can't be emptied again.
-If(
-    CountRows(colStages) = 0,
-    ClearCollect(
-        colStages,
-        Table(
-            { Stage: "Intake" },
-            { Stage: "WM Account Team Assimilation" },
-            { Stage: "Partner Introduction" },
-            { Stage: "Preliminary Scoping" },
-            { Stage: "Proposal/Quote" },
-            { Stage: "Review/Decision" }
-        )
+    Table(
+        { Stage: "Intake" },
+        { Stage: "WM Account Team Assimilation" },
+        { Stage: "Partner Introduction" },
+        { Stage: "Preliminary Scoping" },
+        { Stage: "Proposal/Quote" },
+        { Stage: "Review/Decision" }
     )
 );
 

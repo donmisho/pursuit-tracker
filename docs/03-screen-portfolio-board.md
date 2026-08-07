@@ -37,6 +37,23 @@ Three nested galleries is the deepest canvas apps allow, and this uses all of it
 Reloading on every visit is what makes a stage change from elsewhere in the app show up
 when you come back.
 
+## `colStages` is a literal table
+
+Board columns come from a hard-coded six-row table in the `LoadPortfolio` block, not from
+`Choices('pursuit-tracker-pursuits'.'Workflow Stage')`.
+
+`Choices()` is the better design and the commented line is kept right above it: board order
+would be a list setting rather than an app edit, and adding a stage wouldn't mean touching
+three files. It isn't in use because the record `Choices()` returns doesn't type as text on
+this column — `Text(C.Value)` raises *"Expected text or number"*, the collection resolves to
+`Error`, and every read of `ThisItem.Stage` fails after it. What that looks like on screen is
+a board with no columns, no cards, and no error message, which is worse than a stage list you
+have to edit by hand.
+
+The literal has to match the SharePoint choice set **exactly** — casing, spacing, the missing
+space in `Proposal/Quote`. A stage in the table that isn't in the column renders an empty
+column; a stage in the column that isn't in the table hides those pursuits entirely.
+
 ## Page header
 
 | Control | Property | Formula |
