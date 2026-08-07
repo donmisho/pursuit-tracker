@@ -225,13 +225,14 @@
       X: =GapPage
       Y: =176
       Width: =(Parent.Width - (GapPage * 3)) / 2
-      Height: =434
+      Height: =329
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
       RadiusTopRight: =RadiusCard
       RadiusBottomLeft: =RadiusCard
       RadiusBottomRight: =RadiusCard
+      TabIndex: =-1
 
 - lblDetailsHead:
     Control: Label
@@ -251,9 +252,9 @@
     Control: Label
     Properties:
       X: =cardDetails.X + 24
-      Y: =232
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      Y: =233
+      Width: =262
+      Height: =14
       Text: ="PURSUIT ID"
       Font: =FontUI
       Size: =SizeMeta
@@ -264,9 +265,9 @@
     Control: Label
     Properties:
       X: =cardDetails.X + 24
-      Y: =248
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      Y: =250
+      Width: =262
+      Height: =20
       Text: =gblPursuit.Title
       Font: =FontUI
       Size: =SizeBody
@@ -276,10 +277,10 @@
 - lblCap0R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
+      X: =249
       Y: =232
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      Width: =273
+      Height: =15
       Text: ="ACCOUNT"
       Font: =FontUI
       Size: =SizeMeta
@@ -289,10 +290,10 @@
 - lblVal0R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
+      X: =249
       Y: =248
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      Width: =273
+      Height: =21
       Text: =Clip(gblPursuit.'Account Name', 30)
       Font: =FontUI
       Size: =SizeBody
@@ -303,9 +304,9 @@
     Control: Label
     Properties:
       X: =cardDetails.X + 24
-      Y: =286
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      Y: =287
+      Width: =262
+      Height: =14
       Text: ="SALESFORCE OPPORTUNITY"
       Font: =FontUI
       Size: =SizeMeta
@@ -316,9 +317,9 @@
     Control: Label
     Properties:
       X: =cardDetails.X + 24
-      Y: =302
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      Y: =304
+      Width: =262
+      Height: =20
       Text: =Coalesce(gblPursuit.'Salesforce Opportunity ID', "Not linked")
       Font: =FontUI
       Size: =SizeBody
@@ -328,10 +329,10 @@
 - lblCap1R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
+      X: =249
       Y: =286
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      Width: =273
+      Height: =15
       Text: ="OPPORTUNITY LINK"
       Font: =FontUI
       Size: =SizeMeta
@@ -341,10 +342,10 @@
 - lblVal1R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
+      X: =249
       Y: =302
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      Width: =273
+      Height: =21
       Text: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), "—", "Open in Salesforce")
       Font: =FontUI
       Size: =SizeBody
@@ -358,9 +359,9 @@
     Control: Label
     Properties:
       X: =cardDetails.X + 24
-      Y: =340
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      Y: =341
+      Width: =262
+      Height: =14
       Text: ="PURSUIT OWNER"
       Font: =FontUI
       Size: =SizeMeta
@@ -371,9 +372,9 @@
     Control: Label
     Properties:
       X: =cardDetails.X + 24
-      Y: =356
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      Y: =358
+      Width: =262
+      Height: =20
       Text: =Coalesce(LookUp(colPeople, Email = gblPursuit.'WM Pursuit Owner Entra ID').Name, gblPursuit.'WM Pursuit Owner Entra ID')
       Font: =FontUI
       Size: =SizeBody
@@ -383,10 +384,10 @@
 - lblCap2R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
+      X: =249
       Y: =340
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      Width: =273
+      Height: =15
       Text: ="WORKFLOW STAGE"
       Font: =FontUI
       Size: =SizeMeta
@@ -396,10 +397,10 @@
 - lblVal2R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
+      X: =249
       Y: =356
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      Width: =273
+      Height: =21
       Text: =gblPursuit.'Workflow Stage'.Value
       Font: =FontUI
       Size: =SizeBody
@@ -410,9 +411,9 @@
     Control: Label
     Properties:
       X: =cardDetails.X + 24
-      Y: =394
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      Y: =395
+      Width: =262
+      Height: =14
       Text: ="HEALTH"
       Font: =FontUI
       Size: =SizeMeta
@@ -423,9 +424,9 @@
     Control: Label
     Properties:
       X: =cardDetails.X + 24
-      Y: =410
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      Y: =412
+      Width: =262
+      Height: =20
       Text: =gblPursuit.Health.Value
       Font: =FontUI
       Size: =SizeBody
@@ -435,11 +436,11 @@
 - lblCap3R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
+      X: =249
       Y: =394
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
-      Text: ="TARGET DECISION DATE"
+      Width: =273
+      Height: =15
+      Text: ="DECISION DATE"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
@@ -448,10 +449,10 @@
 - lblVal3R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
+      X: =249
       Y: =410
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      Width: =273
+      Height: =21
       Text: =If(IsBlank(gblPursuit.'Target Decision Date'), "Not set", Text(gblPursuit.'Target Decision Date', "mmm d, yyyy"))
       Font: =FontUI
       Size: =SizeBody
@@ -461,10 +462,10 @@
 - lblCap4L:
     Control: Label
     Properties:
-      X: =cardDetails.X + 24
-      Y: =448
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      X: =457
+      Y: =291
+      Width: =190
+      Height: =14
       Text: ="ALIGNED SIS"
       Font: =FontUI
       Size: =SizeMeta
@@ -474,10 +475,10 @@
 - lblVal4L:
     Control: Label
     Properties:
-      X: =cardDetails.X + 24
-      Y: =464
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      X: =457
+      Y: =308
+      Width: =202
+      Height: =20
       Text: =If(IsBlank(Concat(gblPursuit.'Aligned SIs', Value, ", ")), "None", Concat(gblPursuit.'Aligned SIs', Value, ", "))
       Font: =FontUI
       Size: =SizeBody
@@ -487,10 +488,10 @@
 - lblCap4R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
-      Y: =448
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      X: =457
+      Y: =239
+      Width: =190
+      Height: =15
       Text: ="HYPERSCALERS"
       Font: =FontUI
       Size: =SizeMeta
@@ -500,10 +501,10 @@
 - lblVal4R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
-      Y: =464
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      X: =457
+      Y: =258
+      Width: =190
+      Height: =20
       Text: =If(IsBlank(Concat(gblPursuit.Hyperscalers, Value, ", ")), "None", Concat(gblPursuit.Hyperscalers, Value, ", "))
       Font: =FontUI
       Size: =SizeBody
@@ -513,10 +514,10 @@
 - lblCap5L:
     Control: Label
     Properties:
-      X: =cardDetails.X + 24
-      Y: =502
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      X: =458
+      Y: =340
+      Width: =189
+      Height: =20
       Text: ="DEAL VALUE"
       Font: =FontUI
       Size: =SizeMeta
@@ -526,10 +527,10 @@
 - lblVal5L:
     Control: Label
     Properties:
-      X: =cardDetails.X + 24
-      Y: =518
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      X: =458
+      Y: =356
+      Width: =190
+      Height: =17
       Text: =If(IsBlank(gblPursuit.'Estimated Fees'), "Not set", Text(gblPursuit.'Estimated Fees', "[$-en-US]$#,##0"))
       Font: =FontUI
       Size: =SizeBody
@@ -539,10 +540,10 @@
 - lblCap5R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
-      Y: =502
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      X: =458
+      Y: =391
+      Width: =201
+      Height: =14
       Text: ="ACTIVE"
       Font: =FontUI
       Size: =SizeMeta
@@ -552,9 +553,9 @@
 - lblVal5R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
-      Y: =518
-      Width: =(cardDetails.Width - 60) / 2
+      X: =458
+      Y: =407
+      Width: =202
       Height: =22
       Text: =Coalesce(gblPursuit.Active.Value, "Not set")
       Font: =FontUI
@@ -565,10 +566,10 @@
 - lblCap6L:
     Control: Label
     Properties:
-      X: =cardDetails.X + 24
-      Y: =556
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      X: =50
+      Y: =451
+      Width: =190
+      Height: =15
       Text: ="CREATED"
       Font: =FontUI
       Size: =SizeMeta
@@ -578,10 +579,10 @@
 - lblVal6L:
     Control: Label
     Properties:
-      X: =cardDetails.X + 24
-      Y: =572
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      X: =50
+      Y: =468
+      Width: =190
+      Height: =21
       Text: =Text(gblPursuit.Created, "mmm d, yyyy · h:mm AM/PM")
       Font: =FontUI
       Size: =SizeBody
@@ -591,10 +592,10 @@
 - lblCap6R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
-      Y: =556
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =16
+      X: =250
+      Y: =451
+      Width: =190
+      Height: =15
       Text: ="MODIFIED"
       Font: =FontUI
       Size: =SizeMeta
@@ -604,10 +605,10 @@
 - lblVal6R:
     Control: Label
     Properties:
-      X: =cardDetails.X + 36 + (cardDetails.Width - 60) / 2
-      Y: =572
-      Width: =(cardDetails.Width - 60) / 2
-      Height: =22
+      X: =250
+      Y: =468
+      Width: =190
+      Height: =21
       Text: =Text(gblPursuit.Modified, "mmm d, yyyy · h:mm AM/PM")
       Font: =FontUI
       Size: =SizeBody
@@ -633,6 +634,7 @@
       RadiusTopRight: =RadiusCard
       RadiusBottomLeft: =RadiusCard
       RadiusBottomRight: =RadiusCard
+      TabIndex: =-1
 
 - lblActionsHead:
     Control: Label
@@ -733,6 +735,7 @@
             Height: =24
             Visible: =ThisItem.Health.Value = "At risk"
             RadiusTopLeft: =RadiusChip
+            TabIndex: =-1
             RadiusTopRight: =RadiusChip
             RadiusBottomLeft: =RadiusChip
             RadiusBottomRight: =RadiusChip
@@ -809,6 +812,7 @@
       RadiusTopRight: =RadiusCard
       RadiusBottomLeft: =RadiusCard
       RadiusBottomRight: =RadiusCard
+      TabIndex: =-1
 
 - lblUpdatesHead:
     Control: Label
@@ -898,6 +902,7 @@
             Height: =22
             Visible: =Not(IsBlank(ThisItem.'Risk / Decision'.Value))
             RadiusTopLeft: =RadiusChip
+            TabIndex: =-1
             RadiusTopRight: =RadiusChip
             RadiusBottomLeft: =RadiusChip
             RadiusBottomRight: =RadiusChip
@@ -951,15 +956,16 @@
       PressedFill: =ClrCard
       OnSelect: =false
       X: =GapPage
-      Y: =626
+      Y: =521
       Width: =(Parent.Width - (GapPage * 3)) / 2
-      Height: =Parent.Height - 626 - GapPage
+      Height: =Parent.Height - 521 - GapPage
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
       RadiusTopRight: =RadiusCard
       RadiusBottomLeft: =RadiusCard
       RadiusBottomRight: =RadiusCard
+      TabIndex: =-1
 
 - lblLatestHead:
     Control: Label
@@ -1020,6 +1026,7 @@
       Height: =22
       Visible: =Not(IsBlank(First(colUpdates).'Risk / Decision'.Value))
       RadiusTopLeft: =RadiusChip
+      TabIndex: =-1
       RadiusTopRight: =RadiusChip
       RadiusBottomLeft: =RadiusChip
       RadiusBottomRight: =RadiusChip
@@ -1202,6 +1209,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(gblPursuit.'Account Name', "")
+      TabIndex: =1
 
 - lblCaptxtPurName:
     Control: Label
@@ -1231,6 +1239,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(gblPursuit.'Pursuit Name', "")
+      TabIndex: =2
 
 - lblCapdrpPurStage:
     Control: Label
@@ -1263,6 +1272,7 @@
         =ForAll(Filter(colLookups, LookupType = "Workflow Stage") As L, { Value: L.Value })
       Default: =gblPursuit.'Workflow Stage'.Value
       AllowEmptySelection: =true
+      TabIndex: =3
 
 - lblCapdrpPurHealth:
     Control: Label
@@ -1295,6 +1305,7 @@
         =ForAll(Filter(colLookups, LookupType = "Health") As L, { Value: L.Value })
       Default: =gblPursuit.Health.Value
       AllowEmptySelection: =true
+      TabIndex: =4
 
 - lblCaptxtPurOwner:
     Control: Label
@@ -1324,6 +1335,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(gblPursuit.'WM Pursuit Owner Entra ID', "")
+      TabIndex: =5
 
 - lblCapdtePurTarget:
     Control: Label
@@ -1353,6 +1365,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       DefaultDate: =gblPursuit.'Target Decision Date'
+      TabIndex: =6
 
 - lblCaptxtPurActive:
     Control: Label
@@ -1362,7 +1375,7 @@
       Width: =280
       Height: =16
       Visible: =gblPanel = "pursuit"
-      Text: ="ACTIVE (1 = LIVE)"
+      Text: ="ACTIVE"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextMuted
@@ -1385,6 +1398,7 @@
         =Table({ Value: "Yes" }, { Value: "No" }, { Value: "Suspended" })
       Default: =Coalesce(gblPursuit.Active.Value, "Yes")
       AllowEmptySelection: =false
+      TabIndex: =7
 
 - lblCaptxtPurSfId:
     Control: Label
@@ -1414,6 +1428,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(gblPursuit.'Salesforce Opportunity ID', "")
+      TabIndex: =8
 
 - lblCaptxtPurSfUrl:
     Control: Label
@@ -1443,6 +1458,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(gblPursuit.'Salesforce Opportunity URL', "")
+      TabIndex: =9
 
 - lblCapcmbPurSIs:
     Control: Label
@@ -1476,6 +1492,7 @@
       DefaultSelectedItems: |
         =ForAll(gblPursuit.'Aligned SIs' As S, { Value: S.Value })
       SelectMultiple: =true
+      TabIndex: =10
 
 - lblCapcmbPurHype:
     Control: Label
@@ -1509,6 +1526,7 @@
       DefaultSelectedItems: |
         =ForAll(gblPursuit.Hyperscalers As H, { Value: H.Value })
       SelectMultiple: =true
+      TabIndex: =11
 
 - lblCaptxtPurFees:
     Control: Label
@@ -1538,6 +1556,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(Text(gblPursuit.'Estimated Fees'), "")
+      TabIndex: =12
 
 - lblCaptxtPurAiVer:
     Control: Label
@@ -1567,6 +1586,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(gblPursuit.'AI Overview Current Version', "")
+      TabIndex: =13
 
 - lblCaptxtActTitle:
     Control: Label
@@ -1596,6 +1616,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(gblEditAction.'Action Title', "")
+      TabIndex: =1
 
 - lblCapdrpActStage:
     Control: Label
@@ -1628,6 +1649,7 @@
         =ForAll(Filter(colLookups, LookupType = "Workflow Stage") As L, { Value: L.Value })
       Default: =gblEditAction.'Workflow Stage'.Value
       AllowEmptySelection: =true
+      TabIndex: =2
 
 - lblCapdrpActStatus:
     Control: Label
@@ -1660,6 +1682,7 @@
         =ForAll(Filter(colLookups, LookupType = "Action Status") As L, { Value: L.Value })
       Default: =gblEditAction.Status.Value
       AllowEmptySelection: =true
+      TabIndex: =3
 
 - lblCapdrpActHealth:
     Control: Label
@@ -1692,6 +1715,7 @@
         =ForAll(Filter(colLookups, LookupType = "Health") As L, { Value: L.Value })
       Default: =gblEditAction.Health.Value
       AllowEmptySelection: =true
+      TabIndex: =4
 
 - lblCapdrpActEffort:
     Control: Label
@@ -1724,6 +1748,7 @@
         =ForAll(Filter(colLookups, LookupType = "Effort Size") As L, { Value: L.Value })
       Default: =gblEditAction.'Effort Size'.Value
       AllowEmptySelection: =true
+      TabIndex: =5
 
 - lblCapdteActDue:
     Control: Label
@@ -1753,6 +1778,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       DefaultDate: =gblEditAction.'Due Date'
+      TabIndex: =6
 
 - lblCaptxtActOwner:
     Control: Label
@@ -1782,6 +1808,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(gblEditAction.'Action Owner Entra ID', "")
+      TabIndex: =7
 
 - lblCaptxtActPred:
     Control: Label
@@ -1811,6 +1838,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =Coalesce(gblEditAction.'Predecessor Action ID', "")
+      TabIndex: =8
 
 - lblCaptxtActNotes:
     Control: Label
@@ -1841,6 +1869,7 @@
       BorderColor: =ClrBorder
       Default: =Coalesce(gblEditAction.Notes, "")
       Mode: =TextMode.MultiLine
+      TabIndex: =9
 
 - lblCaptxtUpdTopic:
     Control: Label
@@ -1870,6 +1899,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: =gblEditUpdate.Topic
+      TabIndex: =1
 
 - lblCaptxtUpdText:
     Control: Label
@@ -1900,6 +1930,7 @@
       BorderColor: =ClrBorder
       Default: =Coalesce(gblEditUpdate.'Update Text', "")
       Mode: =TextMode.MultiLine
+      TabIndex: =2
 
 - lblCapdrpUpdType:
     Control: Label
@@ -1932,6 +1963,7 @@
         =ForAll(Filter(colLookups, LookupType = "Update Type") As L, { Value: L.Value })
       Default: =gblEditUpdate.'Update Type'.Value
       AllowEmptySelection: =true
+      TabIndex: =3
 
 - lblCapdrpUpdRisk:
     Control: Label
@@ -1964,6 +1996,7 @@
         =ForAll(Filter(colLookups, LookupType = "Risk / Decision") As L, { Value: L.Value })
       Default: =gblEditUpdate.'Risk / Decision'.Value
       AllowEmptySelection: =true
+      TabIndex: =4
 
 - btnPanelDelete:
     Control: Classic/Button
@@ -2010,6 +2043,7 @@
             false
         );
         Set(gblPanel, "")
+      TabIndex: =90
 
 - btnPanelCancel:
     Control: Classic/Button
@@ -2041,6 +2075,7 @@
             Set(gblNewPursuit, false);
             Navigate(scrPortfolioBoard, ScreenTransition.None)
         )
+      TabIndex: =91
 
 - btnPanelSave:
     Control: Classic/Button
@@ -2199,3 +2234,4 @@
 # ---------------------------------------------------------------------------
 # SCREEN PROPERTIES — Fill =ClrPage, OnVisible per docs/05-screen-pursuit-workspace.md
 # ---------------------------------------------------------------------------
+      TabIndex: =92

@@ -159,6 +159,26 @@ top of the update panel.
 Both display formulas read `Coalesce(…Topic, "Untitled update")`, so the rows that predate
 the column still render instead of showing a blank line.
 
+## Tab order
+
+`TabIndex` defaults to `0`, which means "follow z-order" — so without it, tabbing walks the
+tree in document order. On this screen that put the whole page *behind* the scrim ahead of
+the panel that's open on top of it: about forty stops before reaching the first field.
+
+The panel inputs carry an explicit `TabIndex`, numbered 1..n in visual order within each
+mode, and Delete / Cancel / Save take 90 / 91 / 92. Any positive `TabIndex` sorts ahead of
+every `0`, so the panel comes first whenever it's open — and the numbers can repeat across
+the three modes because only one mode is ever visible, and hidden controls are skipped.
+
+The four cards and the three chip pills are `Classic/Button` — the only classic control
+with radius properties — which makes them focusable even though there's nothing to click.
+They're set to `TabIndex: =-1`.
+
+The transparent row layers (`btnActionRow`, `btnUpdateRow`, `btnLatestClick`) keep their
+default. They look like nothing, but they *are* the interactive element for a row, so
+removing them from the sequence would leave no keyboard route into an action or an update.
+Each carries a `Tooltip` that a screen reader announces.
+
 ## The edit panel
 
 One slide-over, three modes on this screen. `gblPanel` holds which: `"pursuit"`,
