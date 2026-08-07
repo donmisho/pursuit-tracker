@@ -40,7 +40,8 @@ corrupt file is worse than no file.
 | | |
 |---|---|
 | `src/App.Formulas.powerfx` | Dark theme as named formulas. Paste into App → Formulas |
-| `src/App.OnStart.powerfx` | Startup state and the shared portfolio load |
+| `src/App.OnStart.powerfx` | Startup state, the shared portfolio load, the lookup vocabulary |
+| `src/screens/*.OnVisible.powerfx` | One file per screen's OnVisible — pasted as-is, no editing |
 | `src/yaml/01-PortfolioBoard.pa.yaml` | The kanban as code-view YAML — 36 controls. Paste onto `scrPortfolioBoard` |
 | `src/yaml/02-PortfolioList.pa.yaml` | The table and export button — 42 controls |
 | `src/yaml/03-PursuitWorkspace.pa.yaml` | Opportunity details, actions, status updates, and the edit panel — 119 controls |

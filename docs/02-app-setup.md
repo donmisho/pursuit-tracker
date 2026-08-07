@@ -98,8 +98,8 @@ For each screen in turn:
 2. In Studio, right-click the matching screen in the tree view → **Paste**. The first
    paste triggers a browser clipboard-permission prompt; approve it.
 3. Set the screen's `Fill` to `=ClrPage`.
-4. Set the screen's `OnVisible` — the comment block at the foot of each YAML file says
-   which one, and `docs/03`–`05a` carry the formulas.
+4. Set the screen's `OnVisible` from `src/screens/<screen>.OnVisible.powerfx` — one file
+   per screen, pasted whole, nothing to trim.
 
 | File | Screen | Controls |
 |---|---|---|

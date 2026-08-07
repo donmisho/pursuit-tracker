@@ -1,0 +1,41 @@
+// Paste into: Power Apps Studio -> Tree view -> scrPursuitWorkspace -> OnVisible property
+//
+
+Set(gblPursuit, LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey));
+
+// This pursuit's actions, with the dependency wording used when an action has no due
+// date but does name a predecessor. Sorting happens on the gallery, not here -- the
+// two-key sort (completed last, then due date) is a display concern.
+ClearCollect(
+    colActions_P,
+    AddColumns(
+        Filter('pursuit-tracker-actions', 'Pursuit ID' = gblPursuitKey) As A,
+        DueWording,
+        If(
+            !IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'),
+            "",
+            "After " & Lower(
+                LookUp('pursuit-tracker-actions', Title = A.'Predecessor Action ID').'Workflow Stage'.Value
+            )
+        )
+    )
+);
+
+ClearCollect(
+    colUpdates,
+    Sort(Filter('pursuit-tracker-status-updates', 'Pursuit ID' = gblPursuitKey), 'Update Date', SortOrder.Descending)
+);
+
+// Update authors are email strings and aren't necessarily pursuit owners, so colPeople
+// (built at startup from owners only) won't have them. Top it up here.
+ForAll(
+    Distinct(colUpdates, 'Created By Entra ID') As E,
+    If(
+        IsBlank(E.Value) || !IsBlank(LookUp(colPeople, Email = E.Value)),
+        false,
+        Collect(colPeople, { Email: E.Value, Name: IfError(Office365Users.UserProfileV2(E.Value).displayName, E.Value) })
+    )
+);
+
+Set(gblPanel, If(gblNewPursuit, "pursuit", ""));
+Set(gblEditKey, "")

@@ -1,0 +1,122 @@
+// Paste into: Power Apps Studio -> Tree view -> scrPortfolioBoard -> OnVisible property
+//
+// The LoadPortfolio block, verbatim from src/App.OnStart.powerfx. Canvas apps have no
+// user-defined behaviour functions, so it is duplicated rather than called. Change it in
+// App.OnStart, then re-paste here and into scrPortfolioList.
+//
+// Reloading on every visit is what makes a stage change from elsewhere in the app show up
+// when you come back.
+
+// All actions, unfiltered. Filtering on Status <> "Completed" here would look tidier
+// but SharePoint doesn't delegate <> on a choice column, so the server would silently
+// return a truncated set. Pulling the list whole and filtering in memory is both
+// correct and faster, until the list passes the 2000-row data limit.
+ClearCollect(colActions, 'pursuit-tracker-actions');
+
+// Owner display names. The owner column is an email string, not a Person column, so
+// there's no .DisplayName to read -- resolve each distinct address once here rather
+// than calling the connector per card. IfError keeps a departed or mistyped address
+// from blanking the whole collection; you get the raw email in the UI instead.
+ClearCollect(
+    colPeople,
+    ForAll(
+        Distinct('pursuit-tracker-pursuits', 'WM Pursuit Owner Entra ID') As E,
+        {
+            Email: E.Value,
+            Name:  IfError(Office365Users.UserProfileV2(E.Value).displayName, E.Value)
+        }
+    )
+);
+
+ClearCollect(
+    colPortfolio,
+    AddColumns(
+        // No Active filter yet -- every row was 0 when the schema was read, so filtering
+        // would empty the board. Switch one of these in once the column means something:
+        //     Filter('pursuit-tracker-pursuits', Active = 1) As P     // still a Number
+        //     Filter('pursuit-tracker-pursuits', Active) As P         // converted to Yes/No
+        'pursuit-tracker-pursuits' As P,
+
+        OwnerName,
+        Coalesce(
+            LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name,
+            P.'WM Pursuit Owner Entra ID'
+        ),
+
+        // The next open action, as two scalar columns rather than one record column.
+        // A record-valued column doesn't survive into a collection with its type intact:
+        // ThisItem.NextAction.'Due Date' comes back untyped, so Text() rejects the date
+        // format and Coalesce() rejects the title. Scalars just work.
+        //
+        // Actions with no due date are excluded -- they can't be "next due", and
+        // including them would let an undated action win the sort and blank the date.
+        NextActionTitle,
+        First(
+            Sort(
+                Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))),
+                'Due Date',
+                SortOrder.Ascending
+            )
+        ).'Action Title',
+
+        NextActionDue,
+        First(
+            Sort(
+                Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))),
+                'Due Date',
+                SortOrder.Ascending
+            )
+        ).'Due Date',
+
+        // Flattened choice values. Galleries bind to the raw multi-choice tables, but the
+        // Excel export needs text, and computing it in two places invites drift.
+        SIsText,  Concat(P.'Aligned SIs', Value, ", "),
+        HypeText, Concat(P.Hyperscalers, Value, ", ")
+    )
+);
+
+// Board columns, read from the Workflow Stage choice list. Board order is whatever order
+// the choices are in on the SharePoint column, so adding or reordering a stage is a list
+// edit, not an app edit.
+ClearCollect(
+    colStages,
+    ForAll(
+        Choices('pursuit-tracker-pursuits'.'Workflow Stage') As C,
+        { Stage: C.Value }
+    )
+);
+
+// Fallback for an empty choice list. These columns have fill-in enabled, so before the
+// choice values were defined Choices() returned nothing and the board rendered zero
+// columns -- a blank screen with no error to explain it. Keep this until you're sure the
+// choice list can't be emptied again.
+If(
+    CountRows(colStages) = 0,
+    ClearCollect(
+        colStages,
+        Table(
+            { Stage: "Unassigned" },
+            { Stage: "WM Account Team Assimilation" },
+            { Stage: "Partner Introduction" },
+            { Stage: "Preliminary Scoping" },
+            { Stage: "Proposal/Quote" }
+        )
+    )
+);
+
+// Fill-in choices mean a pursuit can carry a stage that was typed rather than picked, and
+// so isn't in the choice list. Append those at the end rather than dropping the pursuits
+// that hold them -- an unexpected trailing column is a visible prompt to fix the data.
+ForAll(
+    Distinct(colPortfolio, 'Workflow Stage'.Value) As S,
+    If(
+        IsBlank(S.Value) || !IsBlank(LookUp(colStages, Stage = S.Value)),
+        false,
+        Collect(colStages, { Stage: S.Value })
+    )
+);
+
+// Clear any half-finished stage move. A card left picked up would still be armed on the
+// next visit. The ID < 0 lookup rather than Blank() because it returns an empty record of
+// the right shape, which is the type information the compiler needs.
+Set(gblMoving, LookUp('pursuit-tracker-pursuits', ID < 0))
