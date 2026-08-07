@@ -353,3 +353,46 @@ The budgets are character counts, not measured text, so a name in all wide chara
 will still run a line long. Power Apps exposes no way to measure rendered text, so the
 alternative is `AutoHeight` plus a variable-height template, which a fixed-position card
 layout can't use. If a title clips too eagerly, raise the number.
+
+## Filters
+
+Three dropdowns above the board and above the list: **SI**, **HS**, **Active**, plus a
+Clear button. Each defaults to `All`.
+
+They filter `colPortfolio` in memory, so there is no second query, nothing to reload, and
+no delegation limit in play — the collection is already whole.
+
+```powerfx
+Filter(
+    colPortfolio,
+    'Workflow Stage'.Value = ThisItem.Stage,
+    drpFltSI.Selected.Value = "All" || drpFltSI.Selected.Value in SIsText,
+    drpFltHype.Selected.Value = "All" || drpFltHype.Selected.Value in HypeText,
+    drpFltActive.Selected.Value = "All" || drpFltActive.Selected.Value = ActiveText
+)
+```
+
+The same three lines appear in `galCards.Items` and `lblStageCount.Text` on the board, and
+in `galPortfolioList.Items` on the list — so a stage header's count always matches the
+cards under it.
+
+**No globals and no OnChange handlers.** The galleries read `drpFltSI.Selected.Value`
+directly, so selecting a value recalculates them the way a spreadsheet cell recalculates.
+A global would need three OnChange handlers per screen kept in step with each other.
+
+**SI and HS test `in` against the flattened text columns**, not the multi-choice tables.
+`"Fujitsu" in SIsText` is a substring test over `"Fujitsu, NTT Data"`, which is both
+simpler and avoids reaching into a choice table inside a predicate — the thing that has
+broken repeatedly on this app. `ActiveText` was added to `colPortfolio` for the same
+reason, including in the two inline rebuilds that run after a card is moved; without it
+there, the filters would break the moment someone moved a card.
+
+The SI and HS option lists come from `colLookups`, so **a value that isn't in the lookup
+list can't be filtered on** even if it's in the SharePoint column. `Active` uses its own
+three values, which are fixed in the column.
+
+### Why not SharePoint views
+
+A view would mean a round trip per filter change, a separate data source per combination,
+and no way to combine three of them. In-memory filtering over a collection that's already
+loaded is faster and composes.

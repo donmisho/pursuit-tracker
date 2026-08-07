@@ -28,10 +28,10 @@ ClearCollect(
 ClearCollect(
     colPortfolio,
     AddColumns(
-        // Active is a Yes/No column now. The board still shows every pursuit, because
-        // nothing has set the flag yet and filtering on it today empties the screen. Once
-        // the rows are marked, swap the line below for:
-        //     Filter('pursuit-tracker-pursuits', Active) As P
+        // Every pursuit loads. Active is filtered in the UI instead -- drpFltActive on
+        // the board and the list -- so one row can be hidden without reloading, and the
+        // three rows still holding "0" from when the column was a Number stay visible
+        // rather than vanishing without explanation.
         'pursuit-tracker-pursuits' As P,
 
         OwnerName,
@@ -68,7 +68,11 @@ ClearCollect(
         // Flattened choice values. Galleries bind to the raw multi-choice tables, but the
         // Excel export needs text, and computing it in two places invites drift.
         SIsText,  Concat(P.'Aligned SIs', Value, ", "),
-        HypeText, Concat(P.Hyperscalers, Value, ", ")
+        HypeText, Concat(P.Hyperscalers, Value, ", "),
+
+        // Active as plain text, so the filter dropdown compares text to text rather than
+        // reaching through a choice record inside a Filter predicate.
+        ActiveText, P.Active.Value
     )
 );
 
@@ -101,6 +105,22 @@ ClearCollect(
 // block that used to be here walked Distinct(colPortfolio, 'Workflow Stage'.Value) and was
 // the source of the "Incompatible types for comparison" / "Text has some invalid arguments"
 // pair that appeared identically in all three copies of this block.
+
+// Filter options. "All" has to be prepended as its own row -- Power Fx has no way to
+// concatenate two tables in a single expression, so it's a ClearCollect followed by a
+// Collect rather than one formula.
+//
+// SI and Hyperscaler read the lookup list, so a value only appears here if it's in
+// pursuit-tracker-lookups. If a value is in the SharePoint column but not the lookup
+// list, it can't be filtered on.
+ClearCollect(colFltSI, { Value: "All" });
+Collect(colFltSI, ForAll(Filter(colLookups, LookupType = "Systems Integrator") As L, { Value: L.Value }));
+
+ClearCollect(colFltHype, { Value: "All" });
+Collect(colFltHype, ForAll(Filter(colLookups, LookupType = "Hyperscaler") As L, { Value: L.Value }));
+
+// Active is the pursuits column's own choice set, which is fixed at three values.
+ClearCollect(colFltActive, Table({ Value: "All" }, { Value: "Yes" }, { Value: "No" }, { Value: "Suspended" }));
 
 // Close any row's ... menu left open from the previous visit.
 Set(gblRowMenu, "")

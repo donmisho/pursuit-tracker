@@ -202,6 +202,107 @@
       Width: =150
       X: =btnDownloadExcel.X - Self.Width - 12
       Y: =96
+- lblFltSI:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =32
+      Size: =SizeMeta
+      Text: ="SI"
+      Width: =24
+      Wrap: =false
+      X: =24
+      Y: =168
+- drpFltSI:
+    Control: Classic/DropDown@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      Color: =ClrText
+      Default: ="All"
+      Fill: =ClrColumn
+      Font: =FontUI
+      Height: =32
+      Items: =colFltSI
+      Size: =SizeBody
+      Width: =180
+      X: =52
+      Y: =168
+- lblFltHype:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =32
+      Size: =SizeMeta
+      Text: ="HS"
+      Width: =26
+      Wrap: =false
+      X: =248
+      Y: =168
+- drpFltHype:
+    Control: Classic/DropDown@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      Color: =ClrText
+      Default: ="All"
+      Fill: =ClrColumn
+      Font: =FontUI
+      Height: =32
+      Items: =colFltHype
+      Size: =SizeBody
+      Width: =180
+      X: =278
+      Y: =168
+- lblFltActive:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =32
+      Size: =SizeMeta
+      Text: ="ACTIVE"
+      Width: =52
+      Wrap: =false
+      X: =474
+      Y: =168
+- drpFltActive:
+    Control: Classic/DropDown@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      Color: =ClrText
+      Default: ="All"
+      Fill: =ClrColumn
+      Font: =FontUI
+      Height: =32
+      Items: =colFltActive
+      Size: =SizeBody
+      Width: =140
+      X: =530
+      Y: =168
+- btnFltClear:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      Color: =ClrTextMuted
+      Fill: =ClrPage
+      Font: =FontUI
+      Height: =32
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Reset(drpFltSI); Reset(drpFltHype); Reset(drpFltActive)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =11
+      Text: ="Clear filters"
+      Width: =110
+      X: =686
+      Y: =168
 - lblHdrAccount:
     Control: Label@2.5.1
     Properties:
@@ -291,7 +392,17 @@
     Variant: Vertical
     Properties:
       Height: =Parent.Height - 250 - 56
-      Items: =Sort(colPortfolio, 'Account Name' & " " & 'Pursuit Name', SortOrder.Ascending)
+      Items: |
+        =Sort(
+            Filter(
+                colPortfolio,
+                drpFltSI.Selected.Value = "All" || drpFltSI.Selected.Value in SIsText,
+                drpFltHype.Selected.Value = "All" || drpFltHype.Selected.Value in HypeText,
+                drpFltActive.Selected.Value = "All" || drpFltActive.Selected.Value = ActiveText
+            ),
+            'Account Name' & " " & 'Pursuit Name',
+            SortOrder.Ascending
+        )
       TemplatePadding: =0
       TemplateSize: =110
       Width: =Parent.Width - (GapPage * 2)
