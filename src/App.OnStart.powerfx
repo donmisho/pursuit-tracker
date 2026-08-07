@@ -126,7 +126,12 @@ ClearCollect(
     colStages,
     ForAll(
         Choices('pursuit-tracker-pursuits'.'Workflow Stage') As C,
-        { Stage: C.Value }
+        // Text() is load-bearing. colStages is written three times -- here, the literal
+        // fallback below, and the fill-in append after it -- and a collection has one type
+        // for all of them. C.Value carries the choice column's type rather than plain text,
+        // so without this the three writes disagree and the whole collection resolves to
+        // Error: "Incompatible type", then "'Stage' isn't recognized" everywhere it's read.
+        { Stage: Text(C.Value) }
     )
 );
 
@@ -156,7 +161,7 @@ ForAll(
     If(
         IsBlank(S.Value) || !IsBlank(LookUp(colStages, Stage = S.Value)),
         false,
-        Collect(colStages, { Stage: S.Value })
+        Collect(colStages, { Stage: Text(S.Value) })
     )
 );
 
