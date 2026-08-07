@@ -170,6 +170,12 @@ keep consistent by hand.
 `Created By Entra ID` are set on create and left alone on edit, so editing a typo doesn't
 re-date the entry.
 
+`Active` is a Yes/No column, so it's a two-item dropdown — `Table({ Value: "Yes" }, { Value: "No" })` —
+rather than a Toggle. A Toggle is the natural control and the dropdown is the safer one: it's
+the same `Classic/DropDown` used by the other seven fields on this panel, with a property set
+already known to survive a code-view paste. Save writes the comparison, not the text:
+`Active: drpPurActive.Selected.Value = "Yes"`. New pursuits default to Yes.
+
 Owner fields are plain text inputs rather than people pickers. The columns hold email
 strings, not Person values, so a combo box would mean converting between a user record and
 an address in both directions for no gain.

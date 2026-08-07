@@ -211,7 +211,7 @@
       RadiusTopRight: =6
       RadiusBottomLeft: =6
       RadiusBottomRight: =6
-      OnSelect: =Set(gblPanel, "pursuit"); Reset(txtPurAccount); Reset(txtPurName); Reset(drpPurStage); Reset(drpPurHealth); Reset(txtPurOwner); Reset(dtePurTarget); Reset(txtPurActive); Reset(txtPurSfId); Reset(txtPurSfUrl); Reset(cmbPurSIs); Reset(cmbPurHype); Reset(txtPurFees); Reset(txtPurAiVer)
+      OnSelect: =Set(gblPanel, "pursuit"); Reset(txtPurAccount); Reset(txtPurName); Reset(drpPurStage); Reset(drpPurHealth); Reset(txtPurOwner); Reset(dtePurTarget); Reset(drpPurActive); Reset(txtPurSfId); Reset(txtPurSfUrl); Reset(cmbPurSIs); Reset(cmbPurHype); Reset(txtPurFees); Reset(txtPurAiVer)
 
 # ================================================ LEFT — opportunity details
 - cardDetails:
@@ -556,7 +556,7 @@
       Y: =518
       Width: =(cardDetails.Width - 60) / 2
       Height: =22
-      Text: =Text(gblPursuit.Active)
+      Text: =If(gblPursuit.Active, "Yes", "No")
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
@@ -1205,8 +1205,8 @@
       Color: =ClrTextMuted
       Wrap: =false
 
-- txtPurActive:
-    Control: Classic/TextInput
+- drpPurActive:
+    Control: Classic/DropDown
     Properties:
       X: =Parent.Width - 616
       Y: =486
@@ -1218,7 +1218,10 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Default: =Coalesce(Text(gblPursuit.Active), "")
+      Items: |
+        =Table({ Value: "Yes" }, { Value: "No" })
+      Default: =If(gblNewPursuit || gblPursuit.Active, "Yes", "No")
+      AllowEmptySelection: =false
 
 - lblCaptxtPurSfId:
     Control: Label
@@ -1890,7 +1893,7 @@
                             Health:                        { Value: drpPurHealth.Selected.Value },
                             'WM Pursuit Owner Entra ID':   txtPurOwner.Text,
                             'Target Decision Date':        dtePurTarget.SelectedDate,
-                            Active:                        If(IsBlank(txtPurActive.Text), 0, Value(txtPurActive.Text)),
+                            Active:                        drpPurActive.Selected.Value = "Yes",
                             'Salesforce Opportunity ID':   txtPurSfId.Text,
                             'Salesforce Opportunity URL':  txtPurSfUrl.Text,
                             'Aligned SIs':                 ForAll(cmbPurSIs.SelectedItems As S, { Value: S.Value }),
@@ -1907,7 +1910,7 @@
                             Health:                        { Value: drpPurHealth.Selected.Value },
                             'WM Pursuit Owner Entra ID':   txtPurOwner.Text,
                             'Target Decision Date':        dtePurTarget.SelectedDate,
-                            Active:                        If(IsBlank(txtPurActive.Text), 0, Value(txtPurActive.Text)),
+                            Active:                        drpPurActive.Selected.Value = "Yes",
                             'Salesforce Opportunity ID':   txtPurSfId.Text,
                             'Salesforce Opportunity URL':  txtPurSfUrl.Text,
                             'Aligned SIs':                 ForAll(cmbPurSIs.SelectedItems As S, { Value: S.Value }),

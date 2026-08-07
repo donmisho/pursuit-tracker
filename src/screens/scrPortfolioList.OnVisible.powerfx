@@ -28,10 +28,10 @@ ClearCollect(
 ClearCollect(
     colPortfolio,
     AddColumns(
-        // No Active filter yet -- every row was 0 when the schema was read, so filtering
-        // would empty the board. Switch one of these in once the column means something:
-        //     Filter('pursuit-tracker-pursuits', Active = 1) As P     // still a Number
-        //     Filter('pursuit-tracker-pursuits', Active) As P         // converted to Yes/No
+        // Active is a Yes/No column now. The board still shows every pursuit, because
+        // nothing has set the flag yet and filtering on it today empties the screen. Once
+        // the rows are marked, swap the line below for:
+        //     Filter('pursuit-tracker-pursuits', Active) As P
         'pursuit-tracker-pursuits' As P,
 
         OwnerName,
