@@ -8,8 +8,9 @@ scrPursuitWorkspace
 ├── nav bar (four tabs)
 ├── lblBreadcrumb / lblAccount / lblPursuitName / btnEditDetails
 ├── LEFT  — cardDetails    every pursuit field, read-only, two per row
+│         — cardLatest     the newest status update + btnAddUpdate ("New Update")
 └── RIGHT — cardActions    btnAddAction + galActions   (top half)
-          — cardUpdates    btnAddUpdate + galUpdates   (bottom half)
+          — cardUpdates    galUpdates, every update except the newest (bottom half)
    EDIT PANEL              recPanelScrim + recPanel + pursuit/action/update fields
                            + btnPanelDelete / btnPanelCancel / btnPanelSave
 ```
@@ -117,12 +118,46 @@ a compound sort out of Power Fx.
 Undated actions substitute `Date(2099, 12, 31)` so they sink to the bottom of the open
 group rather than floating to the top, which is what a blank date would otherwise do.
 
-## `galUpdates` — newest first, with the time
+## The status update split
 
-`Sort(colUpdates, 'Update Date', SortOrder.Descending)`. The stamp line shows
-`mmm d, yyyy · h:mm AM/PM` plus the update type rather than "Today" — on a feed where two
-updates can land in the same afternoon, the relative form hides the ordering it's meant to
-convey.
+The newest update gets its own card under Opportunity details, at the same heading size —
+it's the thing anyone opening a pursuit reads first, and burying it at the top of a
+scrolling feed made it one row among many. `cardUpdates` on the right then carries
+everything *else*.
+
+`cardLatest` binds to `First(colUpdates)` rather than to a global. `colUpdates` is already
+sorted newest-first by `OnVisible`, so `First` is the latest, and reading it directly means
+there's no third variable to keep in step with the collection after a save.
+
+`galUpdates` excludes it:
+
+```powerfx
+Sort(
+    Filter(colUpdates, Title <> First(colUpdates).Title),
+    'Update Date',
+    SortOrder.Descending
+)
+```
+
+Filtering by key rather than by index — `LastN(colUpdates, CountRows(colUpdates) - 1)`
+would be the obvious alternative and asks for a negative count when there are no updates.
+
+**"New Update" lives on the latest card**, not on the previous-updates list. Adding an
+update is how you replace what's in that card, so the button belongs where the result
+appears.
+
+The stamp line shows `mmm d, yyyy · h:mm AM/PM` plus the update type rather than "Today" —
+on a feed where two updates can land in the same afternoon, the relative form hides the
+ordering it's meant to convey.
+
+## `Topic`
+
+A text column on `pursuit-tracker-status-updates` that titles each update. It's the bold
+first line on the latest card and on every previous-update row, and a `TOPIC` input at the
+top of the update panel.
+
+Both display formulas read `Coalesce(…Topic, "Untitled update")`, so the rows that predate
+the column still render instead of showing a blank line.
 
 ## The edit panel
 
