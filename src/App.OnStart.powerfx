@@ -144,26 +144,21 @@ If(
     ClearCollect(
         colStages,
         Table(
-            { Stage: "Unassigned" },
+            { Stage: "Intake" },
             { Stage: "WM Account Team Assimilation" },
             { Stage: "Partner Introduction" },
             { Stage: "Preliminary Scoping" },
-            { Stage: "Proposal/Quote" }
+            { Stage: "Proposal/Quote" },
+            { Stage: "Review/Decision" }
         )
     )
 );
 
-// Fill-in choices mean a pursuit can carry a stage that was typed rather than picked, and
-// so isn't in the choice list. Append those at the end rather than dropping the pursuits
-// that hold them -- an unexpected trailing column is a visible prompt to fix the data.
-ForAll(
-    Distinct(colPortfolio, 'Workflow Stage'.Value) As S,
-    If(
-        IsBlank(S.Value) || !IsBlank(LookUp(colStages, Stage = S.Value)),
-        false,
-        Collect(colStages, { Stage: Text(S.Value) })
-    )
-);
+// No fill-in append. Workflow Stage is FillInChoice="FALSE" in the list, so a pursuit
+// cannot carry a stage that isn't in the choice set and there is nothing to append. The
+// block that used to be here walked Distinct(colPortfolio, 'Workflow Stage'.Value) and was
+// the source of the "Incompatible types for comparison" / "Text has some invalid arguments"
+// pair that appeared identically in all three copies of this block.
 
 
 // =====================================================================

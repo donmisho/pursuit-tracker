@@ -170,11 +170,14 @@ keep consistent by hand.
 `Created By Entra ID` are set on create and left alone on edit, so editing a typo doesn't
 re-date the entry.
 
-`Active` is a Yes/No column, so it's a two-item dropdown — `Table({ Value: "Yes" }, { Value: "No" })` —
-rather than a Toggle. A Toggle is the natural control and the dropdown is the safer one: it's
-the same `Classic/DropDown` used by the other seven fields on this panel, with a property set
-already known to survive a code-view paste. Save writes the comparison, not the text:
-`Active: drpPurActive.Selected.Value = "Yes"`. New pursuits default to Yes.
+`Active` is a Choice column with three values — `Yes`, `No`, `Suspended` — not a Yes/No
+column, so it's a dropdown over a literal table and saves as `{ Value: … }` like every other
+choice field. The values are hard-coded rather than read from `Choices()` because the set is
+three items that describe a lifecycle rather than a vocabulary anyone maintains.
+
+Three rows currently hold `0`, left behind from when the column was a Number. They read as
+`0` in the app until they're corrected in the list — the column no longer accepts fill-in,
+so saving one of those pursuits will replace it with a real value.
 
 Owner fields are plain text inputs rather than people pickers. The columns hold email
 strings, not Person values, so a combo box would mean converting between a user record and

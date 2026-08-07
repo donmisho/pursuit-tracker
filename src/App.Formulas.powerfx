@@ -52,7 +52,7 @@ GapPage        = 24;   // page gutter
 GapCard        = 16;   // inside a card
 RadiusCard     = 8;
 RadiusChip     = 10;
-BoardColumns   = 5;    // stage columns visible without scrolling; the board divides
+BoardColumns   = 6;    // stage columns visible without scrolling; the board divides
                        // the canvas by this rather than using a fixed column width
 
 // ---------------------------------------------------------------- helpers
@@ -62,11 +62,12 @@ BoardColumns   = 5;    // stage columns visible without scrolling; the board div
 StageAccent(stage: Text): Color =
     Switch(
         stage,
-        "Unassigned",                   ColorValue("#5A6474"),
+        "Intake",                       ColorValue("#5A6474"),
         "WM Account Team Assimilation", ColorValue("#6B7DF2"),
         "Partner Introduction",         ColorValue("#5AB0C9"),
         "Preliminary Scoping",          ColorValue("#8E7BD8"),
         "Proposal/Quote",               ColorValue("#D8A05A"),
+        "Review/Decision",               ColorValue("#C96A6A"),
         ClrTextMuted
     );
 

@@ -53,9 +53,9 @@ corrupt file is worse than no file.
 
 **The schema is confirmed and current.** Column names come from the real list exports,
 the five list titles are confirmed, and the four schema changes the mockups needed are
-applied. One item is open: `Active` is a Yes/No column that nothing has set yet, so the
-app doesn't filter on it and the board shows all fourteen pursuits. The filter sits
-commented in `src/App.OnStart.powerfx`, ready for when the rows are marked.
+applied. One item is open: `Active` is a Choice column (`Yes` / `No` / `Suspended`) and
+three rows still hold `0` from when it was a Number, so the app doesn't filter on it and
+the board shows every pursuit. The filter sits commented in `src/App.OnStart.powerfx`.
 
 **The AI overview is display-only.** SharePoint's native AI populates the overview text
 and its version history; the app reads and renders it, and there's no Refresh button.

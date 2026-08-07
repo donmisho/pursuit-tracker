@@ -556,7 +556,7 @@
       Y: =518
       Width: =(cardDetails.Width - 60) / 2
       Height: =22
-      Text: =If(gblPursuit.Active, "Yes", "No")
+      Text: =Coalesce(gblPursuit.Active.Value, "Not set")
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
@@ -1219,8 +1219,8 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Items: |
-        =Table({ Value: "Yes" }, { Value: "No" })
-      Default: =If(gblNewPursuit || gblPursuit.Active, "Yes", "No")
+        =Table({ Value: "Yes" }, { Value: "No" }, { Value: "Suspended" })
+      Default: =Coalesce(gblPursuit.Active.Value, "Yes")
       AllowEmptySelection: =false
 
 - lblCaptxtPurSfId:
@@ -1893,7 +1893,7 @@
                             Health:                        { Value: drpPurHealth.Selected.Value },
                             'WM Pursuit Owner Entra ID':   txtPurOwner.Text,
                             'Target Decision Date':        dtePurTarget.SelectedDate,
-                            Active:                        drpPurActive.Selected.Value = "Yes",
+                            Active:                        { Value: drpPurActive.Selected.Value },
                             'Salesforce Opportunity ID':   txtPurSfId.Text,
                             'Salesforce Opportunity URL':  txtPurSfUrl.Text,
                             'Aligned SIs':                 ForAll(cmbPurSIs.SelectedItems As S, { Value: S.Value }),
@@ -1910,7 +1910,7 @@
                             Health:                        { Value: drpPurHealth.Selected.Value },
                             'WM Pursuit Owner Entra ID':   txtPurOwner.Text,
                             'Target Decision Date':        dtePurTarget.SelectedDate,
-                            Active:                        drpPurActive.Selected.Value = "Yes",
+                            Active:                        { Value: drpPurActive.Selected.Value },
                             'Salesforce Opportunity ID':   txtPurSfId.Text,
                             'Salesforce Opportunity URL':  txtPurSfUrl.Text,
                             'Aligned SIs':                 ForAll(cmbPurSIs.SelectedItems As S, { Value: S.Value }),
