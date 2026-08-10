@@ -523,7 +523,6 @@
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
-      VerticalAlign: =VerticalAlign.Top
 
 - cardAiHistory:
     Control: Classic/Button

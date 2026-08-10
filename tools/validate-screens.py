@@ -75,6 +75,15 @@ KNOWN_GLOBALS = {
     "Office365Users", "Parent", "Self", "ThisItem", "Value",
 }
 
+# Properties a control type doesn't have. Studio rejects the whole paste with PA2108
+# "Unknown property 'X' for control type 'Y'", so a Label converted to another control
+# that kept a Label-only property costs you the entire screen.
+FORBIDDEN = {
+    "HtmlViewer":      {"VerticalAlign", "Wrap", "Align", "FontWeight", "Underline", "Text"},
+    "RichTextEditor":  {"VerticalAlign", "Wrap", "Align", "Text", "Mode", "Size", "Color",
+                        "Font", "Fill", "BorderColor"},
+}
+
 errors, warnings = [], []
 
 
@@ -98,6 +107,11 @@ def walk(controls, path, names, file):
             continue
         if "Control" not in body:
             errors.append(f"{file}: {here} is missing a Control type")
+
+        ctype = str(body.get("Control", "")).split("@")[0]
+        for bad in FORBIDDEN.get(ctype, ()):
+            if bad in body.get("Properties", {}):
+                errors.append(f"{file}: {here} is a {ctype} and has no '{bad}' property (PA2108)")
 
         for key, value in body.get("Properties", {}).items():
             if key in NON_FORMULA_KEYS:

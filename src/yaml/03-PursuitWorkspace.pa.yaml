@@ -1167,7 +1167,7 @@
 - htmLatestBody:
     Control: HtmlViewer
     Properties:
-      X: =GapPage + 24
+      X: =cardLatest.X + 24
       Y: =cardLatest.Y + 106
       Width: =cardLatest.Width - 48
       Height: =cardLatest.Height - 122
@@ -1176,7 +1176,6 @@
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
-      VerticalAlign: =VerticalAlign.Top
 
 - lblLatestEmpty:
     Control: Label
