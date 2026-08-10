@@ -144,6 +144,41 @@ convention every other list in this app uses for its key column.
 Without one of those, whoever uploads has to set `Pursuit ID` on the item afterwards or the
 document won't appear in the app.
 
+### Stamping the pursuit onto uploaded files
+
+`Pursuit ID`, `Account Name` and `Pursuit Name` on the library are filled by the app, but
+not at upload time — **nothing in the app creates a library item.** Add Document hands you
+off to SharePoint and the file is created there, so there is no `Patch` to hang the values
+on.
+
+They're set on the way past instead. `OnVisible` and the refresh button both walk the
+pursuit's folder and patch anything missing one of the three:
+
+```powerfx
+ForAll(
+    Filter(
+        'Pursuit Documents',
+        "/" & gblPursuitKey & "/" in 'Folder path',
+        IsBlank('Pursuit ID') || IsBlank('Account Name') || IsBlank('Pursuit Name')
+    ) As D,
+    Patch('Pursuit Documents', D, {
+        'Pursuit ID':   gblPursuitKey,
+        'Account Name': gblPursuit.'Account Name',
+        'Pursuit Name': gblPursuit.'Pursuit Name'
+    })
+);
+```
+
+Only rows with something missing are touched, so a visit to a tidy folder costs nothing and
+a value corrected by hand in SharePoint is never overwritten. The catch is that a file is
+unlabelled until someone opens the screen — fine for a column you read in SharePoint, wrong
+if anything ever depends on it being set the moment the file lands. A flow on *when a file
+is created* in the library is the version that doesn't wait; it belongs alongside the
+folder-creation flow rather than in the app.
+
+The gallery itself doesn't read any of the three — it filters on `Folder path` — so a gap
+never hides a document.
+
 ### Refresh
 
 Each card has a `↻` beside its `+`.

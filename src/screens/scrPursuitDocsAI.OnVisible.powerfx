@@ -3,6 +3,30 @@
 
 Set(gblPursuit, LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey));
 
+// Stamp the pursuit onto anything uploaded to its folder. Nothing in the app creates a
+// library item -- Add Document hands you off to SharePoint and the upload happens there --
+// so the app can't set these on the way in. It sets them on the way past instead: any file
+// in this pursuit's folder that's missing one of the three gets all three.
+//
+// Only rows with something missing are patched, so a visit costs nothing once the folder
+// is tidy, and a value corrected by hand in SharePoint is never overwritten.
+ForAll(
+    Filter(
+        'Pursuit Documents',
+        "/" & gblPursuitKey & "/" in 'Folder path',
+        IsBlank('Pursuit ID') || IsBlank('Account Name') || IsBlank('Pursuit Name')
+    ) As D,
+    Patch(
+        'Pursuit Documents',
+        D,
+        {
+            'Pursuit ID':   gblPursuitKey,
+            'Account Name': gblPursuit.'Account Name',
+            'Pursuit Name': gblPursuit.'Pursuit Name'
+        }
+    )
+);
+
 // Links. Newest change first -- Modified, not Added Date, because editing a link's type
 // or URL should float it back to the top, which is what "last update" means to whoever
 // asked.

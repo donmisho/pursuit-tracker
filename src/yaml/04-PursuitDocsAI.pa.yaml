@@ -258,7 +258,24 @@
       RadiusBottomLeft: =4
       RadiusBottomRight: =4
       DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
-      OnSelect: =Refresh('Pursuit Documents')
+      OnSelect: |
+        =Refresh('Pursuit Documents');
+        ForAll(
+            Filter(
+                'Pursuit Documents',
+                "/" & gblPursuitKey & "/" in 'Folder path',
+                IsBlank('Pursuit ID') || IsBlank('Account Name') || IsBlank('Pursuit Name')
+            ) As D,
+            Patch(
+                'Pursuit Documents',
+                D,
+                {
+                    'Pursuit ID':   gblPursuitKey,
+                    'Account Name': gblPursuit.'Account Name',
+                    'Pursuit Name': gblPursuit.'Pursuit Name'
+                }
+            )
+        )
       Tooltip: ="Refresh Documents"
 
 - galDocs:
