@@ -48,7 +48,7 @@ Set(gblEditKey, "")
 **Documents** is the `Pursuit Documents` **library**, read directly:
 
 ```powerfx
-Sort(Filter('Pursuit Documents', PursuitID = gblPursuitKey), Modified, SortOrder.Descending)
+Sort(Filter('Pursuit Documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending)
 ```
 
 No collection behind it — it holds files, nothing in the app writes to it, and there's no
@@ -68,14 +68,17 @@ gets. **A library row can't exist before its file does**, so there is no new-ite
 prefill — the upload creates the row. Two ways to get the `PursuitID` filled without typing
 it, both configured in SharePoint rather than here:
 
+The column is `Pursuit ID`, with a space, so it needs the single quotes — the same
+convention every other list in this app uses for its key column.
+
 - **Column default value** on a per-folder basis (Library settings → Column default value
-  settings). One folder per pursuit, each defaulting `PursuitID` to that pursuit. The upload
+  settings). One folder per pursuit, each defaulting `Pursuit ID` to that pursuit. The upload
   then carries the right value with no user action. Change the `Launch` URL to point at the
   folder rather than the filtered view.
 - **A Power Automate flow** on "when a file is created", reading the pursuit from the folder
   path or from a prompt.
 
-Without one of those, whoever uploads has to set `PursuitID` on the item afterwards or the
+Without one of those, whoever uploads has to set `Pursuit ID` on the item afterwards or the
 document won't appear in the app.
 
 **Links** is the `pursuit-tracker-documents` list, unchanged — title, type, URL, and the
