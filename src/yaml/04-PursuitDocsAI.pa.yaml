@@ -261,9 +261,11 @@
             Y: =10
             Width: =42
             Height: =20
-            Fill: =ClrChip
-            HoverFill: =ClrChip
-            PressedFill: =ClrChip
+            Fill: =Color.Transparent
+            HoverFill: =Color.Transparent
+            PressedFill: =Color.Transparent
+            BorderColor: =DocTagColor(ThisItem.Name)
+            BorderThickness: =1
             OnSelect: =false
             TabIndex: =-1
             RadiusTopLeft: =4
@@ -278,15 +280,10 @@
             Y: =10
             Width: =42
             Height: =20
-            Text: |
-              =If(
-                  IsBlank(Find(".", ThisItem.Name)),
-                  "FILE",
-                  Left(Upper(Last(Split(ThisItem.Name, ".")).Result), 4)
-              )
+            Text: =DocTag(ThisItem.Name)
             Font: =FontUI
             Size: =SizeChip
-            Color: =ClrChipText
+            Color: =ClrText
             Align: =Align.Center
             Wrap: =false
 

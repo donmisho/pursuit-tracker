@@ -70,7 +70,8 @@ KNOWN_GLOBALS = {
     "colDocs", "colLinks", "colHistory", "colLookups",
     "colFltSI", "colFltHype", "colFltActive", "colFltStage", "colFltStatus",
     "colFltHealth", "colFltEffort", "colFltRisk", "colFltDate",
-    "SiteUrl", "PursuitLabel", "PlainText",
+    "SiteUrl", "PursuitLabel", "PlainText", "DocTag", "DocTagColor",
+    "ClrDocWord", "ClrDocPpt", "ClrDocXl", "ClrDocMail", "ClrDocPdf", "ClrDocOther",
     "scrPortfolioBoard", "scrPortfolioList", "scrPursuitWorkspace", "scrPursuitDocsAI",
     "Office365Users", "Parent", "Self", "ThisItem", "Value",
 }

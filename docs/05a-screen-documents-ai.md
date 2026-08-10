@@ -76,15 +76,32 @@ Type badge, file name, and who touched it:
 
 | | |
 |---|---|
-| `recDocType` + `lblDocType` | the extension as a chip, `FILE` when the name has no dot |
+| `recDocType` + `lblDocType` | file-type chip: coloured outline, white letters |
 | `lblDocName` | `Name`, link-coloured |
 | `lblDocModified` | `Modified`, right-aligned |
 | `lblDocWho` | `Created by … · Modified by …` from the two Person columns |
 
-The type badge is text rather than a real file-type icon. Canvas apps have no icon set for
-document types, and the alternatives — an image per extension, or the library's
-`{Thumbnail}` — mean either bundling assets or a per-row image fetch. Three letters in a
-chip reads at a glance and costs nothing.
+### The file-type chip
+
+An outlined chip, white text, coloured border by extension:
+
+| | | |
+|---|---|---|
+| `.doc` `.docx` | `W` | blue |
+| `.ppt` `.pptx` | `PPT` | orange |
+| `.xls` `.xlsx` `.csv` | `XL` | green |
+| `.msg` `.eml` | `E` | yellow |
+| `.pdf` | `PDF` | red |
+| anything else | `O` | white |
+
+`DocTag()` and `DocTagColor()` in `App.Formulas` both switch on
+`Lower(Last(Split(name, ".")).Result)`. A name with no dot returns the whole name as
+`Split`'s only row, which matches nothing and falls to the `O` / white default — so a file
+without an extension needs no special case.
+
+Text rather than a real file-type icon: canvas apps have no icon set for document types,
+and the alternatives — an image per extension, or the library's `{Thumbnail}` — mean either
+bundling assets or a per-row image fetch.
 
 No collection behind it — it holds files, nothing in the app writes to it, and there's no
 join to build, so there's nothing to refresh after a save. Clicking a row opens the file

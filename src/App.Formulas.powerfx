@@ -34,6 +34,13 @@ ClrChip        = ColorValue("#2A3243");
 ClrChipText    = ColorValue("#CBD4E4");
 ClrAvatar      = ColorValue("#3D4A66");
 ClrAvatarText  = ColorValue("#DCE3F0");
+ClrDocWord     = ColorValue("#5B8FF0");   // .doc  .docx
+ClrDocPpt      = ColorValue("#E08A3C");   // .ppt  .pptx
+ClrDocXl       = ColorValue("#4FA85C");   // .xls  .xlsx  .csv
+ClrDocMail     = ColorValue("#D8B84A");   // .msg  .eml
+ClrDocPdf      = ColorValue("#D9534F");   // .pdf
+ClrDocOther    = ColorValue("#E6E9F0");   // anything else, and no extension at all
+
 ClrRiskFill    = ColorValue("#7E3B3B");
 ClrRiskText    = ColorValue("#F6D2D2");
 ClrOkFill      = ColorValue("#2F4A3C");
@@ -89,6 +96,32 @@ DueLabel(due: DateTime, wording: Text): Text =
         !IsBlank(due), Text(due, "mmmm d"),
         !IsBlank(wording), wording,
         ""
+    );
+
+// The file-type chip on the documents list: two or three letters and a colour, from the
+// file name's extension. Split on a name with no dot returns the whole name as its only
+// row, which matches nothing and falls through to the "O" / white default -- so a file
+// without an extension needs no special case.
+DocTag(name: Text): Text =
+    Switch(
+        Lower(Last(Split(name, ".")).Result),
+        "doc",  "W",   "docx", "W",
+        "ppt",  "PPT", "pptx", "PPT",
+        "xls",  "XL",  "xlsx", "XL",  "csv", "XL",
+        "msg",  "E",   "eml",  "E",
+        "pdf",  "PDF",
+        "O"
+    );
+
+DocTagColor(name: Text): Color =
+    Switch(
+        Lower(Last(Split(name, ".")).Result),
+        "doc",  ClrDocWord, "docx", ClrDocWord,
+        "ppt",  ClrDocPpt,  "pptx", ClrDocPpt,
+        "xls",  ClrDocXl,   "xlsx", ClrDocXl,   "csv", ClrDocXl,
+        "msg",  ClrDocMail, "eml",  ClrDocMail,
+        "pdf",  ClrDocPdf,
+        ClrDocOther
     );
 
 // "Don Mishory" -> "DM". Owner columns hold email addresses, so when Office 365 Users
