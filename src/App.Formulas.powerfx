@@ -34,7 +34,7 @@ ClrChip        = ColorValue("#2A3243");
 ClrChipText    = ColorValue("#CBD4E4");
 ClrAvatar      = ColorValue("#3D4A66");
 ClrAvatarText  = ColorValue("#DCE3F0");
-ClrDocWord     = ColorValue("#5B8FF0");   // .doc  .docx
+ClrDocWord     = ColorValue("#4DA6FF");   // .doc  .docx
 ClrDocPpt      = ColorValue("#E08A3C");   // .ppt  .pptx
 ClrDocXl       = ColorValue("#4FA85C");   // .xls  .xlsx  .csv
 ClrDocMail     = ColorValue("#D8B84A");   // .msg  .eml
@@ -98,31 +98,10 @@ DueLabel(due: DateTime, wording: Text): Text =
         ""
     );
 
-// The file-type chip on the documents list: two or three letters and a colour, from the
-// file name's extension. Split on a name with no dot returns the whole name as its only
-// row, which matches nothing and falls through to the "O" / white default -- so a file
-// without an extension needs no special case.
-DocTag(name: Text): Text =
-    Switch(
-        Lower(Last(Split(name, ".")).Result),
-        "doc",  "W",   "docx", "W",
-        "ppt",  "PPT", "pptx", "PPT",
-        "xls",  "XL",  "xlsx", "XL",  "csv", "XL",
-        "msg",  "E",   "eml",  "E",
-        "pdf",  "PDF",
-        "O"
-    );
-
-DocTagColor(name: Text): Color =
-    Switch(
-        Lower(Last(Split(name, ".")).Result),
-        "doc",  ClrDocWord, "docx", ClrDocWord,
-        "ppt",  ClrDocPpt,  "pptx", ClrDocPpt,
-        "xls",  ClrDocXl,   "xlsx", ClrDocXl,   "csv", ClrDocXl,
-        "msg",  ClrDocMail, "eml",  ClrDocMail,
-        "pdf",  ClrDocPdf,
-        ClrDocOther
-    );
+// The file-type chip's colours live here; the letters and the border switch inline on
+// scrPursuitDocsAI. That was a pair of user-defined functions and the letters came back
+// empty while the border still coloured -- the same switch in two properties is more
+// duplication than I'd like, but it depends on nothing but a token.
 
 // "Don Mishory" -> "DM". Owner columns hold email addresses, so when Office 365 Users
 // can't resolve one the raw address arrives here and yields a single letter -- ugly but
