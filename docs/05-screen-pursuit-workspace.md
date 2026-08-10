@@ -142,6 +142,11 @@ Sort(
 Filtering by key rather than by index — `LastN(colUpdates, CountRows(colUpdates) - 1)`
 would be the obvious alternative and asks for a negative count when there are no updates.
 
+The previous-updates row is deliberately thin — topic, then date and update type on one
+line, 48 tall. The card is a third of the column, so a body preview and a Risk / Decision
+chip cost a visible row each and told you nothing the latest card and the panel don't. The
+heading and both filters share the top line for the same reason.
+
 **"New Update" lives on the latest card**, not on the previous-updates list. Adding an
 update is how you replace what's in that card, so the button belongs where the result
 appears.

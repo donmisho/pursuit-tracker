@@ -901,7 +901,7 @@
     Properties:
       X: =cardUpdates.X + 24
       Y: =cardUpdates.Y + 16
-      Width: =400
+      Width: =150
       Height: =24
       Text: ="Previous Updates"
       Font: =FontUI
@@ -914,9 +914,9 @@
 - drpUFDate:
     Control: Classic/DropDown
     Properties:
-      X: =cardUpdates.X + cardUpdates.Width - 24 - ((cardUpdates.Width - 60) / 2 - 60) * 2 - 8
+      X: =cardUpdates.X + 186
       Y: =cardUpdates.Y + 14
-      Width: =(cardUpdates.Width - 60) / 2 - 60
+      Width: =(cardUpdates.Width - 218) / 2
       Height: =28
       Font: =FontUI
       Size: =SizeMeta
@@ -930,9 +930,9 @@
 - drpUFRisk:
     Control: Classic/DropDown
     Properties:
-      X: =cardUpdates.X + cardUpdates.Width - 24 - ((cardUpdates.Width - 60) / 2 - 60)
+      X: =cardUpdates.X + 194 + (cardUpdates.Width - 218) / 2
       Y: =cardUpdates.Y + 14
-      Width: =(cardUpdates.Width - 60) / 2 - 60
+      Width: =(cardUpdates.Width - 218) / 2
       Height: =28
       Font: =FontUI
       Size: =SizeMeta
@@ -962,7 +962,7 @@
             'Update Date',
             SortOrder.Descending
         )
-      TemplateSize: =80
+      TemplateSize: =48
       TemplatePadding: =0
       ShowScrollbar: =true
     Children:
@@ -970,8 +970,8 @@
           Control: Label
           Properties:
             X: =0
-            Y: =4
-            Width: =Parent.Width - 120
+            Y: =5
+            Width: =Parent.Width - 20
             Height: =20
             Text: =Clip(Coalesce(ThisItem.Topic, "Untitled Update"), 44)
             Font: =FontUI
@@ -984,62 +984,14 @@
           Control: Label
           Properties:
             X: =0
-            Y: =24
-            Width: =Parent.Width - 120
-            Height: =14
+            Y: =25
+            Width: =Parent.Width - 20
+            Height: =16
             Text: =Text(ThisItem.'Update Date', "mmm d, yyyy · h:mm AM/PM") & " · " & Lower(ThisItem.'Update Type'.Value)
             Font: =FontUI
             Size: =SizeMeta
             Color: =ClrTextFaint
             Wrap: =false
-
-      - lblUpdateBody:
-          Control: Label
-          Properties:
-            X: =0
-            Y: =40
-            Width: =Parent.Width - 120
-            Height: =34
-            Text: =Clip(PlainText(ThisItem.'Update Text'), 150)
-            Font: =FontUI
-            Size: =SizeBody
-            Color: =ClrText
-            Wrap: =true
-            VerticalAlign: =VerticalAlign.Top
-
-      - recUpdateTag:
-          Control: Classic/Button
-          Properties:
-            Text: =""
-            Fill: =ClrChip
-            HoverFill: =ClrChip
-            PressedFill: =ClrChip
-            OnSelect: =false
-            X: =Parent.Width - 106
-            Y: =4
-            Width: =76
-            Height: =22
-            Visible: =Not(IsBlank(ThisItem.'Risk / Decision'.Value))
-            RadiusTopLeft: =RadiusChip
-            TabIndex: =-1
-            RadiusTopRight: =RadiusChip
-            RadiusBottomLeft: =RadiusChip
-            RadiusBottomRight: =RadiusChip
-
-      - lblUpdateTag:
-          Control: Label
-          Properties:
-            X: =Parent.Width - 106
-            Y: =4
-            Width: =76
-            Height: =22
-            Visible: =recUpdateTag.Visible
-            Text: =ThisItem.'Risk / Decision'.Value
-            Font: =FontUI
-            Size: =SizeChip
-            Color: =ClrChipText
-            Align: =Align.Center
-            VerticalAlign: =VerticalAlign.Middle
 
       - recUpdateDivider:
           Control: Rectangle
