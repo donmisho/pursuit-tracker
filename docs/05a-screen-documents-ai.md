@@ -94,15 +94,21 @@ An outlined chip, white text, coloured border by extension:
 | `.pdf` | `PDF` | red |
 | anything else | `O` | white |
 
-Both the letter and the border are a `Switch` on `Lower(Last(Split(ThisItem.Name, ".")).Result)`,
-written inline on the two controls. A name with no dot returns the whole name as `Split`'s
-only row, which matches nothing and falls to the `O` / white default — so a file without an
-extension needs no special case.
+Both the letter and the border are an `If` chain of `EndsWith()` against
+`ThisItem.'{FilenameWithExtension}'`, written inline on the two controls.
 
-That started as a pair of user-defined functions and the letters came back **empty while
-the border still coloured**, which is the failure mode a UDF has and an inline formula
-doesn't. The same switch in two properties is more duplication than I'd like; it depends on
-nothing but a colour token, which is what every other control on the screen already needs.
+Two things had to be got right, and I got both wrong first:
+
+**`Name` doesn't carry the extension.** The connector exposes the leaf name without it, so
+anything parsing `Name` classifies every file as "other". `{FilenameWithExtension}` is the
+column that has the suffix. `Name` is still what the row *displays* — the extension is
+already in the chip.
+
+**`EndsWith`, not `Split`.** `Lower(Last(Split(name, ".")).Result)` assumes `Split` names its
+output column `Result`. Get that wrong and the whole expression is an error: the label
+renders **blank** and the border quietly falls back to a default, which reads as "the chip
+half works" rather than as a broken formula. `EndsWith` is case-insensitive and has no
+intermediate table to name.
 
 Text rather than a real file-type icon: canvas apps have no icon set for document types,
 and the alternatives — an image per extension, or the library's `{Thumbnail}` — mean either

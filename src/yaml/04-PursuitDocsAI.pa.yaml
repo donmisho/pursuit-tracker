@@ -291,13 +291,13 @@
             HoverFill: =Color.Transparent
             PressedFill: =Color.Transparent
             BorderColor: |
-              =Switch(
-                  Lower(Last(Split(ThisItem.Name, ".")).Result),
-                  "doc",  ClrDocWord, "docx", ClrDocWord,
-                  "ppt",  ClrDocPpt,  "pptx", ClrDocPpt,
-                  "xls",  ClrDocXl,   "xlsx", ClrDocXl,   "csv", ClrDocXl,
-                  "msg",  ClrDocMail, "eml",  ClrDocMail,
-                  "pdf",  ClrDocPdf,
+              =If(
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".docx") || EndsWith(ThisItem.'{FilenameWithExtension}', ".doc"),  ClrDocWord,
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".pptx") || EndsWith(ThisItem.'{FilenameWithExtension}', ".ppt"),  ClrDocPpt,
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".xlsx") || EndsWith(ThisItem.'{FilenameWithExtension}', ".xls")
+                      || EndsWith(ThisItem.'{FilenameWithExtension}', ".csv"),                       ClrDocXl,
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".msg")  || EndsWith(ThisItem.'{FilenameWithExtension}', ".eml"),  ClrDocMail,
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".pdf"),                              ClrDocPdf,
                   ClrDocOther
               )
             BorderThickness: =1
@@ -316,13 +316,13 @@
             Width: =42
             Height: =20
             Text: |
-              =Switch(
-                  Lower(Last(Split(ThisItem.Name, ".")).Result),
-                  "doc",  "W",   "docx", "W",
-                  "ppt",  "PPT", "pptx", "PPT",
-                  "xls",  "XL",  "xlsx", "XL",  "csv", "XL",
-                  "msg",  "E",   "eml",  "E",
-                  "pdf",  "PDF",
+              =If(
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".docx") || EndsWith(ThisItem.'{FilenameWithExtension}', ".doc"),  "W",
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".pptx") || EndsWith(ThisItem.'{FilenameWithExtension}', ".ppt"),  "PPT",
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".xlsx") || EndsWith(ThisItem.'{FilenameWithExtension}', ".xls")
+                      || EndsWith(ThisItem.'{FilenameWithExtension}', ".csv"),                       "XL",
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".msg")  || EndsWith(ThisItem.'{FilenameWithExtension}', ".eml"),  "E",
+                  EndsWith(ThisItem.'{FilenameWithExtension}', ".pdf"),                              "PDF",
                   "O"
               )
             Font: =FontUI
