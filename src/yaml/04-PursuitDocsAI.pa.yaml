@@ -46,7 +46,7 @@
       Y: =14
       Width: =170
       Height: =36
-      Text: ="Portfolio board"
+      Text: ="Portfolio Board"
       Font: =FontUI
       Size: =12
       Fill: =ClrNav
@@ -69,7 +69,7 @@
       Y: =14
       Width: =160
       Height: =36
-      Text: ="Portfolio list"
+      Text: ="Portfolio List"
       Font: =FontUI
       Size: =12
       Fill: =ClrNav
@@ -92,7 +92,7 @@
       Y: =14
       Width: =190
       Height: =36
-      Text: ="Pursuit workspace"
+      Text: ="Pursuit Workspace"
       Font: =FontUI
       Size: =12
       Fill: =ClrNav
@@ -139,7 +139,7 @@
       Y: =74
       Width: =700
       Height: =18
-      Text: ="SI pursuit management"
+      Text: ="SI Pursuit Management"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextFaint
@@ -151,7 +151,7 @@
       Y: =92
       Width: =800
       Height: =36
-      Text: =If(gblNewPursuit, "New pursuit", Clip(gblPursuit.'Account Name', 40))
+      Text: =If(gblNewPursuit, "New Pursuit", Clip(gblPursuit.'Account Name', 40))
       Font: =FontUI
       Size: =SizePageTitle
       FontWeight: =FontWeight.Semibold
@@ -229,7 +229,7 @@
       Y: =cardDocs.Y + 16
       Width: =104
       Height: =26
-      Text: ="Add document"
+      Text: ="Add Document"
       Font: =FontUI
       Size: =11
       Fill: =ClrColumn
@@ -420,7 +420,7 @@
             Y: =48
             Width: =Parent.Width - 120
             Height: =16
-            Text: =If(ThisItem.'Include in AI Overview'.Value = "Yes", "Included in AI overview", "")
+            Text: =If(ThisItem.'Include in AI Overview'.Value = "Yes", "Included In AI Overview", "")
             Font: =FontUI
             Size: =SizeMeta
             Color: =ClrOkText
@@ -487,7 +487,7 @@
       Y: =cardAiCurrent.Y + 16
       Width: =400
       Height: =24
-      Text: ="Current AI overview"
+      Text: ="Current AI Overview"
       Font: =FontUI
       Size: =SizeCardTitle
       FontWeight: =FontWeight.Semibold
@@ -504,7 +504,7 @@
       Text: |
         =If(
             IsBlank(gblOverview),
-            "Nothing generated yet",
+            "Nothing Generated Yet",
             "Version " & gblOverview.'Version Number' & " · " & Text(gblOverview.'Refreshed Date', "mmm d, yyyy · h:mm AM/PM")
         )
       Font: =FontUI
@@ -551,7 +551,7 @@
       Y: =cardAiHistory.Y + 16
       Width: =400
       Height: =24
-      Text: ="Previous versions"
+      Text: ="Previous Versions"
       Font: =FontUI
       Size: =SizeCardTitle
       FontWeight: =FontWeight.Semibold
@@ -665,7 +665,7 @@
       Width: =592
       Height: =30
       Visible: =gblPanel <> ""
-      Text: =If(gblEditKey = "", "New document link", "Edit document link")
+      Text: =If(gblEditKey = "", "New Document Link", "Edit Document Link")
       Font: =FontUI
       Size: =18
       FontWeight: =FontWeight.Semibold

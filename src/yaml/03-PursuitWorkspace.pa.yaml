@@ -50,7 +50,7 @@
       Y: =14
       Width: =170
       Height: =36
-      Text: ="Portfolio board"
+      Text: ="Portfolio Board"
       Font: =FontUI
       Size: =12
       Fill: =ClrNav
@@ -73,7 +73,7 @@
       Y: =14
       Width: =160
       Height: =36
-      Text: ="Portfolio list"
+      Text: ="Portfolio List"
       Font: =FontUI
       Size: =12
       Fill: =ClrNav
@@ -96,7 +96,7 @@
       Y: =14
       Width: =190
       Height: =36
-      Text: ="Pursuit workspace"
+      Text: ="Pursuit Workspace"
       Font: =FontUI
       Size: =12
       Fill: =ClrAccent
@@ -143,7 +143,7 @@
       Y: =74
       Width: =700
       Height: =18
-      Text: ="SI pursuit management"
+      Text: ="SI Pursuit Management"
       Font: =FontUI
       Size: =SizeMeta
       Color: =ClrTextFaint
@@ -155,7 +155,7 @@
       Y: =92
       Width: =800
       Height: =36
-      Text: =If(gblNewPursuit, "New pursuit", Clip(gblPursuit.'Account Name', 40))
+      Text: =If(gblNewPursuit, "New Pursuit", Clip(gblPursuit.'Account Name', 40))
       Font: =FontUI
       Size: =SizePageTitle
       FontWeight: =FontWeight.Semibold
@@ -204,7 +204,7 @@
       Y: =100
       Width: =150
       Height: =38
-      Text: =If(gblNewPursuit, "Enter details", "Edit details")
+      Text: =If(gblNewPursuit, "Enter Details", "Edit Details")
       Font: =FontUI
       Size: =12
       Fill: =ClrAccent
@@ -248,7 +248,7 @@
       Y: =192
       Width: =400
       Height: =24
-      Text: ="Opportunity details"
+      Text: ="Opportunity Details"
       Font: =FontUI
       Size: =SizeCardTitle
       FontWeight: =FontWeight.Semibold
@@ -327,7 +327,7 @@
       Y: =304
       Width: =262
       Height: =20
-      Text: =Coalesce(gblPursuit.'Salesforce Opportunity ID', "Not linked")
+      Text: =Coalesce(gblPursuit.'Salesforce Opportunity ID', "Not Linked")
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
@@ -353,7 +353,7 @@
       Y: =302
       Width: =273
       Height: =21
-      Text: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), "—", "Open in Salesforce")
+      Text: =If(IsBlank(gblPursuit.'Salesforce Opportunity URL'), "—", "Open In Salesforce")
       Font: =FontUI
       Size: =SizeBody
       Wrap: =false
@@ -460,7 +460,7 @@
       Y: =410
       Width: =273
       Height: =21
-      Text: =If(IsBlank(gblPursuit.'Target Decision Date'), "Not set", Text(gblPursuit.'Target Decision Date', "mmm d, yyyy"))
+      Text: =If(IsBlank(gblPursuit.'Target Decision Date'), "Not Set", Text(gblPursuit.'Target Decision Date', "mmm d, yyyy"))
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
@@ -538,7 +538,7 @@
       Y: =356
       Width: =190
       Height: =17
-      Text: =If(IsBlank(gblPursuit.'Estimated Fees'), "Not set", Text(gblPursuit.'Estimated Fees', "[$-en-US]$#,##0"))
+      Text: =If(IsBlank(gblPursuit.'Estimated Fees'), "Not Set", Text(gblPursuit.'Estimated Fees', "[$-en-US]$#,##0"))
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
@@ -564,7 +564,7 @@
       Y: =407
       Width: =202
       Height: =22
-      Text: =Coalesce(gblPursuit.Active.Value, "Not set")
+      Text: =Coalesce(gblPursuit.Active.Value, "Not Set")
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
@@ -650,7 +650,7 @@
       Y: =cardActions.Y + 16
       Width: =400
       Height: =24
-      Text: ="Actions and dependencies"
+      Text: ="Actions And Dependencies"
       Font: =FontUI
       Size: =SizeCardTitle
       FontWeight: =FontWeight.Semibold
@@ -814,7 +814,7 @@
             Y: =8
             Width: =84
             Height: =24
-            Visible: =ThisItem.Health.Value = "At risk"
+            Visible: =ThisItem.Health.Value = "At Risk"
             RadiusTopLeft: =RadiusChip
             TabIndex: =-1
             RadiusTopRight: =RadiusChip
@@ -829,7 +829,7 @@
             Width: =84
             Height: =24
             Visible: =recActionPill.Visible
-            Text: ="At risk"
+            Text: ="At Risk"
             Font: =FontUI
             Size: =SizeChip
             Color: =ClrRiskText
@@ -902,7 +902,7 @@
       Y: =cardUpdates.Y + 16
       Width: =400
       Height: =24
-      Text: ="Previous updates"
+      Text: ="Previous Updates"
       Font: =FontUI
       Size: =SizeCardTitle
       FontWeight: =FontWeight.Semibold
@@ -922,7 +922,7 @@
       Color: =ClrText
       Fill: =ClrColumn
       BorderColor: =ClrBorder
-      Default: ="All time"
+      Default: ="All Time"
       Items: =colFltDate
       TabIndex: =-1
 
@@ -972,7 +972,7 @@
             Y: =4
             Width: =Parent.Width - 120
             Height: =20
-            Text: =Clip(Coalesce(ThisItem.Topic, "Untitled update"), 44)
+            Text: =Clip(Coalesce(ThisItem.Topic, "Untitled Update"), 44)
             Font: =FontUI
             Size: =SizeBody
             FontWeight: =FontWeight.Semibold
@@ -1092,7 +1092,7 @@
       Y: =cardLatest.Y + 16
       Width: =400
       Height: =24
-      Text: ="Latest status update"
+      Text: ="Latest Status Update"
       Font: =FontUI
       Size: =SizeCardTitle
       FontWeight: =FontWeight.Semibold
@@ -1107,7 +1107,7 @@
       Width: =cardLatest.Width - 160
       Height: =22
       Visible: =Not(IsEmpty(colUpdates))
-      Text: =Clip(Coalesce(First(colUpdates).Topic, "Untitled update"), 46)
+      Text: =Clip(Coalesce(First(colUpdates).Topic, "Untitled Update"), 46)
       Font: =FontUI
       Size: =SizeBody
       FontWeight: =FontWeight.Semibold
@@ -1185,7 +1185,7 @@
       Width: =cardLatest.Width - 48
       Height: =22
       Visible: =IsEmpty(colUpdates)
-      Text: =If(gblNewPursuit, "Save the pursuit first.", "No status updates yet.")
+      Text: =If(gblNewPursuit, "Save the pursuit first.", "No Status Updates Yet")
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrTextFaint
@@ -1273,9 +1273,9 @@
       Text: |
         =Switch(
             gblPanel,
-            "pursuit", If(gblNewPursuit, "New pursuit", "Pursuit details"),
-            "action",  If(gblEditKey = "", "New action", "Edit action"),
-            "update",  If(gblEditKey = "", "New status update", "Edit status update"),
+            "pursuit", If(gblNewPursuit, "New Pursuit", "Pursuit Details"),
+            "action",  If(gblEditKey = "", "New Action", "Edit Action"),
+            "update",  If(gblEditKey = "", "New Status Update", "Edit Status Update"),
             ""
         )
       Font: =FontUI

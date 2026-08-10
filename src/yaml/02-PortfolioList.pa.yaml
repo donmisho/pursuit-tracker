@@ -65,7 +65,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =12
-      Text: ="Portfolio board"
+      Text: ="Portfolio Board"
       Width: =170
       X: =210
       Y: =14
@@ -86,7 +86,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =12
-      Text: ="Portfolio list"
+      Text: ="Portfolio List"
       X: =390
       Y: =14
 - btnNavWorkspace:
@@ -108,7 +108,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =12
-      Text: ="Pursuit workspace"
+      Text: ="Pursuit Workspace"
       Width: =190
       X: =560
       Y: =14
@@ -198,7 +198,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =12
-      Text: ="Add pursuit"
+      Text: ="Add Pursuit"
       Width: =150
       X: =btnDownloadExcel.X - Self.Width - 12
       Y: =96
@@ -299,7 +299,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =11
-      Text: ="Clear filters"
+      Text: ="Clear Filters"
       Width: =110
       X: =686
       Y: =168
@@ -459,7 +459,7 @@
             Font: =FontUI
             Height: =18
             Size: =SizeMeta
-            Text: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Salesforce opportunity linked")
+            Text: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce Opportunity", "Salesforce Opportunity Linked")
             Width: =230
             X: =160
             Y: =66
@@ -482,7 +482,7 @@
             Font: =FontUI
             Height: =42
             Size: =SizeBody
-            Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 58))
+            Text: =If(IsBlank(ThisItem.NextActionTitle), "No Open Actions", Clip(ThisItem.NextActionTitle, 58))
             VerticalAlign: =VerticalAlign.Top
             Width: =210
             X: =1084
@@ -655,7 +655,7 @@
             RadiusTopLeft: =4
             RadiusTopRight: =4
             Size: =11
-            Text: ="Open pursuit workspace"
+            Text: ="Open Pursuit Workspace"
             Visible: =gblRowMenu = ThisItem.Title
             Width: =220
             X: =401
@@ -682,7 +682,7 @@
             RadiusTopLeft: =4
             RadiusTopRight: =4
             Size: =11
-            Text: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce opportunity", "Open Salesforce opportunity")
+            Text: =If(IsBlank(ThisItem.'Salesforce Opportunity URL'), "No Salesforce Opportunity", "Open Salesforce Opportunity")
             Visible: =gblRowMenu = ThisItem.Title
             Width: =220
             X: =401

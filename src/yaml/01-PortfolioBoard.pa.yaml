@@ -22,7 +22,7 @@
 # everything it overlaps. btnCardClick covers the whole card and so comes after the card's
 # content; lblMoveHandle comes after btnCardClick so the handle still gets its own clicks.
 # lblDropHint sits on top of recDropTarget and therefore carries the same OnSelect --
-# without it the label swallows the click and "Move here" does nothing.
+# without it the label swallows the click and "Move Here" does nothing.
 
 - navBg:
     Control: Rectangle@2.3.0
@@ -65,7 +65,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =12
-      Text: ="Portfolio board"
+      Text: ="Portfolio Board"
       Width: =170
       X: =210
       Y: =14
@@ -87,7 +87,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =12
-      Text: ="Portfolio list"
+      Text: ="Portfolio List"
       X: =390
       Y: =14
 - btnNavWorkspace:
@@ -109,7 +109,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =12
-      Text: ="Pursuit workspace"
+      Text: ="Pursuit Workspace"
       Width: =190
       X: =560
       Y: =14
@@ -181,7 +181,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =12
-      Text: ="Add pursuit"
+      Text: ="Add Pursuit"
       Width: =150
       X: =Parent.Width - Self.Width - GapPage
       Y: =96
@@ -282,7 +282,7 @@
       RadiusTopLeft: =6
       RadiusTopRight: =6
       Size: =11
-      Text: ="Clear filters"
+      Text: ="Clear Filters"
       Width: =110
       X: =686
       Y: =164
@@ -411,7 +411,7 @@
               );
               Notify("Moved to " & ThisItem.Stage, NotificationType.Success, 2000)
             Size: =SizeBody
-            Text: ="Move here"
+            Text: ="Move Here"
             Visible: =recDropTarget.Visible
             Width: =colBg.Width - 28
             X: =14
@@ -458,7 +458,7 @@
             - recHealth:
                 Control: Rectangle@2.3.0
                 Properties:
-                  Fill: =If(ThisItem.Health.Value = "At risk", ClrRiskFill, Color.Transparent)
+                  Fill: =If(ThisItem.Health.Value = "At Risk", ClrRiskFill, Color.Transparent)
                   Height: =228
                   Width: =3
             - lblCardAccount:
@@ -628,7 +628,7 @@
                   Font: =FontUI
                   Height: =32
                   Size: =SizeBody
-                  Text: =If(IsBlank(ThisItem.NextActionTitle), "No open actions", Clip(ThisItem.NextActionTitle, 52))
+                  Text: =If(IsBlank(ThisItem.NextActionTitle), "No Open Actions", Clip(ThisItem.NextActionTitle, 52))
                   VerticalAlign: =VerticalAlign.Top
                   Width: =recCard.Width - 28
                   X: =14
