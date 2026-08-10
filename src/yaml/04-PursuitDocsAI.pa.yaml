@@ -225,13 +225,13 @@
 - btnAddDoc:
     Control: Classic/Button
     Properties:
-      X: =cardDocs.X + cardDocs.Width - 128
+      X: =cardDocs.X + cardDocs.Width - 52
       Y: =cardDocs.Y + 16
-      Width: =104
-      Height: =26
-      Text: ="Add Document"
+      Width: =28
+      Height: =28
+      Text: ="+"
       Font: =FontUI
-      Size: =11
+      Size: =16
       Fill: =ClrColumn
       Color: =ClrText
       HoverFill: =ClrCardHover
@@ -246,6 +246,7 @@
       RadiusBottomRight: =4
       DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
       OnSelect: =Launch(SiteUrl & "/Pursuit Documents/Forms/AllItems.aspx?FilterField1=PursuitID&FilterValue1=" & gblPursuitKey)
+      Tooltip: ="Add Document"
 
 - galDocs:
     Control: Gallery
@@ -349,13 +350,13 @@
 - btnAddLink:
     Control: Classic/Button
     Properties:
-      X: =cardLinks.X + cardLinks.Width - 96
+      X: =cardLinks.X + cardLinks.Width - 52
       Y: =cardLinks.Y + 16
-      Width: =72
-      Height: =26
-      Text: ="+ Add"
+      Width: =28
+      Height: =28
+      Text: ="+"
       Font: =FontUI
-      Size: =11
+      Size: =16
       Fill: =ClrColumn
       Color: =ClrText
       HoverFill: =ClrCardHover
@@ -370,6 +371,7 @@
       RadiusBottomRight: =4
       DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
       OnSelect: =Set(gblPanel, "doc"); Set(gblEditKey, ""); Set(gblEditDoc, LookUp('pursuit-tracker-documents', ID < 0)); Reset(txtDocTitle); Reset(drpDocType); Reset(txtDocUrl); Reset(drpDocInc)
+      Tooltip: ="Add Link"
 
 - galLinks:
     Control: Gallery
@@ -811,12 +813,12 @@
     Properties:
       X: =Parent.Width - 616
       Y: =Parent.Height - 76
-      Width: =110
+      Width: =44
       Height: =40
       Visible: =gblPanel = "doc" && gblEditKey <> ""
-      Text: ="Delete"
+      Text: ="🗑"
       Font: =FontUI
-      Size: =12
+      Size: =16
       Fill: =ClrCard
       Color: =ClrRiskText
       HoverFill: =ClrRiskFill
@@ -833,6 +835,7 @@
         =Remove('pursuit-tracker-documents', LookUp('pursuit-tracker-documents', Title = gblEditKey));
         ClearCollect(colLinks, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending));
         Set(gblPanel, "")
+      Tooltip: ="Delete"
 
 - btnPanelCancel:
     Control: Classic/Button

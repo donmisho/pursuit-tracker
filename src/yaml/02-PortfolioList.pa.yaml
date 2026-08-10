@@ -197,11 +197,13 @@
       RadiusBottomRight: =6
       RadiusTopLeft: =6
       RadiusTopRight: =6
-      Size: =12
-      Text: ="Add Pursuit"
-      Width: =150
+      Size: =20
+      Text: ="+"
+      Width: =38
       X: =btnDownloadExcel.X - Self.Width - 12
       Y: =96
+      Height: =38
+      Tooltip: ="Add Pursuit"
 - lblFltSI:
     Control: Label@2.5.1
     Properties:

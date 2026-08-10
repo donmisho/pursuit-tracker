@@ -660,13 +660,13 @@
 - btnAddAction:
     Control: Classic/Button
     Properties:
-      X: =cardActions.X + cardActions.Width - 96
+      X: =cardActions.X + cardActions.Width - 52
       Y: =cardActions.Y + 16
-      Width: =72
-      Height: =26
-      Text: ="+ Add"
+      Width: =28
+      Height: =28
+      Text: ="+"
       Font: =FontUI
-      Size: =11
+      Size: =16
       Fill: =ClrColumn
       Color: =ClrText
       HoverFill: =ClrCardHover
@@ -681,6 +681,7 @@
       RadiusBottomRight: =4
       DisplayMode: =If(gblNewPursuit, DisplayMode.Disabled, DisplayMode.Edit)
       OnSelect: =Set(gblPanel, "action"); Set(gblEditKey, ""); Set(gblEditAction, LookUp('pursuit-tracker-actions', ID < 0)); Reset(txtActTitle); Reset(drpActStage); Reset(drpActStatus); Reset(drpActHealth); Reset(drpActEffort); Reset(dteActDue); Reset(txtActOwner); Reset(txtActPred); Reset(txtActNotes)
+      Tooltip: ="Add Action"
 
 - drpAFStage:
     Control: Classic/DropDown
@@ -1210,13 +1211,13 @@
 - btnAddUpdate:
     Control: Classic/Button
     Properties:
-      X: =cardLatest.X + cardLatest.Width - 128
+      X: =cardLatest.X + cardLatest.Width - 52
       Y: =cardLatest.Y + 16
-      Width: =104
-      Height: =26
-      Text: ="New Update"
+      Width: =28
+      Height: =28
+      Text: ="+"
       Font: =FontUI
-      Size: =11
+      Size: =16
       Fill: =ClrColumn
       Color: =ClrText
       HoverFill: =ClrCardHover
@@ -1231,6 +1232,7 @@
       RadiusBottomRight: =4
       DisplayMode: =If(gblNewPursuit, DisplayMode.Disabled, DisplayMode.Edit)
       OnSelect: =Set(gblPanel, "update"); Set(gblEditKey, ""); Set(gblEditUpdate, LookUp('pursuit-tracker-status-updates', ID < 0)); Reset(txtUpdTopic); Reset(rteUpdText); Reset(drpUpdType); Reset(drpUpdRisk)
+      Tooltip: ="New Update"
 
 # ================================================ EDIT PANEL
 - recPanelScrim:
@@ -2113,12 +2115,12 @@
     Properties:
       X: =Parent.Width - 616
       Y: =Parent.Height - 76
-      Width: =110
+      Width: =44
       Height: =40
       Visible: =gblPanel <> "" && gblPanel <> "pursuit" && gblEditKey <> ""
-      Text: ="Delete"
+      Text: ="🗑"
       Font: =FontUI
-      Size: =12
+      Size: =16
       Fill: =ClrCard
       Color: =ClrRiskText
       HoverFill: =ClrRiskFill
@@ -2154,6 +2156,7 @@
         );
         Set(gblPanel, "")
       TabIndex: =90
+      Tooltip: ="Delete"
 
 - btnPanelCancel:
     Control: Classic/Button
