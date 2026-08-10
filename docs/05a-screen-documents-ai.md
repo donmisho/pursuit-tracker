@@ -138,6 +138,18 @@ convention every other list in this app uses for its key column.
 Without one of those, whoever uploads has to set `Pursuit ID` on the item afterwards or the
 document won't appear in the app.
 
+### Refresh
+
+Each card has a `↻` beside its `+`.
+
+**Documents needs it.** Adding a document leaves the app for SharePoint, and coming back to
+a browser tab that never lost focus doesn't re-run `OnVisible` — the gallery keeps showing
+what the connector cached. `Refresh('Pursuit Documents')` drops that cache and re-queries.
+
+**Links doesn't, strictly.** Saving or deleting a link already rebuilds `colLinks` in
+`btnPanelSave` and `btnPanelDelete`, so the list is current after anything done in the app.
+Its `↻` is there for changes someone else made to the list while the screen was open.
+
 **Links** is the `pursuit-tracker-documents` list, unchanged — title, type, URL, and the
 "included in AI overview" flag, with the same add/edit/delete panel it always had. The two
 are separate on purpose: a link to a file in someone's OneDrive and a file in the site

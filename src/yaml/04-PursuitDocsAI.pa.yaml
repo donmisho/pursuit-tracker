@@ -235,6 +235,32 @@
       OnSelect: =Launch(SiteUrl & "/Pursuit Documents/" & gblPursuitKey)
       Tooltip: ="Add Document"
 
+- btnRefreshDocs:
+    Control: Classic/Button
+    Properties:
+      X: =cardDocs.X + cardDocs.Width - 88
+      Y: =cardDocs.Y + 16
+      Width: =28
+      Height: =28
+      Text: ="↻"
+      Font: =FontUI
+      Size: =16
+      Fill: =ClrColumn
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =4
+      RadiusTopRight: =4
+      RadiusBottomLeft: =4
+      RadiusBottomRight: =4
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Refresh('Pursuit Documents')
+      Tooltip: ="Refresh Documents"
+
 - galDocs:
     Control: Gallery
     Variant: Vertical
@@ -433,6 +459,32 @@
       DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
       OnSelect: =Set(gblPanel, "doc"); Set(gblEditKey, ""); Set(gblEditDoc, LookUp('pursuit-tracker-documents', ID < 0)); Reset(txtDocTitle); Reset(drpDocType); Reset(txtDocUrl); Reset(drpDocInc)
       Tooltip: ="Add Link"
+
+- btnRefreshLinks:
+    Control: Classic/Button
+    Properties:
+      X: =cardLinks.X + cardLinks.Width - 88
+      Y: =cardLinks.Y + 16
+      Width: =28
+      Height: =28
+      Text: ="↻"
+      Font: =FontUI
+      Size: =16
+      Fill: =ClrColumn
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =4
+      RadiusTopRight: =4
+      RadiusBottomLeft: =4
+      RadiusBottomRight: =4
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Refresh('pursuit-tracker-documents'); ClearCollect(colLinks, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending))
+      Tooltip: ="Refresh Links"
 
 - galLinks:
     Control: Gallery
