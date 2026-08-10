@@ -232,7 +232,7 @@
       RadiusBottomLeft: =4
       RadiusBottomRight: =4
       DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
-      OnSelect: =Launch(SiteUrl & "/Pursuit Documents")
+      OnSelect: =Launch(SiteUrl & "/Pursuit Documents/" & gblPursuitKey)
       Tooltip: ="Add Document"
 
 - galDocs:
@@ -243,33 +243,86 @@
       Y: =cardDocs.Y + 52
       Width: =cardDocs.Width - 48
       Height: =cardDocs.Height - 68
-      Items: =Sort(Filter('Pursuit Documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending)
-      TemplateSize: =56
+      Items: |
+        =Sort(
+            Filter('Pursuit Documents', "/" & gblPursuitKey & "/" in 'Folder path'),
+            Modified,
+            SortOrder.Descending
+        )
+      TemplateSize: =62
       TemplatePadding: =0
       ShowScrollbar: =true
     Children:
+      - recDocType:
+          Control: Classic/Button
+          Properties:
+            Text: =""
+            X: =0
+            Y: =10
+            Width: =42
+            Height: =20
+            Fill: =ClrChip
+            HoverFill: =ClrChip
+            PressedFill: =ClrChip
+            OnSelect: =false
+            TabIndex: =-1
+            RadiusTopLeft: =4
+            RadiusTopRight: =4
+            RadiusBottomLeft: =4
+            RadiusBottomRight: =4
+
+      - lblDocType:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =10
+            Width: =42
+            Height: =20
+            Text: =Upper(Last(Split(ThisItem.Name, ".")).Result)
+            Font: =FontUI
+            Size: =SizeChip
+            Color: =ClrChipText
+            Align: =Align.Center
+            Wrap: =false
+
       - lblDocName:
           Control: Label
           Properties:
-            X: =0
-            Y: =6
-            Width: =Parent.Width - 40
+            X: =52
+            Y: =8
+            Width: =Parent.Width - 232
             Height: =20
-            Text: =Clip(ThisItem.Name, 52)
+            Text: =Clip(ThisItem.Name, 46)
             Font: =FontUI
             Size: =SizeBody
+            FontWeight: =FontWeight.Semibold
             Color: =ClrLink
-            Underline: =true
             Wrap: =false
 
-      - lblDocMeta:
+      - lblDocModified:
           Control: Label
           Properties:
-            X: =0
-            Y: =28
-            Width: =Parent.Width - 40
-            Height: =16
+            X: =Parent.Width - 180
+            Y: =8
+            Width: =160
+            Height: =20
             Text: =Text(ThisItem.Modified, "mmm d, yyyy · h:mm AM/PM")
+            Font: =FontUI
+            Size: =SizeMeta
+            Color: =ClrTextFaint
+            Align: =Align.Right
+            Wrap: =false
+
+      - lblDocWho:
+          Control: Label
+          Properties:
+            X: =52
+            Y: =30
+            Width: =Parent.Width - 72
+            Height: =16
+            Text: |
+              ="Created by " & Coalesce(ThisItem.'Created By'.DisplayName, "—")
+               & " · Modified by " & Coalesce(ThisItem.'Modified By'.DisplayName, "—")
             Font: =FontUI
             Size: =SizeMeta
             Color: =ClrTextFaint
@@ -296,7 +349,7 @@
             HoverFill: =RGBA(255, 255, 255, 0.04)
             PressedFill: =RGBA(255, 255, 255, 0.07)
             BorderThickness: =0
-            Tooltip: ="Open this document"
+            Tooltip: ="Open This Document"
             OnSelect: =Launch(ThisItem.'Link to item')
 
 # ================================================ LEFT — links

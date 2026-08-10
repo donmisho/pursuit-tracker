@@ -45,11 +45,46 @@ Set(gblEditKey, "")
 
 ## Documents and Links are two different stores
 
-**Documents** is the `Pursuit Documents` **library**, read directly:
+**Documents** is the `Pursuit Documents` **library**, read directly. Files live in a folder
+named for the pursuit — `PUR-014` — created by a flow, so the filter is on where the file
+sits rather than on a column of the item:
 
 ```powerfx
-Sort(Filter('Pursuit Documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending)
+Sort(
+    Filter('Pursuit Documents', "/" & gblPursuitKey & "/" in 'Folder path'),
+    Modified,
+    SortOrder.Descending
+)
 ```
+
+`in` is a substring test, so it doesn't delegate — SharePoint returns the library and the
+match happens in memory. Fine at this size, and it dodges having to reconstruct the exact
+server-relative path, which differs between the display name and the URL.
+
+The folder rows themselves don't appear: a folder sits in the library root, so its own
+`Folder path` doesn't contain `/PUR-014/`. No `IsFolder` filter needed.
+
+### There is no way to bind a SharePoint view
+
+The connector exposes the library and its columns. Views are a SharePoint page construct —
+there's no `Views(...)` in Power Fx and no gallery property that takes one. A view's column
+choice, sort and filter have to be rebuilt in the gallery, which is what the row below is.
+
+### The row
+
+Type badge, file name, and who touched it:
+
+| | |
+|---|---|
+| `recDocType` + `lblDocType` | the extension as a chip — `Upper(Last(Split(ThisItem.Name, ".")).Result)` |
+| `lblDocName` | `Name`, link-coloured |
+| `lblDocModified` | `Modified`, right-aligned |
+| `lblDocWho` | `Created by … · Modified by …` from the two Person columns |
+
+The type badge is text rather than a real file-type icon. Canvas apps have no icon set for
+document types, and the alternatives — an image per extension, or the library's
+`{Thumbnail}` — mean either bundling assets or a per-row image fetch. Three letters in a
+chip reads at a glance and costs nothing.
 
 No collection behind it — it holds files, nothing in the app writes to it, and there's no
 join to build, so there's nothing to refresh after a save. Clicking a row opens the file
