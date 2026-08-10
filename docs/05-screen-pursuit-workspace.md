@@ -150,6 +150,16 @@ The stamp line shows `mmm d, yyyy · h:mm AM/PM` plus the update type rather tha
 on a feed where two updates can land in the same afternoon, the relative form hides the
 ordering it's meant to convey.
 
+## The Risk / Decision chip is neutral
+
+`Risk / Decision` holds `Price`, `Timing` and `Capabilities` — three things a decision is
+*about*, not three levels of alarm. The chip used to turn red when the value was `"Risk"`,
+which was never one of them, so the conditional was dead code that made every chip render
+neutral anyway. It's a plain `ClrChip` now in both places.
+
+The one red pill left on this screen is the action's `At risk` health, which does mean
+something is wrong.
+
 ## `Topic`
 
 A text column on `pursuit-tracker-status-updates` that titles each update. It's the bold

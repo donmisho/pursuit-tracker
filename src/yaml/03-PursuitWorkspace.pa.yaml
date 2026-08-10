@@ -1010,9 +1010,9 @@
           Control: Classic/Button
           Properties:
             Text: =""
-            Fill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
-            HoverFill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
-            PressedFill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
+            Fill: =ClrChip
+            HoverFill: =ClrChip
+            PressedFill: =ClrChip
             OnSelect: =false
             X: =Parent.Width - 106
             Y: =4
@@ -1036,7 +1036,7 @@
             Text: =ThisItem.'Risk / Decision'.Value
             Font: =FontUI
             Size: =SizeChip
-            Color: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskText, ClrChipText)
+            Color: =ClrChipText
             Align: =Align.Center
             VerticalAlign: =VerticalAlign.Middle
 
@@ -1134,9 +1134,9 @@
     Control: Classic/Button
     Properties:
       Text: =""
-      Fill: =If(First(colUpdates).'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
-      HoverFill: =If(First(colUpdates).'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
-      PressedFill: =If(First(colUpdates).'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
+      Fill: =ClrChip
+      HoverFill: =ClrChip
+      PressedFill: =ClrChip
       OnSelect: =false
       X: =cardLatest.X + cardLatest.Width - 128
       Y: =cardLatest.Y + 56
@@ -1160,7 +1160,7 @@
       Text: =First(colUpdates).'Risk / Decision'.Value
       Font: =FontUI
       Size: =SizeChip
-      Color: =If(First(colUpdates).'Risk / Decision'.Value = "Risk", ClrRiskText, ClrChipText)
+      Color: =ClrChipText
       Align: =Align.Center
       VerticalAlign: =VerticalAlign.Middle
 
