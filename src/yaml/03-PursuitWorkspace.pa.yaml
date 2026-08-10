@@ -926,7 +926,7 @@
       Items: =colFltDate
       TabIndex: =-1
 
-- drpUFType:
+- drpUFRisk:
     Control: Classic/DropDown
     Properties:
       X: =cardUpdates.X + cardUpdates.Width - 24 - ((cardUpdates.Width - 60) / 2 - 60)
@@ -939,7 +939,7 @@
       Fill: =ClrColumn
       BorderColor: =ClrBorder
       Default: ="All"
-      Items: =colFltUpdType
+      Items: =colFltRisk
       TabIndex: =-1
 
 - galUpdates:
@@ -955,7 +955,7 @@
             Filter(
                 colUpdates,
                 Title <> First(colUpdates).Title,
-                drpUFType.Selected.Value = "All" || drpUFType.Selected.Value = 'Update Type'.Value,
+                drpUFRisk.Selected.Value = "All" || drpUFRisk.Selected.Value = 'Risk / Decision'.Value,
                 drpUFDate.Selected.Days = 0 || 'Update Date' >= DateAdd(Now(), -drpUFDate.Selected.Days, TimeUnit.Days)
             ),
             'Update Date',

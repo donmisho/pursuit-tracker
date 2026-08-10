@@ -52,8 +52,8 @@ Collect(colFltHealth, ForAll(Filter(colLookups, LookupType = "Health") As L, { V
 ClearCollect(colFltEffort, { Value: "All" });
 Collect(colFltEffort, ForAll(Filter(colLookups, LookupType = "Effort Size") As L, { Value: L.Value }));
 
-ClearCollect(colFltUpdType, { Value: "All" });
-Collect(colFltUpdType, ForAll(Filter(colLookups, LookupType = "Update Type") As L, { Value: L.Value }));
+ClearCollect(colFltRisk, { Value: "All" });
+Collect(colFltRisk, ForAll(Filter(colLookups, LookupType = "Risk / Decision") As L, { Value: L.Value }));
 
 // Date ranges rather than two date pickers. A pair of pickers is four states to get wrong
 // (neither set, one set, both set, inverted) for a feed that is read newest-first anyway.

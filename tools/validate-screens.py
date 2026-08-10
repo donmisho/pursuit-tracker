@@ -69,7 +69,7 @@ KNOWN_GLOBALS = {
     "colActions", "colActions_P", "colPeople", "colPortfolio", "colStages", "colUpdates",
     "colDocs", "colLinks", "colHistory", "colLookups",
     "colFltSI", "colFltHype", "colFltActive", "colFltStage", "colFltStatus",
-    "colFltHealth", "colFltEffort", "colFltUpdType", "colFltDate",
+    "colFltHealth", "colFltEffort", "colFltRisk", "colFltDate",
     "SiteUrl", "PursuitLabel", "PlainText",
     "scrPortfolioBoard", "scrPortfolioList", "scrPursuitWorkspace", "scrPursuitDocsAI",
     "Office365Users", "Parent", "Self", "ThisItem", "Value",
