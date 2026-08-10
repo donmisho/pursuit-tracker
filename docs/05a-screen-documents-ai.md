@@ -55,11 +55,13 @@ No collection behind it — it holds files, nothing in the app writes to it, and
 join to build, so there's nothing to refresh after a save. Clicking a row opens the file
 through `ThisItem.'Link to item'`.
 
-**Add document** leaves the app: `Launch()` on the library filtered to this pursuit.
+**Add document** leaves the app: `Launch(SiteUrl & "/Pursuit Documents")`.
 
-```powerfx
-Launch(SiteUrl & "/Pursuit Documents/Forms/AllItems.aspx?FilterField1=PursuitID&FilterValue1=" & gblPursuitKey)
-```
+It opens the library plainly, with no view filter. `Forms/AllItems.aspx?FilterField1=…` is
+the documented way to filter a view by URL and it takes the column's **internal** name, not
+its display name — a name SharePoint doesn't recognise doesn't filter to nothing, it fails
+the whole view render: *"Unknown render failure. The specified view might have been
+deleted."* A plain library link can't break that way.
 
 That is as close to "a new record with the pursuit id prepopulated" as a document library
 gets. **A library row can't exist before its file does**, so there is no new-item form to

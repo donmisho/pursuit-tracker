@@ -167,19 +167,7 @@
       Width: =800
       Height: =24
       Text: |
-        =If(gblNewPursuit, "Fill in the details panel and save to create it", Clip(
-            With(
-                { n: gblPursuit.'Pursuit Name' },
-                Trim(
-                    If(
-                        !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
-                        !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
-                        n
-                    )
-                )
-            ),
-            90
-        ))
+        =PursuitLabel(gblPursuit.Title, Clip(gblPursuit.'Pursuit Name', 72))
       Font: =FontUI
       Size: =SizeCardTitle
       Color: =ClrTextMuted
@@ -190,8 +178,7 @@
 - cardDocs:
     Control: Classic/Button
     Properties:
-      Text: |
-        =PursuitLabel(gblPursuit.Title, Clip(gblPursuit.'Pursuit Name', 72))
+      Text: =""
       Fill: =ClrCard
       HoverFill: =ClrCard
       PressedFill: =ClrCard
@@ -245,7 +232,7 @@
       RadiusBottomLeft: =4
       RadiusBottomRight: =4
       DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
-      OnSelect: =Launch(SiteUrl & "/Pursuit Documents/Forms/AllItems.aspx?FilterField1=PursuitID&FilterValue1=" & gblPursuitKey)
+      OnSelect: =Launch(SiteUrl & "/Pursuit Documents")
       Tooltip: ="Add Document"
 
 - galDocs:
