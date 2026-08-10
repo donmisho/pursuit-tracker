@@ -171,19 +171,26 @@
       Width: =800
       Height: =24
       Text: |
-        =If(gblNewPursuit, "Fill in the details panel and save to create it", Clip(
-            With(
-                { n: gblPursuit.'Pursuit Name' },
-                Trim(
-                    If(
-                        !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
-                        !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
-                        n
-                    )
+        =If(
+            gblNewPursuit,
+            "Fill in the details panel and save to create it",
+            PursuitLabel(
+                gblPursuit.Title,
+                Clip(
+                    With(
+                        { n: gblPursuit.'Pursuit Name' },
+                        Trim(
+                            If(
+                                !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
+                                !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
+                                n
+                            )
+                        )
+                    ),
+                    72
                 )
-            ),
-            90
-        ))
+            )
+        )
       Font: =FontUI
       Size: =SizeCardTitle
       Color: =ClrTextMuted
@@ -624,10 +631,10 @@
       HoverFill: =ClrCard
       PressedFill: =ClrCard
       OnSelect: =false
-      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage
-      Y: =176
+      X: =GapPage
+      Y: =521
       Width: =(Parent.Width - (GapPage * 3)) / 2
-      Height: =(Parent.Height - 176 - GapPage - 16) / 2
+      Height: =Parent.Height - 521 - GapPage
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -639,8 +646,8 @@
 - lblActionsHead:
     Control: Label
     Properties:
-      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage + 24
-      Y: =192
+      X: =GapPage + 24
+      Y: =cardActions.Y + 16
       Width: =400
       Height: =24
       Text: ="Actions and dependencies"
@@ -654,7 +661,7 @@
     Control: Classic/Button
     Properties:
       X: =cardActions.X + cardActions.Width - 96
-      Y: =192
+      Y: =cardActions.Y + 16
       Width: =72
       Height: =26
       Text: ="+ Add"
@@ -675,17 +682,91 @@
       DisplayMode: =If(gblNewPursuit, DisplayMode.Disabled, DisplayMode.Edit)
       OnSelect: =Set(gblPanel, "action"); Set(gblEditKey, ""); Set(gblEditAction, LookUp('pursuit-tracker-actions', ID < 0)); Reset(txtActTitle); Reset(drpActStage); Reset(drpActStatus); Reset(drpActHealth); Reset(drpActEffort); Reset(dteActDue); Reset(txtActOwner); Reset(txtActPred); Reset(txtActNotes)
 
+- drpAFStage:
+    Control: Classic/DropDown
+    Properties:
+      X: =cardActions.X + 24
+      Y: =cardActions.Y + 50
+      Width: =(cardActions.Width - 60) / 4
+      Height: =28
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: ="All"
+      Items: =colFltStage
+      TabIndex: =-1
+
+- drpAFStatus:
+    Control: Classic/DropDown
+    Properties:
+      X: =cardActions.X + 24 + ((cardActions.Width - 60) / 4 + 4)
+      Y: =cardActions.Y + 50
+      Width: =(cardActions.Width - 60) / 4
+      Height: =28
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: ="All"
+      Items: =colFltStatus
+      TabIndex: =-1
+
+- drpAFHealth:
+    Control: Classic/DropDown
+    Properties:
+      X: =cardActions.X + 24 + ((cardActions.Width - 60) / 4 + 4) * 2
+      Y: =cardActions.Y + 50
+      Width: =(cardActions.Width - 60) / 4
+      Height: =28
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: ="All"
+      Items: =colFltHealth
+      TabIndex: =-1
+
+- drpAFEffort:
+    Control: Classic/DropDown
+    Properties:
+      X: =cardActions.X + 24 + ((cardActions.Width - 60) / 4 + 4) * 3
+      Y: =cardActions.Y + 50
+      Width: =(cardActions.Width - 60) / 4
+      Height: =28
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: ="All"
+      Items: =colFltEffort
+      TabIndex: =-1
+
 - galActions:
     Control: Gallery
     Variant: Vertical
     Properties:
       X: =cardActions.X + 24
-      Y: =228
+      Y: =cardActions.Y + 86
       Width: =cardActions.Width - 48
-      Height: =cardActions.Height - 68
+      Height: =cardActions.Height - 102
       Items: |
         =Sort(
-            Sort(colActions_P, If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'), SortOrder.Ascending),
+            Sort(
+                Filter(
+                    colActions_P,
+                    drpAFStage.Selected.Value  = "All" || drpAFStage.Selected.Value  = 'Workflow Stage'.Value,
+                    drpAFStatus.Selected.Value = "All" || drpAFStatus.Selected.Value = Status.Value,
+                    drpAFHealth.Selected.Value = "All" || drpAFHealth.Selected.Value = Health.Value,
+                    drpAFEffort.Selected.Value = "All" || drpAFEffort.Selected.Value = 'Effort Size'.Value
+                ),
+                If(IsBlank('Due Date'), Date(2099, 12, 31), 'Due Date'),
+                SortOrder.Ascending
+            ),
             If(Status.Value = "Completed", 1, 0),
             SortOrder.Ascending
         )
@@ -803,9 +884,9 @@
       PressedFill: =ClrCard
       OnSelect: =false
       X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage
-      Y: =176 + (Parent.Height - 176 - GapPage - 16) / 2 + 16
+      Y: =176 + (Parent.Height - 216) * 2 / 3 + 16
       Width: =(Parent.Width - (GapPage * 3)) / 2
-      Height: =(Parent.Height - 176 - GapPage - 16) / 2
+      Height: =(Parent.Height - 216) / 3
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -817,7 +898,7 @@
 - lblUpdatesHead:
     Control: Label
     Properties:
-      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage + 24
+      X: =cardUpdates.X + 24
       Y: =cardUpdates.Y + 16
       Width: =400
       Height: =24
@@ -829,6 +910,38 @@
       Wrap: =false
 
 
+- drpUFDate:
+    Control: Classic/DropDown
+    Properties:
+      X: =cardUpdates.X + cardUpdates.Width - 24 - ((cardUpdates.Width - 60) / 2 - 60) * 2 - 8
+      Y: =cardUpdates.Y + 14
+      Width: =(cardUpdates.Width - 60) / 2 - 60
+      Height: =28
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: ="All time"
+      Items: =colFltDate
+      TabIndex: =-1
+
+- drpUFType:
+    Control: Classic/DropDown
+    Properties:
+      X: =cardUpdates.X + cardUpdates.Width - 24 - ((cardUpdates.Width - 60) / 2 - 60)
+      Y: =cardUpdates.Y + 14
+      Width: =(cardUpdates.Width - 60) / 2 - 60
+      Height: =28
+      Font: =FontUI
+      Size: =SizeMeta
+      Color: =ClrText
+      Fill: =ClrColumn
+      BorderColor: =ClrBorder
+      Default: ="All"
+      Items: =colFltUpdType
+      TabIndex: =-1
+
 - galUpdates:
     Control: Gallery
     Variant: Vertical
@@ -839,11 +952,16 @@
       Height: =cardUpdates.Height - 68
       Items: |
         =Sort(
-            Filter(colUpdates, Title <> First(colUpdates).Title),
+            Filter(
+                colUpdates,
+                Title <> First(colUpdates).Title,
+                drpUFType.Selected.Value = "All" || drpUFType.Selected.Value = 'Update Type'.Value,
+                drpUFDate.Selected.Days = 0 || 'Update Date' >= DateAdd(Now(), -drpUFDate.Selected.Days, TimeUnit.Days)
+            ),
             'Update Date',
             SortOrder.Descending
         )
-      TemplateSize: =96
+      TemplateSize: =80
       TemplatePadding: =0
       ShowScrollbar: =true
     Children:
@@ -851,7 +969,7 @@
           Control: Label
           Properties:
             X: =0
-            Y: =6
+            Y: =4
             Width: =Parent.Width - 120
             Height: =20
             Text: =Clip(Coalesce(ThisItem.Topic, "Untitled update"), 44)
@@ -865,9 +983,9 @@
           Control: Label
           Properties:
             X: =0
-            Y: =28
+            Y: =24
             Width: =Parent.Width - 120
-            Height: =16
+            Height: =14
             Text: =Text(ThisItem.'Update Date', "mmm d, yyyy · h:mm AM/PM") & " · " & Lower(ThisItem.'Update Type'.Value)
             Font: =FontUI
             Size: =SizeMeta
@@ -878,10 +996,10 @@
           Control: Label
           Properties:
             X: =0
-            Y: =46
+            Y: =40
             Width: =Parent.Width - 120
-            Height: =42
-            Text: =Clip(ThisItem.'Update Text', 150)
+            Height: =34
+            Text: =Clip(PlainText(ThisItem.'Update Text'), 150)
             Font: =FontUI
             Size: =SizeBody
             Color: =ClrText
@@ -897,7 +1015,7 @@
             PressedFill: =If(ThisItem.'Risk / Decision'.Value = "Risk", ClrRiskFill, ClrChip)
             OnSelect: =false
             X: =Parent.Width - 106
-            Y: =6
+            Y: =4
             Width: =76
             Height: =22
             Visible: =Not(IsBlank(ThisItem.'Risk / Decision'.Value))
@@ -911,7 +1029,7 @@
           Control: Label
           Properties:
             X: =Parent.Width - 106
-            Y: =6
+            Y: =4
             Width: =76
             Height: =22
             Visible: =recUpdateTag.Visible
@@ -944,7 +1062,7 @@
             PressedFill: =RGBA(255, 255, 255, 0.07)
             BorderThickness: =0
             Tooltip: ="Edit this update"
-            OnSelect: =Set(gblPanel, "update"); Set(gblEditKey, ThisItem.Title); Set(gblEditUpdate, ThisItem); Reset(txtUpdTopic); Reset(txtUpdText); Reset(drpUpdType); Reset(drpUpdRisk)
+            OnSelect: =Set(gblPanel, "update"); Set(gblEditKey, ThisItem.Title); Set(gblEditUpdate, ThisItem); Reset(txtUpdTopic); Reset(rteUpdText); Reset(drpUpdType); Reset(drpUpdRisk)
 
 # ================================================ LATEST STATUS UPDATE (left column)
 - cardLatest:
@@ -955,10 +1073,10 @@
       HoverFill: =ClrCard
       PressedFill: =ClrCard
       OnSelect: =false
-      X: =GapPage
-      Y: =521
+      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage
+      Y: =176
       Width: =(Parent.Width - (GapPage * 3)) / 2
-      Height: =Parent.Height - 521 - GapPage
+      Height: =(Parent.Height - 216) * 2 / 3
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
@@ -970,7 +1088,7 @@
 - lblLatestHead:
     Control: Label
     Properties:
-      X: =GapPage + 24
+      X: =cardLatest.X + 24
       Y: =cardLatest.Y + 16
       Width: =400
       Height: =24
@@ -984,7 +1102,7 @@
 - lblLatestTopic:
     Control: Label
     Properties:
-      X: =GapPage + 24
+      X: =cardLatest.X + 24
       Y: =cardLatest.Y + 56
       Width: =cardLatest.Width - 160
       Height: =22
@@ -999,7 +1117,7 @@
 - lblLatestStamp:
     Control: Label
     Properties:
-      X: =GapPage + 24
+      X: =cardLatest.X + 24
       Y: =cardLatest.Y + 80
       Width: =cardLatest.Width - 160
       Height: =16
@@ -1046,25 +1164,24 @@
       Align: =Align.Center
       VerticalAlign: =VerticalAlign.Middle
 
-- lblLatestBody:
-    Control: Label
+- htmLatestBody:
+    Control: HtmlViewer
     Properties:
       X: =GapPage + 24
       Y: =cardLatest.Y + 106
       Width: =cardLatest.Width - 48
       Height: =cardLatest.Height - 122
       Visible: =Not(IsEmpty(colUpdates))
-      Text: =Clip(First(colUpdates).'Update Text', 900)
+      HtmlText: =First(colUpdates).'Update Text'
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
-      Wrap: =true
       VerticalAlign: =VerticalAlign.Top
 
 - lblLatestEmpty:
     Control: Label
     Properties:
-      X: =GapPage + 24
+      X: =cardLatest.X + 24
       Y: =cardLatest.Y + 60
       Width: =cardLatest.Width - 48
       Height: =22
@@ -1079,7 +1196,7 @@
     Control: Classic/Button
     Properties:
       Text: =""
-      X: =GapPage + 12
+      X: =cardLatest.X + 12
       Y: =cardLatest.Y + 48
       Width: =cardLatest.Width - 24
       Height: =cardLatest.Height - 60
@@ -1089,7 +1206,7 @@
       PressedFill: =RGBA(255, 255, 255, 0.06)
       BorderThickness: =0
       Tooltip: ="Edit this update"
-      OnSelect: =Set(gblPanel, "update"); Set(gblEditKey, First(colUpdates).Title); Set(gblEditUpdate, First(colUpdates)); Reset(txtUpdTopic); Reset(txtUpdText); Reset(drpUpdType); Reset(drpUpdRisk)
+      OnSelect: =Set(gblPanel, "update"); Set(gblEditKey, First(colUpdates).Title); Set(gblEditUpdate, First(colUpdates)); Reset(txtUpdTopic); Reset(rteUpdText); Reset(drpUpdType); Reset(drpUpdRisk)
 
 - btnAddUpdate:
     Control: Classic/Button
@@ -1114,7 +1231,7 @@
       RadiusBottomLeft: =4
       RadiusBottomRight: =4
       DisplayMode: =If(gblNewPursuit, DisplayMode.Disabled, DisplayMode.Edit)
-      OnSelect: =Set(gblPanel, "update"); Set(gblEditKey, ""); Set(gblEditUpdate, LookUp('pursuit-tracker-status-updates', ID < 0)); Reset(txtUpdTopic); Reset(txtUpdText); Reset(drpUpdType); Reset(drpUpdRisk)
+      OnSelect: =Set(gblPanel, "update"); Set(gblEditKey, ""); Set(gblEditUpdate, LookUp('pursuit-tracker-status-updates', ID < 0)); Reset(txtUpdTopic); Reset(rteUpdText); Reset(drpUpdType); Reset(drpUpdRisk)
 
 # ================================================ EDIT PANEL
 - recPanelScrim:
@@ -1915,28 +2032,22 @@
       Color: =ClrTextMuted
       Wrap: =false
 
-- txtUpdText:
-    Control: Classic/TextInput
+- rteUpdText:
+    Control: RichTextEditor
     Properties:
       X: =Parent.Width - 616
       Y: =180
       Width: =592
-      Height: =70
+      Height: =180
       Visible: =gblPanel = "update"
-      Font: =FontUI
-      Size: =SizeBody
-      Color: =ClrText
-      Fill: =ClrColumn
-      BorderColor: =ClrBorder
       Default: =Coalesce(gblEditUpdate.'Update Text', "")
-      Mode: =TextMode.MultiLine
       TabIndex: =2
 
 - lblCapdrpUpdType:
     Control: Label
     Properties:
       X: =Parent.Width - 616
-      Y: =260
+      Y: =372
       Width: =592
       Height: =16
       Visible: =gblPanel = "update"
@@ -1950,7 +2061,7 @@
     Control: Classic/DropDown
     Properties:
       X: =Parent.Width - 616
-      Y: =278
+      Y: =390
       Width: =592
       Height: =34
       Visible: =gblPanel = "update"
@@ -1969,7 +2080,7 @@
     Control: Label
     Properties:
       X: =Parent.Width - 616
-      Y: =322
+      Y: =434
       Width: =592
       Height: =16
       Visible: =gblPanel = "update"
@@ -1983,7 +2094,7 @@
     Control: Classic/DropDown
     Properties:
       X: =Parent.Width - 616
-      Y: =340
+      Y: =452
       Width: =592
       Height: =34
       Visible: =gblPanel = "update"
@@ -2103,7 +2214,7 @@
         =If(
             (gblPanel = "pursuit" && !IsBlank(txtPurAccount.Text) && !IsBlank(txtPurName.Text)) ||
             (gblPanel = "action"  && !IsBlank(txtActTitle.Text)) ||
-            (gblPanel = "update"  && !IsBlank(txtUpdText.Text)),
+            (gblPanel = "update"  && !IsBlank(PlainText(rteUpdText.HtmlText))),
             DisplayMode.Edit,
             DisplayMode.Disabled
         )
@@ -2212,14 +2323,14 @@
                     'Update Date':         Now(),
                     Topic:                 txtUpdTopic.Text,
                     'Update Type':         { Value: drpUpdType.Selected.Value },
-                    'Update Text':         txtUpdText.Text,
+                    'Update Text':         rteUpdText.HtmlText,
                     'Risk / Decision':     { Value: drpUpdRisk.Selected.Value },
                     'Created By Entra ID': gblUser.Email
                 }),
                 Patch('pursuit-tracker-status-updates', LookUp('pursuit-tracker-status-updates', Title = gblEditKey), {
                     Topic:             txtUpdTopic.Text,
                     'Update Type':     { Value: drpUpdType.Selected.Value },
-                    'Update Text':     txtUpdText.Text,
+                    'Update Text':     rteUpdText.HtmlText,
                     'Risk / Decision': { Value: drpUpdRisk.Selected.Value }
                 })
             );

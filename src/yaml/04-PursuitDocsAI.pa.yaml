@@ -190,7 +190,8 @@
 - cardDocs:
     Control: Classic/Button
     Properties:
-      Text: =""
+      Text: |
+        =PursuitLabel(gblPursuit.Title, Clip(gblPursuit.'Pursuit Name', 72))
       Fill: =ClrCard
       HoverFill: =ClrCard
       PressedFill: =ClrCard
@@ -198,22 +199,23 @@
       X: =GapPage
       Y: =176
       Width: =(Parent.Width - (GapPage * 3)) / 2
-      Height: =Parent.Height - 176 - GapPage
+      Height: =(Parent.Height - 216) / 2
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
       RadiusTopRight: =RadiusCard
       RadiusBottomLeft: =RadiusCard
       RadiusBottomRight: =RadiusCard
+      TabIndex: =-1
 
 - lblDocsHead:
     Control: Label
     Properties:
-      X: =GapPage + 24
-      Y: =192
+      X: =cardDocs.X + 24
+      Y: =cardDocs.Y + 16
       Width: =400
       Height: =24
-      Text: ="Documents and links"
+      Text: ="Documents"
       Font: =FontUI
       Size: =SizeCardTitle
       FontWeight: =FontWeight.Semibold
@@ -223,11 +225,11 @@
 - btnAddDoc:
     Control: Classic/Button
     Properties:
-      X: =cardDocs.X + cardDocs.Width - 108
-      Y: =192
-      Width: =72
+      X: =cardDocs.X + cardDocs.Width - 128
+      Y: =cardDocs.Y + 16
+      Width: =104
       Height: =26
-      Text: ="+ Add link"
+      Text: ="Add document"
       Font: =FontUI
       Size: =11
       Fill: =ClrColumn
@@ -242,23 +244,147 @@
       RadiusTopRight: =4
       RadiusBottomLeft: =4
       RadiusBottomRight: =4
-      DisplayMode: =If(gblNewPursuit, DisplayMode.Disabled, DisplayMode.Edit)
-      OnSelect: =Set(gblPanel, "doc"); Set(gblEditKey, ""); Set(gblEditDoc, LookUp('pursuit-tracker-documents', ID < 0)); Reset(txtDocTitle); Reset(drpDocType); Reset(txtDocUrl); Reset(drpDocInc)
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Launch(SiteUrl & "/Pursuit Documents/Forms/AllItems.aspx?FilterField1=PursuitID&FilterValue1=" & gblPursuitKey)
 
 - galDocs:
     Control: Gallery
     Variant: Vertical
     Properties:
       X: =cardDocs.X + 24
-      Y: =228
+      Y: =cardDocs.Y + 52
       Width: =cardDocs.Width - 48
       Height: =cardDocs.Height - 68
-      Items: =Sort(colDocs, Modified, SortOrder.Descending)
+      Items: =Sort(Filter('Pursuit Documents', PursuitID = gblPursuitKey), Modified, SortOrder.Descending)
+      TemplateSize: =56
+      TemplatePadding: =0
+      ShowScrollbar: =true
+    Children:
+      - lblDocName:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =6
+            Width: =Parent.Width - 40
+            Height: =20
+            Text: =Clip(ThisItem.Name, 52)
+            Font: =FontUI
+            Size: =SizeBody
+            Color: =ClrLink
+            Underline: =true
+            Wrap: =false
+
+      - lblDocMeta:
+          Control: Label
+          Properties:
+            X: =0
+            Y: =28
+            Width: =Parent.Width - 40
+            Height: =16
+            Text: =Text(ThisItem.Modified, "mmm d, yyyy · h:mm AM/PM")
+            Font: =FontUI
+            Size: =SizeMeta
+            Color: =ClrTextFaint
+            Wrap: =false
+
+      - recDocDivider:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =Parent.TemplateHeight - 1
+            Width: =Parent.Width - 20
+            Height: =1
+            Fill: =ClrDivider
+
+      - btnDocOpen:
+          Control: Classic/Button
+          Properties:
+            Text: =""
+            X: =0
+            Y: =0
+            Width: =Parent.Width - 20
+            Height: =Parent.TemplateHeight - 1
+            Fill: =Color.Transparent
+            HoverFill: =RGBA(255, 255, 255, 0.04)
+            PressedFill: =RGBA(255, 255, 255, 0.07)
+            BorderThickness: =0
+            Tooltip: ="Open this document"
+            OnSelect: =Launch(ThisItem.'Link to item')
+
+# ================================================ LEFT — links
+- cardLinks:
+    Control: Classic/Button
+    Properties:
+      Text: =""
+      Fill: =ClrCard
+      HoverFill: =ClrCard
+      PressedFill: =ClrCard
+      OnSelect: =false
+      TabIndex: =-1
+      X: =GapPage
+      Y: =176 + (Parent.Height - 216) / 2 + 16
+      Width: =(Parent.Width - (GapPage * 3)) / 2
+      Height: =(Parent.Height - 216) / 2
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =RadiusCard
+      RadiusTopRight: =RadiusCard
+      RadiusBottomLeft: =RadiusCard
+      RadiusBottomRight: =RadiusCard
+
+- lblLinksHead:
+    Control: Label
+    Properties:
+      X: =cardLinks.X + 24
+      Y: =cardLinks.Y + 16
+      Width: =400
+      Height: =24
+      Text: ="Links"
+      Font: =FontUI
+      Size: =SizeCardTitle
+      FontWeight: =FontWeight.Semibold
+      Color: =ClrText
+      Wrap: =false
+
+- btnAddLink:
+    Control: Classic/Button
+    Properties:
+      X: =cardLinks.X + cardLinks.Width - 96
+      Y: =cardLinks.Y + 16
+      Width: =72
+      Height: =26
+      Text: ="+ Add"
+      Font: =FontUI
+      Size: =11
+      Fill: =ClrColumn
+      Color: =ClrText
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      RadiusTopLeft: =4
+      RadiusTopRight: =4
+      RadiusBottomLeft: =4
+      RadiusBottomRight: =4
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      OnSelect: =Set(gblPanel, "doc"); Set(gblEditKey, ""); Set(gblEditDoc, LookUp('pursuit-tracker-documents', ID < 0)); Reset(txtDocTitle); Reset(drpDocType); Reset(txtDocUrl); Reset(drpDocInc)
+
+- galLinks:
+    Control: Gallery
+    Variant: Vertical
+    Properties:
+      X: =cardLinks.X + 24
+      Y: =228
+      Width: =cardLinks.Width - 48
+      Height: =cardLinks.Height - 68
+      Items: =Sort(colLinks, Modified, SortOrder.Descending)
       TemplateSize: =72
       TemplatePadding: =0
       ShowScrollbar: =true
     Children:
-      - lblDocLink:
+      - lblLinkTitle:
           Control: Label
           Properties:
             X: =0
@@ -274,7 +400,7 @@
             Wrap: =false
             OnSelect: =Launch(SafeUrl(ThisItem.'Document URL'))
 
-      - lblDocMeta:
+      - lblLinkMeta:
           Control: Label
           Properties:
             X: =0
@@ -287,7 +413,7 @@
             Color: =ClrTextFaint
             Wrap: =false
 
-      - lblDocFlag:
+      - lblLinkFlag:
           Control: Label
           Properties:
             X: =0
@@ -300,7 +426,7 @@
             Color: =ClrOkText
             Wrap: =false
 
-      - recDocDivider:
+      - recLinkDivider:
           Control: Rectangle
           Properties:
             X: =0
@@ -309,7 +435,7 @@
             Height: =1
             Fill: =ClrDivider
 
-      - btnDocEdit:
+      - btnLinkEdit:
           Control: Classic/Button
           Properties:
             X: =Parent.Width - 96
@@ -345,19 +471,20 @@
       X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage
       Y: =176
       Width: =(Parent.Width - (GapPage * 3)) / 2
-      Height: =(Parent.Height - 176 - GapPage - 16) / 2
+      Height: =(Parent.Height - 216) * 2 / 3
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
       RadiusTopRight: =RadiusCard
       RadiusBottomLeft: =RadiusCard
       RadiusBottomRight: =RadiusCard
+      TabIndex: =-1
 
 - lblAiHead:
     Control: Label
     Properties:
-      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage + 24
-      Y: =192
+      X: =cardAiCurrent.X + 24
+      Y: =cardAiCurrent.Y + 16
       Width: =400
       Height: =24
       Text: ="Current AI overview"
@@ -371,7 +498,7 @@
     Control: Label
     Properties:
       X: =cardAiCurrent.X + 24
-      Y: =218
+      Y: =cardAiCurrent.Y + 46
       Width: =cardAiCurrent.Width - 48
       Height: =18
       Text: |
@@ -385,18 +512,17 @@
       Color: =ClrTextFaint
       Wrap: =false
 
-- lblAiBody:
-    Control: Label
+- htmAiBody:
+    Control: HtmlViewer
     Properties:
       X: =cardAiCurrent.X + 24
-      Y: =244
+      Y: =cardAiCurrent.Y + 74
       Width: =cardAiCurrent.Width - 48
-      Height: =cardAiCurrent.Height - 84
-      Text: =Clip(Coalesce(gblOverview.'Overview Text', "No overview has been generated for this pursuit yet."), 900)
+      Height: =cardAiCurrent.Height - 90
+      HtmlText: =gblOverview.'Overview Text'
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
-      Wrap: =true
       VerticalAlign: =VerticalAlign.Top
 
 - cardAiHistory:
@@ -408,20 +534,21 @@
       PressedFill: =ClrCard
       OnSelect: =false
       X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage
-      Y: =176 + (Parent.Height - 176 - GapPage - 16) / 2 + 16
+      Y: =176 + (Parent.Height - 216) * 2 / 3 + 16
       Width: =(Parent.Width - (GapPage * 3)) / 2
-      Height: =(Parent.Height - 176 - GapPage - 16) / 2
+      Height: =(Parent.Height - 216) / 3
       BorderColor: =ClrBorder
       BorderThickness: =1
       RadiusTopLeft: =RadiusCard
       RadiusTopRight: =RadiusCard
       RadiusBottomLeft: =RadiusCard
       RadiusBottomRight: =RadiusCard
+      TabIndex: =-1
 
 - lblAiHistHead:
     Control: Label
     Properties:
-      X: =GapPage + (Parent.Width - (GapPage * 3)) / 2 + GapPage + 24
+      X: =cardAiHistory.X + 24
       Y: =cardAiHistory.Y + 16
       Width: =400
       Height: =24
@@ -705,7 +832,7 @@
       RadiusBottomRight: =6
       OnSelect: |
         =Remove('pursuit-tracker-documents', LookUp('pursuit-tracker-documents', Title = gblEditKey));
-        ClearCollect(colDocs, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending));
+        ClearCollect(colLinks, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending));
         Set(gblPanel, "")
 
 - btnPanelCancel:
@@ -784,7 +911,7 @@
         );
         If(
             IsEmpty(Errors('pursuit-tracker-documents')),
-            ClearCollect(colDocs, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending));
+            ClearCollect(colLinks, Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending));
             Set(gblPanel, ""),
             Notify("Save failed: " & First(Errors('pursuit-tracker-documents')).Message, NotificationType.Error)
         )

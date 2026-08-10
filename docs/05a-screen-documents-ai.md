@@ -7,9 +7,10 @@ vertical space.
 scrPursuitDocsAI
 ├── nav bar (four tabs)
 ├── lblBreadcrumb / lblAccount / lblPursuitName
-├── LEFT  — cardDocs        btnAddDoc + galDocs, newest change first
-└── RIGHT — cardAiCurrent   current overview      (top half)
-          — cardAiHistory   previous versions     (bottom half)
+├── LEFT  — cardDocs        the Pursuit Documents library, filtered by pursuit (top half)
+│         — cardLinks       pursuit-tracker-documents, the link list      (bottom half)
+└── RIGHT — cardAiCurrent   current overview, rich text   (top two-thirds)
+          — cardAiHistory   previous versions             (bottom third)
    EDIT PANEL               document fields + Delete / Cancel / Save
 ```
 
@@ -42,7 +43,46 @@ Set(gblPanel, "");
 Set(gblEditKey, "")
 ```
 
-## Documents
+## Documents and Links are two different stores
+
+**Documents** is the `Pursuit Documents` **library**, read directly:
+
+```powerfx
+Sort(Filter('Pursuit Documents', PursuitID = gblPursuitKey), Modified, SortOrder.Descending)
+```
+
+No collection behind it — it holds files, nothing in the app writes to it, and there's no
+join to build, so there's nothing to refresh after a save. Clicking a row opens the file
+through `ThisItem.'Link to item'`.
+
+**Add document** leaves the app: `Launch()` on the library filtered to this pursuit.
+
+```powerfx
+Launch(SiteUrl & "/Pursuit Documents/Forms/AllItems.aspx?FilterField1=PursuitID&FilterValue1=" & gblPursuitKey)
+```
+
+That is as close to "a new record with the pursuit id prepopulated" as a document library
+gets. **A library row can't exist before its file does**, so there is no new-item form to
+prefill — the upload creates the row. Two ways to get the `PursuitID` filled without typing
+it, both configured in SharePoint rather than here:
+
+- **Column default value** on a per-folder basis (Library settings → Column default value
+  settings). One folder per pursuit, each defaulting `PursuitID` to that pursuit. The upload
+  then carries the right value with no user action. Change the `Launch` URL to point at the
+  folder rather than the filtered view.
+- **A Power Automate flow** on "when a file is created", reading the pursuit from the folder
+  path or from a prompt.
+
+Without one of those, whoever uploads has to set `PursuitID` on the item afterwards or the
+document won't appear in the app.
+
+**Links** is the `pursuit-tracker-documents` list, unchanged — title, type, URL, and the
+"included in AI overview" flag, with the same add/edit/delete panel it always had. The two
+are separate on purpose: a link to a file in someone's OneDrive and a file in the site
+library are different things, and merging them would mean one of them lying about where it
+lives.
+
+## Links
 
 `galDocs` sorts on `Modified` descending, not `Added Date` — editing a link's type or URL
 floats it back to the top, which is what "last updated" means to the person asking.

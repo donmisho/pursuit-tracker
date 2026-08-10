@@ -55,6 +55,16 @@ RadiusChip     = 10;
 BoardColumns   = 6;    // stage columns visible without scrolling; the board divides
                        // the canvas by this rather than using a fixed column width
 
+// ---------------------------------------------------------------- site
+// The SharePoint site, for the links that leave the app -- the Pursuit Documents
+// library in particular. One place to change if the site ever moves.
+SiteUrl = "https://westmonroepartners1.sharepoint.com/sites/PursuitTracking";
+
+// "PUR-014 - Dynamics F&O". The pursuit's own identity line, used as the subtitle on the
+// workspace and the documents screen so both name the same thing the same way.
+PursuitLabel(id: Text, name: Text): Text =
+    If(IsBlank(id), name, id & " - " & name);
+
 // ---------------------------------------------------------------- helpers
 // Stage colour, used for the thin accent on a board column header. Stage names are the
 // values actually present in the list, casing included. Anything unmatched falls

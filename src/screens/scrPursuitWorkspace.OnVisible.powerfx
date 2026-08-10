@@ -37,5 +37,35 @@ ForAll(
     )
 );
 
+// Filter options for this screen's two galleries. "All" is prepended as its own row --
+// Power Fx can't concatenate two tables in one expression, so each is a ClearCollect
+// followed by a Collect.
+ClearCollect(colFltStage,  { Value: "All" });
+Collect(colFltStage,  ForAll(Filter(colLookups, LookupType = "Workflow Stage") As L, { Value: L.Value }));
+
+ClearCollect(colFltStatus, { Value: "All" });
+Collect(colFltStatus, ForAll(Filter(colLookups, LookupType = "Action Status") As L, { Value: L.Value }));
+
+ClearCollect(colFltHealth, { Value: "All" });
+Collect(colFltHealth, ForAll(Filter(colLookups, LookupType = "Health") As L, { Value: L.Value }));
+
+ClearCollect(colFltEffort, { Value: "All" });
+Collect(colFltEffort, ForAll(Filter(colLookups, LookupType = "Effort Size") As L, { Value: L.Value }));
+
+ClearCollect(colFltUpdType, { Value: "All" });
+Collect(colFltUpdType, ForAll(Filter(colLookups, LookupType = "Update Type") As L, { Value: L.Value }));
+
+// Date ranges rather than two date pickers. A pair of pickers is four states to get wrong
+// (neither set, one set, both set, inverted) for a feed that is read newest-first anyway.
+ClearCollect(
+    colFltDate,
+    Table(
+        { Value: "All time",     Days: 0 },
+        { Value: "Last 7 days",  Days: 7 },
+        { Value: "Last 30 days", Days: 30 },
+        { Value: "Last 90 days", Days: 90 }
+    )
+);
+
 Set(gblPanel, If(gblNewPursuit, "pursuit", ""));
 Set(gblEditKey, "")

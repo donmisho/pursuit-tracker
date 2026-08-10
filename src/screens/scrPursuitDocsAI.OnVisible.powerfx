@@ -3,10 +3,15 @@
 
 Set(gblPursuit, LookUp('pursuit-tracker-pursuits', Title = gblPursuitKey));
 
-// Newest change first. Modified, not Added Date -- editing a link's type or URL should
-// float it back to the top, which is what "last update" means to whoever asked.
+// Links. Newest change first -- Modified, not Added Date, because editing a link's type
+// or URL should float it back to the top, which is what "last update" means to whoever
+// asked.
+//
+// The Documents gallery reads the 'Pursuit Documents' library directly rather than through
+// a collection: it holds files, nothing in the app writes to it, and there is no join to
+// build. One less thing to refresh after a save.
 ClearCollect(
-    colDocs,
+    colLinks,
     Sort(Filter('pursuit-tracker-documents', 'Pursuit ID' = gblPursuitKey), Modified, SortOrder.Descending)
 );
 
