@@ -278,7 +278,12 @@
             Y: =10
             Width: =42
             Height: =20
-            Text: =Upper(Last(Split(ThisItem.Name, ".")).Result)
+            Text: |
+              =If(
+                  IsBlank(Find(".", ThisItem.Name)),
+                  "FILE",
+                  Left(Upper(Last(Split(ThisItem.Name, ".")).Result), 4)
+              )
             Font: =FontUI
             Size: =SizeChip
             Color: =ClrChipText
@@ -418,7 +423,7 @@
     Variant: Vertical
     Properties:
       X: =cardLinks.X + 24
-      Y: =228
+      Y: =cardLinks.Y + 52
       Width: =cardLinks.Width - 48
       Height: =cardLinks.Height - 68
       Items: =Sort(colLinks, Modified, SortOrder.Descending)

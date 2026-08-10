@@ -76,7 +76,7 @@ Type badge, file name, and who touched it:
 
 | | |
 |---|---|
-| `recDocType` + `lblDocType` | the extension as a chip — `Upper(Last(Split(ThisItem.Name, ".")).Result)` |
+| `recDocType` + `lblDocType` | the extension as a chip, `FILE` when the name has no dot |
 | `lblDocName` | `Name`, link-coloured |
 | `lblDocModified` | `Modified`, right-aligned |
 | `lblDocWho` | `Created by … · Modified by …` from the two Person columns |
