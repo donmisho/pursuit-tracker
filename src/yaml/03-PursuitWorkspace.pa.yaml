@@ -1814,7 +1814,7 @@
       Default: =Coalesce(gblEditAction.Notes, "")
       Fill: =ClrColumn
       Font: =FontUI
-      Height: =70
+      Height: =Parent.Height - 670
       Mode: =TextMode.MultiLine
       Size: =SizeBody
       TabIndex: =9
@@ -1862,17 +1862,17 @@
       Width: =592
       Wrap: =false
       X: =Parent.Width - 616
-      Y: =162
+      Y: =228
 - rteUpdText:
     Control: RichTextEditor@2.7.0
     Properties:
       Default: =Coalesce(gblEditUpdate.'Update Text', "")
-      Height: =180
+      Height: =Parent.Height - 338
       TabIndex: =2
       Visible: =gblPanel = "update"
       Width: =592
       X: =Parent.Width - 616
-      Y: =180
+      Y: =246
 - lblCapdrpUpdType:
     Control: Label@2.5.1
     Properties:
@@ -1882,10 +1882,10 @@
       Size: =SizeMeta
       Text: ="UPDATE TYPE"
       Visible: =gblPanel = "update"
-      Width: =592
+      Width: =290
       Wrap: =false
       X: =Parent.Width - 616
-      Y: =372
+      Y: =162
 - drpUpdType:
     Control: Classic/DropDown@2.3.1
     Properties:
@@ -1902,9 +1902,9 @@
       Size: =SizeBody
       TabIndex: =3
       Visible: =gblPanel = "update"
-      Width: =592
+      Width: =290
       X: =Parent.Width - 616
-      Y: =390
+      Y: =180
 - lblCapdrpUpdRisk:
     Control: Label@2.5.1
     Properties:
@@ -1914,10 +1914,10 @@
       Size: =SizeMeta
       Text: ="RISK / DECISION"
       Visible: =gblPanel = "update"
-      Width: =592
+      Width: =286
       Wrap: =false
-      X: =Parent.Width - 616
-      Y: =434
+      X: =Parent.Width - 310
+      Y: =162
 - drpUpdRisk:
     Control: Classic/DropDown@2.3.1
     Properties:
@@ -1934,9 +1934,9 @@
       Size: =SizeBody
       TabIndex: =4
       Visible: =gblPanel = "update"
-      Width: =592
-      X: =Parent.Width - 616
-      Y: =452
+      Width: =286
+      X: =Parent.Width - 310
+      Y: =180
 - btnPanelDelete:
     Control: Classic/Button@2.2.0
     Properties:

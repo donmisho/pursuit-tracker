@@ -406,6 +406,25 @@ data migration, not a settings change.
 divide by 7 (columns get narrow — the cards are already tight at 5) or closed pursuits need
 to drop off the board and live in the list. Say which and I'll build it.
 
+### The multi-line fields fill the panel
+
+`rteUpdText` and `txtActNotes` are the only two, and both are sized off `Parent.Height`
+rather than pinned:
+
+| | |
+|---|---|
+| `rteUpdText` | `Parent.Height - 338` |
+| `txtActNotes` | `Parent.Height - 670` |
+
+Both land 16px above `btnPanelSave`, which sits at `Parent.Height - 76`. A taller window
+gives the editor the extra height instead of leaving it below the fold.
+
+For the update mode that meant reordering: Update Type and Risk / Decision moved up to share
+one row under the topic, so the editor is the last field and has nothing beneath it to clear.
+It went from a fixed 180 to 430 at 768 — a rich text editor with a formatting toolbar has
+about 40px of chrome before any text shows, so 180 was closer to four visible lines than to
+the eight it looked like.
+
 ### Saving
 
 `btnPanelSave.OnSelect` is one `Switch`-shaped `If` over `gblPanel`. Each branch either
