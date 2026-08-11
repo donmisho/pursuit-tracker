@@ -162,11 +162,22 @@ for path in files:
     walk(doc, path.stem, names, path.name)
     collect_refs(doc, refs)
 
-    # Power Fx enums (Color.Red, Align.Center, ...) are capitalised the same way controls
-    # are, so only flag lower-camel names, which is the convention every control here uses.
+    # A formula naming a control that isn't on the screen is an error, not a style
+    # question: deleting a control in Studio leaves every reference to it behind, and the
+    # button that reads it silently stops working. Only the control-name prefixes this app
+    # uses are checked, so Power Fx enums (Color.Red, Align.Center) don't trip it.
     for ref in sorted(refs - names - KNOWN_GLOBALS):
-        if ref[0].islower():
+        if re.match(r"(btn|lbl|drp|txt|dte|cmb|rte|gal|rec|card|htm|nav)[A-Z]", ref):
+            errors.append(f"{path.name}: '{ref}' is referenced but no control of that name is on this screen")
+        elif ref[0].islower():
             warnings.append(f"{path.name}: '{ref}.…' referenced but no control of that name on this screen")
+
+    # A caption named lblCap<control> whose control is gone is a leftover from a rename or
+    # a deletion -- it renders a label over empty space.
+    for n in sorted(names):
+        m = re.match(r"lblCap([a-z]{3}[A-Z]\w*)$", n)
+        if m and m.group(1) not in names:
+            errors.append(f"{path.name}: '{n}' captions '{m.group(1)}', which is not on this screen")
 
     print(f"{path.name}: {len(names)} controls")
 
