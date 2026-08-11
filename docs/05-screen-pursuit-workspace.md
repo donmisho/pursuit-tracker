@@ -147,6 +147,13 @@ line, 48 tall. The card is a third of the column, so a body preview and a Risk /
 chip cost a visible row each and told you nothing the latest card and the panel don't. The
 heading and both filters share the top line for the same reason.
 
+The two filters are anchored to the card's **right** edge at a fixed 150 each, and the
+heading takes what's left — `cardUpdates.Width - 372`. It was the other way round, a 150
+heading with the filters placed after it, and "Previous Updates" doesn't fit in 150 at
+`SizeCardTitle`. A Label doesn't clip: the overflow renders anyway, under the controls
+declared after it, so the heading appeared chopped off mid-word. Sizing the heading from
+what's left instead means it can't collide at any card width.
+
 **"New Update" lives on the latest card**, not on the previous-updates list. Adding an
 update is how you replace what's in that card, so the button belongs where the result
 appears.

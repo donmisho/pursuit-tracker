@@ -830,7 +830,7 @@
       Height: =24
       Size: =SizeCardTitle
       Text: ="Previous Updates"
-      Width: =400
+      Width: =cardUpdates.Width - 372
       Wrap: =false
       X: =cardUpdates.X + 24
       Y: =cardUpdates.Y + 16
@@ -847,8 +847,8 @@
       Items.Value: =Value
       Size: =SizeMeta
       TabIndex: =-1
-      Width: =170
-      X: =961
+      Width: =150
+      X: =cardUpdates.X + cardUpdates.Width - 332
       Y: =cardUpdates.Y + 14
 - drpUFRisk:
     Control: Classic/DropDown@2.3.1
@@ -863,8 +863,8 @@
       Items.Value: =Value
       Size: =SizeMeta
       TabIndex: =-1
-      Width: =180
-      X: =1137
+      Width: =150
+      X: =cardUpdates.X + cardUpdates.Width - 174
       Y: =cardUpdates.Y + 14
 - galUpdates:
     Control: Gallery@2.15.0
