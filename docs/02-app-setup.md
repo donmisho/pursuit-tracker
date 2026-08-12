@@ -164,11 +164,11 @@ rebuild that screen on the Scrollable screen layout — the note at the top of
 
 ## If the user-defined functions won't take
 
-The last five entries in `src/App.Formulas.powerfx` — `StageAccent`, `DueLabel`,
-`Initials`, `SafeUrl`, `RelativeDay` — take parameters, which makes them user-defined
-functions rather than plain named formulas. If your Studio rejects them (and only them —
-the colour tokens above go in fine), delete those five definitions and inline them at
-their nine call sites:
+Seven entries in `src/App.Formulas.powerfx` — `PursuitLabel`, `StageAccent`, `DueLabel`,
+`Initials`, `SafeUrl`, `Clip`, `RelativeDay`, plus `DropDecl` / `StatusHtml` — take
+parameters, which makes them user-defined functions rather than plain named formulas. If
+your Studio rejects them (and only them — the colour tokens above go in fine), delete those
+definitions and inline them at their call sites:
 
 | Call | Replace with |
 |---|---|
@@ -177,6 +177,7 @@ their nine call sites:
 | `DueLabel(D, W)`<br>*(`lblActionDue`, workspace)* | `If(!IsBlank(D), Text(D, "mmmm d"), !IsBlank(W), W, "")` |
 | `SafeUrl(U)`<br>*(`lblDocLink.OnSelect`, workspace)* | `If(StartsWith(Lower(U), "http"), U, "https://" & U)` |
 | `RelativeDay(D)`<br>*(3×: overview meta, update byline, version meta)* | `Switch(DateDiff(D, Now(), TimeUnit.Days), 0, "Today", 1, "Yesterday", Text(D, "mmmm d"))` |
+| `StatusHtml(H)`<br>*(`htmLatestBody`, workspace; `htmAiBody`, documents)* | No one-line equivalent — it calls `DropDecl`. If these two are rejected, use the raw column (`First(colUpdates).'Update Text'`) and accept that pasted headings render in their pasted colour. |
 
 Substitute the argument for `X` / `D` / `W` / `U` in each case — e.g. `Initials(ThisItem.OwnerName)`
 becomes `Concat(FirstN(Split(ThisItem.OwnerName, " "), 2), Left(Value, 1))`.

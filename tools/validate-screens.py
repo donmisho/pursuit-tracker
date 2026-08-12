@@ -63,6 +63,7 @@ KNOWN_GLOBALS = {
     "FontUI", "SizePageTitle", "SizeCardTitle", "SizeBody", "SizeMeta", "SizeChip",
     "GapPage", "GapCard", "RadiusCard", "RadiusChip", "BoardColumns",
     "StageAccent", "DueLabel", "Initials", "SafeUrl", "RelativeDay", "Clip",
+    "ClrTextHex", "DropDecl", "StatusHtml",
     "gblUser", "gblMoving", "gblPursuitKey", "gblNewPursuit", "gblPanel", "gblPursuit",
     "gblOverview", "gblExport", "gblExporting", "gblRowMenu", "gblEditKey",
     "gblEditAction", "gblEditDoc", "gblEditUpdate", "gblFields",

@@ -1056,7 +1056,7 @@
       Color: =ClrText
       Font: =FontUI
       Height: =cardLatest.Height - 122
-      HtmlText: =First(colUpdates).'Update Text'
+      HtmlText: =StatusHtml(First(colUpdates).'Update Text')
       Size: =SizeBody
       Visible: =Not(IsEmpty(colUpdates))
       Width: =cardLatest.Width - 48

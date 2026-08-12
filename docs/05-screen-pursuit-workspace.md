@@ -432,6 +432,31 @@ It went from a fixed 180 to 430 at 768 — a rich text editor with a formatting 
 about 40px of chrome before any text shows, so 180 was closer to four visible lines than to
 the eight it looked like.
 
+### Pasted formatting is normalised on the way out, not on the way in
+
+Text pasted into `rteUpdText` from Word, Outlook or Teams carries its own inline styling —
+headings arrive as `color:#4472C4` sized for a white page. That is legible in the editor,
+which has a white surface, and close to invisible in `htmLatestBody`, which is an
+`HtmlViewer` on a dark card. The viewer's own `Color` property can't help: an inline colour
+on the element beats anything the container sets.
+
+So `htmLatestBody.HtmlText` is `StatusHtml(First(colUpdates).'Update Text')`. `StatusHtml`
+(in `src/App.Formulas.powerfx`) strips every `color:` and `font-size:` declaration out of
+the fragment via `DropDecl`, wraps the result in a `<div>` that sets `ClrTextHex` at
+`SizeBody`, and injects `font-size: SizeBody + 2; font-weight:700` as the **first**
+attribute of every `<h1>`–`<h6>`. First attribute wins in HTML — a duplicate `style=` later
+on the same tag is ignored — so there's no need to find and rewrite whatever the paste left
+behind. Splitting on `color:` also catches `background-color:`, which is wanted: a pasted
+white background is exactly as unreadable as light blue text.
+
+Two consequences worth knowing. It runs at display time, so updates saved before it existed
+render correctly too, and the SharePoint column still holds exactly what the editor
+produced — nothing about the fix is destructive. And prose that literally contains the words
+`color:` or `font-size:` loses the few characters after it, which is the price of doing
+string surgery in a language with no regex replace.
+
+`htmAiBody` on the documents screen gets the same treatment, for the same reason.
+
 ### Saving
 
 `btnPanelSave.OnSelect` is one `Switch`-shaped `If` over `gblPanel`. Each branch either

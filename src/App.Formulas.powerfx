@@ -19,6 +19,9 @@ ClrDivider     = ColorValue("#232B3B");
 
 // ---------------------------------------------------------------- text
 ClrText        = ColorValue("#F2F5FA");   // primary
+ClrTextHex     = "#F2F5FA";               // the same colour as a string, for StatusHtml's
+                                          // inline CSS. Keep the two in step by hand --
+                                          // Power Fx has no way to read a Color back out.
 ClrTextMuted   = ColorValue("#98A3B8");   // subtitles, column headers
 ClrTextFaint   = ColorValue("#6F7B90");   // provenance lines, timestamps
 
@@ -122,6 +125,86 @@ Clip(s: Text, n: Number): Text =
 // path and opens as a broken address.
 SafeUrl(url: Text): Text =
     If(StartsWith(Lower(url), "http"), url, "https://" & url);
+
+// ---------------------------------------------------------------- pasted rich text
+// Delete every occurrence of one CSS declaration from a fragment of HTML.
+//
+// Text pasted into the rich text editor from Word, Outlook or Teams brings its own inline
+// styling with it -- headings arrive as color:#4472C4 on a white page, which is close to
+// invisible on the dark card that later displays them. An inline colour beats anything a
+// wrapping element sets, so the only fix is to take the declaration out of the string.
+//
+// Split on the property name, then from each following piece drop everything up to the
+// first ";" or quote or ">" -- that span is the value, and the delimiter itself is kept so
+// the rest of the style attribute survives intact. Note that splitting on "color:" also
+// catches "background-color:", which is wanted: a pasted white background is exactly as
+// unreadable as light blue text. The leftover "background-;" is invalid CSS and ignored.
+//
+// The one false positive is prose that literally contains "color:" or "font-size:", where
+// the next few words are eaten. Worth it.
+DropDecl(html: Text, decl: Text): Text =
+    With(
+        { parts: Split(html, decl) },
+        First(parts).Value &
+        Concat(
+            ForAll(
+                Sequence(CountRows(parts) - 1, 2, 1) As I,
+                {
+                    Tail: With(
+                        { s: Index(parts, I.Value).Value },
+                        Mid(
+                            s,
+                            Min(
+                                If(Find(";",  s) > 0, Find(";",  s), Len(s) + 1),
+                                If(Find("""", s) > 0, Find("""", s), Len(s) + 1),
+                                If(Find("'",  s) > 0, Find("'",  s), Len(s) + 1),
+                                If(Find(">",  s) > 0, Find(">",  s), Len(s) + 1)
+                            )
+                        )
+                    )
+                }
+            ),
+            Tail
+        )
+    );
+
+// Take stored HTML and render it the way the dark cards need: body text white at the app's
+// body size, headings bold and two points larger. Strip the pasted colours and sizes first,
+// then set the size on the wrapper so everything that isn't a heading inherits one size.
+//
+// The heading style is injected as the FIRST attribute of each tag deliberately. HTML keeps
+// the first of any duplicated attribute and ignores the rest, so "<h2 style=ours style=theirs>"
+// resolves to ours -- no need to find and rewrite whatever the paste left behind.
+//
+// This runs at display time, so it fixes updates that were saved before it existed and
+// leaves the SharePoint column holding exactly what the editor produced.
+StatusHtml(html: Text): Text =
+    If(
+        IsBlank(html),
+        "",
+        With(
+            {
+                clean: DropDecl(DropDecl(html, "color:"), "font-size:"),
+                head:  "font-size:" & Text(SizeBody + 2) & "pt;font-weight:700;color:" &
+                       ClrTextHex & ";margin:14px 0 4px 0;"
+            },
+            "<div style=""color:" & ClrTextHex &
+            ";font-family:'Segoe UI',Segoe,sans-serif;font-size:" & Text(SizeBody) &
+            "pt;line-height:1.45;"">" &
+            Substitute(
+                Substitute(
+                    Substitute(
+                        Substitute(
+                            Substitute(
+                                Substitute(clean, "<h1", "<h1 style=""" & head & """"),
+                                "<h2", "<h2 style=""" & head & """"),
+                            "<h3", "<h3 style=""" & head & """"),
+                        "<h4", "<h4 style=""" & head & """"),
+                    "<h5", "<h5 style=""" & head & """"),
+                "<h6", "<h6 style=""" & head & """") &
+            "</div>"
+        )
+    );
 
 // "Today" / "Yesterday" / "August 1" for the status update feed.
 RelativeDay(when: DateTime): Text =

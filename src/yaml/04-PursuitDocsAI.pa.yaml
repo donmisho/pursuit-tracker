@@ -651,7 +651,7 @@
       Y: =cardAiCurrent.Y + 74
       Width: =cardAiCurrent.Width - 48
       Height: =cardAiCurrent.Height - 90
-      HtmlText: =gblOverview.'Overview Text'
+      HtmlText: =StatusHtml(gblOverview.'Overview Text')
       Font: =FontUI
       Size: =SizeBody
       Color: =ClrText
