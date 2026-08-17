@@ -86,6 +86,21 @@ risk indicator your data does exercise.
 predecessor *and no due date*. ACT-003 has both a predecessor and a due date, so the date
 wins and the wording never appears. To see it, clear ACT-003's due date temporarily.
 
+### My Actions
+
+Only what `Action Owner Entra ID` says is yours, and only what isn't `Completed`. On
+current data that is at most two rows — ACT-002 and ACT-003 — and none at all if the owner
+addresses in the list aren't your sign-in address.
+
+An empty screen here is the expected result of an address mismatch rather than a bug, so
+the screen prints the address it matched. If that address looks right and the rows still
+don't appear, check the actions' owner column for a different spelling, and check that the
+two you expect aren't `Completed`.
+
+Switch `SORT BY` between **Due Date** and **Opportunity**: the first puts the nearest date
+at the top with undated actions last, the second groups by account and pursuit with dates
+still ascending inside each group. Overdue dates render in the risk colour.
+
 ## 3. Wire the export, then re-test
 
 `btnDownloadExcel` ships with a placeholder that just notifies. Once the flow from

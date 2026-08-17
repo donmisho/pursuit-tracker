@@ -28,14 +28,14 @@ Keep it terse. Lead with the fix; skip the explanation unless it changes what I 
 
 ## Where things stand
 
-All four screens are built and pasting cleanly: `01-PortfolioBoard` (43 controls),
-`02-PortfolioList` (47), `03-PursuitWorkspace` (136), `04-PursuitDocsAI` (58).
+All five screens are built and pasting cleanly: `01-PortfolioBoard` (44 controls),
+`02-PortfolioList` (48), `03-PursuitWorkspace` (137), `04-PursuitDocsAI` (59),
+`05-MyActions` (33).
 
-Most recent change: pasted rich text in status updates was rendering light-blue-on-dark and
-was unreadable. `StatusHtml()` in `src/App.Formulas.powerfx` now strips `color:` and
-`font-size:` declarations at display time and re-renders the fragment white at `SizeBody` with
-headings bold at `SizeBody + 2`. Applied to `htmLatestBody` (workspace) and `htmAiBody`
-(documents).
+Most recent change: added `scrMyActions` — my open actions across every pursuit, sortable by
+due date or by opportunity, with a row click into the pursuit workspace. It's documented in
+`docs/09-screen-my-actions.md`. The other four screens each gained a `btnNavActions` nav
+button, so all five needed repasting.
 
 Still open on my side, in SharePoint rather than in code — the list is in
 `docs/OPEN-ITEMS.md`: the lookup values don't match the Choice sets exactly, and three

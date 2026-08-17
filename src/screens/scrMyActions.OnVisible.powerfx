@@ -1,0 +1,116 @@
+// Paste into: Power Apps Studio -> Tree view -> scrMyActions -> OnVisible property
+//
+// Builds colMyActions: one row per open action assigned to the signed-in user, flattened
+// to scalars and carrying both sort keys. The screen reads nothing else -- the gallery
+// binds to this collection and switches between DueKey and OppKey, so sorting costs no
+// lookups and the two orders can't disagree about what a row says.
+//
+// Everything this screen needs is loaded here rather than assumed from App.OnStart.
+// Collections can be stale-but-present in Studio and empty at runtime, so a screen that
+// depends on another screen having been visited first renders blank when published.
+
+Set(gblUser, User());
+
+// The whole actions list. Filtering Status <> "Completed" server-side would look tidier
+// but SharePoint doesn't delegate <> on a choice column, so it would silently return a
+// truncated set. Pulled whole and filtered in memory, as everywhere else in this app.
+ClearCollect(colActions, 'pursuit-tracker-actions');
+
+// Pursuit identity only -- key, account, name. An action names its pursuit by text key,
+// and this screen needs to print and sort on the account and pursuit name, so the whole
+// pursuits list is reshaped once here instead of a LookUp per action against SharePoint.
+ClearCollect(
+    colPursuitsMin,
+    ForAll(
+        'pursuit-tracker-pursuits' As P,
+        { Key: P.Title, Account: P.'Account Name', Name: P.'Pursuit Name' }
+    )
+);
+
+// Mine and open.
+//
+// "Mine" is a case-insensitive match on the owner email. 'Action Owner Entra ID' is a
+// text column, not a Person column, so nothing normalises what gets typed into it and
+// Don.Mishory@... and don.mishory@... are different strings to SharePoint.
+//
+// "Open" is Status <> "Completed". A blank status counts as open, which is right -- an
+// action nobody has set a status on is still outstanding.
+//
+// Every column is a scalar. Record-valued and choice-valued columns don't survive into a
+// collection with their types intact (see the NextAction note in App.OnStart), so the
+// choices are flattened to .Value here and the gallery binds to plain text.
+ClearCollect(
+    colMyActions,
+    ForAll(
+        Filter(
+            colActions,
+            Status.Value <> "Completed",
+            Lower('Action Owner Entra ID') = Lower(gblUser.Email)
+        ) As A,
+        With(
+            { P: LookUp(colPursuitsMin, Key = A.'Pursuit ID') },
+            With(
+                {
+                    Acct: Coalesce(P.Account, ""),
+                    Full: Coalesce(P.Name, ""),
+                    // Undated actions sort last rather than first, and this date is what
+                    // both sort keys carry for them.
+                    DueOrFar: If(IsBlank(A.'Due Date'), Date(2099, 12, 31), A.'Due Date')
+                },
+                With(
+                    {
+                        // The account prefix is stripped for display, the same way the
+                        // portfolio list strips it -- "Elevance Health: Carelon Data
+                        // Platform" reads as the account column plus "Carelon Data
+                        // Platform", not the account twice.
+                        Short: Trim(
+                            If(
+                                !IsBlank(Find(": ", Full)),  Mid(Full, Find(": ", Full) + 2),
+                                !IsBlank(Find(" - ", Full)), Mid(Full, Find(" - ", Full) + 3),
+                                Full
+                            )
+                        ),
+                        DueText: Text(DueOrFar, "yyyy-mm-dd")
+                    },
+                    {
+                        ActionKey:   A.Title,
+                        PursuitKey:  A.'Pursuit ID',
+                        ActionTitle: A.'Action Title',
+                        StageText:   A.'Workflow Stage'.Value,
+                        StatusText:  A.Status.Value,
+                        HealthText:  A.Health.Value,
+                        EffortText:  A.'Effort Size'.Value,
+                        Account:     Acct,
+                        Opportunity: PursuitLabel(A.'Pursuit ID', Short),
+                        Due:         A.'Due Date',
+
+                        // Same derivation the workspace uses: an action with no due date
+                        // but a predecessor renders "after proposal / quote" instead.
+                        DueWording:  If(
+                                         !IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'),
+                                         "",
+                                         "After " & Lower(
+                                             LookUp(colActions, Title = A.'Predecessor Action ID').'Workflow Stage'.Value
+                                         )
+                                     ),
+
+                        // The two sort keys, both text so a single Sort() does the whole
+                        // job. Sorted-as-text dates are why the format is yyyy-mm-dd.
+                        // Each ends in the ACT id, so equal keys still order the same way
+                        // every time -- Power Fx does not promise a stable sort.
+                        DueKey:      DueText & " " & Acct & " " & A.Title,
+                        OppKey:      Acct & " " & Short & " " & A.'Pursuit ID' & " " & DueText & " " & A.Title
+                    }
+                )
+            )
+        )
+    )
+);
+
+// The sort dropdown's options. Two rows, in a collection rather than inline on the
+// control, so the Items formula is a name and the default matches a real row.
+ClearCollect(colFltSort, Table({ Value: "Due Date" }, { Value: "Opportunity" }));
+
+// Nothing on this screen edits a pursuit, but the nav bar's Workspace button reads
+// gblNewPursuit -- leaving it true would open the workspace in create mode.
+Set(gblNewPursuit, false)

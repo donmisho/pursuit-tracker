@@ -21,9 +21,13 @@ deliverable is always **text the user pastes into Studio**:
 | `src/screens/scr*.OnVisible.powerfx` | that screen's **OnVisible** |
 | `src/yaml/0*-*.pa.yaml` | right-click the screen → **Paste** (code-view YAML) |
 
-Four screens: `scrPortfolioBoard`, `scrPortfolioList`, `scrPursuitWorkspace`,
-`scrPursuitDocsAI`. `docs/00-QUICKSTART.md` is the ten-file paste map; `docs/01`–`08` carry
-the reasoning. `tools/validate-screens.py` is the only automated check that exists.
+Five screens: `scrPortfolioBoard`, `scrPortfolioList`, `scrPursuitWorkspace`,
+`scrPursuitDocsAI`, `scrMyActions`. `docs/00-QUICKSTART.md` is the twelve-file paste map;
+`docs/01`–`09` carry the reasoning. `tools/validate-screens.py` is the only automated check
+that exists.
+
+The nav bar is duplicated on every screen, so **adding a screen means repasting all of
+them** — or pasting the one new nav button onto each by hand.
 
 **Every change ends with: what to repaste, and where.** A commit the user can't act on is
 not a delivered change.

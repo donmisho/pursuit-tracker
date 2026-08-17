@@ -123,6 +123,28 @@
       Width: =200
       X: =760
       Y: =14
+- btnNavActions_2:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderThickness: =0
+      Color: =ClrTextMuted
+      Fill: =ClrNav
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrMyActions, ScreenTransition.None)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="My Actions"
+      Width: =150
+      X: =970
+      Y: =14
 - lblBreadcrumb:
     Control: Label@2.5.1
     Properties:

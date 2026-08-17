@@ -132,6 +132,29 @@
       RadiusBottomRight: =6
       OnSelect: =false
 
+- btnNavActions:
+    Control: Classic/Button
+    Properties:
+      X: =970
+      Y: =14
+      Width: =150
+      Height: =36
+      Text: ="My Actions"
+      Font: =FontUI
+      Size: =12
+      Fill: =ClrNav
+      Color: =ClrTextMuted
+      HoverFill: =ClrCardHover
+      HoverColor: =ClrText
+      PressedFill: =ClrCardHover
+      PressedColor: =ClrText
+      BorderThickness: =0
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrMyActions, ScreenTransition.None)
+
 - lblBreadcrumb:
     Control: Label
     Properties:

@@ -1,0 +1,562 @@
+# scrMyActions — complete screen. Paste onto scrMyActions.
+# Tablet (1366 x 768), "Scale to fit" OFF. See 01-PortfolioBoard.pa.yaml for paste
+# instructions and fallbacks.
+#
+# Every open action assigned to the signed-in user, across every pursuit, sorted either by
+# due date or by opportunity. The rows come from colMyActions, built in this screen's
+# OnVisible (src/screens/scrMyActions.OnVisible.powerfx) — the screen never reads the
+# actions list directly, so both sort keys are computed once at load rather than per row.
+#
+# CONTROL TYPES: buttons and inputs use the Classic/ prefix -- the unprefixed names
+# resolve to the modern Fluent controls, which have no Fill, Color or Radius properties.
+# Rounded shapes are Classic/Button with Text "" rather than Rectangle: the classic
+# Rectangle has no Radius properties at all, and Button is the only classic control that
+# does. Square shapes (rules, dividers) stay Rectangle.
+#
+# COLUMNS (X relative to the gallery, +24 for the header labels above it):
+#   Action 0/420 · Opportunity 436/380 · Status 832/200 · At Risk pill (right) · Due (right)
+#
+# Z-ORDER: btnRowClick is declared AFTER the row content it covers, so the whole row is
+# clickable. The two empty-state labels come after the gallery because they only show when
+# it has no rows, and nothing under them is clickable then.
+#
+# THE SORT (galMyActions.Items) is two branches rather than one Sort with a conditional
+# key. Each key is a single text column computed at load: DueKey is the due date first
+# (undated actions carry 2099-12-31, so they sort last), OppKey is account, then pursuit,
+# then the due date -- so grouping by opportunity still reads soonest-first inside each
+# one. Both keys end in the ACT id, which makes the order stable without relying on Sort
+# itself being stable, which Power Fx doesn't promise.
+#
+# btnRefreshActions.OnSelect carries a copy of the OnVisible file's three ClearCollects,
+# behind a Refresh() of the actions list. Canvas apps have no user-defined behaviour
+# functions, so a load that runs both on arrival and on demand exists twice -- change both.
+#
+# lblRowDue colours overdue dates with ClrRiskText rather than the warm ClrDate. Undated
+# actions fall through to DueLabel's dependency wording ("after proposal / quote"), which
+# is never overdue.
+#
+# lblEmptyHint names the address being matched. Ownership is an email string in the list,
+# not a Person column, so a mismatched address looks exactly like having no work.
+
+- navBg:
+    Control: Rectangle@2.3.0
+    Properties:
+      Fill: =ClrNav
+      Height: =64
+      Width: =Parent.Width
+- navRule:
+    Control: Rectangle@2.3.0
+    Properties:
+      Fill: =ClrBorder
+      Height: =1
+      Width: =Parent.Width
+      Y: =63
+- navBrand:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrText
+      Font: =FontUI
+      FontWeight: =FontWeight.Semibold
+      Height: =64
+      Size: =14
+      Text: ="Pursuit Tracker"
+      Width: =180
+      X: =GapPage
+- btnNavBoard:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderThickness: =0
+      Color: =ClrTextMuted
+      Fill: =ClrNav
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPortfolioBoard, ScreenTransition.None)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="Portfolio Board"
+      Width: =170
+      X: =210
+      Y: =14
+- btnNavList:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderThickness: =0
+      Color: =ClrTextMuted
+      Fill: =ClrNav
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPortfolioList, ScreenTransition.None)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="Portfolio List"
+      X: =390
+      Y: =14
+- btnNavWorkspace:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderThickness: =0
+      Color: =ClrTextMuted
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      Fill: =ClrNav
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="Pursuit Workspace"
+      Width: =190
+      X: =560
+      Y: =14
+- btnNavDocsAI:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderThickness: =0
+      Color: =ClrTextMuted
+      DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+      Fill: =ClrNav
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitDocsAI, ScreenTransition.None)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="Documents & AI"
+      Width: =200
+      X: =760
+      Y: =14
+- btnNavActions:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderThickness: =0
+      Color: =ClrAccentText
+      Fill: =ClrAccent
+      Font: =FontUI
+      Height: =36
+      HoverColor: =ClrAccentText
+      HoverFill: =ClrAccentHover
+      PressedColor: =ClrAccentText
+      PressedFill: =ClrAccentHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =12
+      Text: ="My Actions"
+      Width: =150
+      X: =970
+      Y: =14
+- lblPageTitle:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrText
+      Font: =FontUI
+      FontWeight: =FontWeight.Semibold
+      Height: =36
+      Size: =SizePageTitle
+      Text: ="My Open Actions"
+      Width: =700
+      X: =GapPage
+      Y: =88
+- lblPageSub:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =24
+      Size: =SizeBody
+      Text: ="Every action assigned to you that isn't completed, across all pursuits."
+      Width: =900
+      X: =GapPage
+      Y: =126
+- lblSortCap:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =32
+      Size: =SizeMeta
+      Text: ="SORT BY"
+      Width: =60
+      Wrap: =false
+      X: =GapPage
+      Y: =168
+- drpMASort:
+    Control: Classic/DropDown@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      Color: =ClrText
+      Default: ="Due Date"
+      Fill: =ClrColumn
+      Font: =FontUI
+      Height: =32
+      Items: =colFltSort
+      Size: =SizeBody
+      Width: =180
+      X: =88
+      Y: =168
+- lblActionCount:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextFaint
+      Font: =FontUI
+      Height: =32
+      Size: =SizeBody
+      Text: =CountRows(galMyActions.AllItems) & If(CountRows(galMyActions.AllItems) = 1, " Open Action", " Open Actions")
+      Width: =240
+      Wrap: =false
+      X: =284
+      Y: =168
+- btnRefreshActions:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      Color: =ClrText
+      Fill: =ClrColumn
+      Font: =FontUI
+      Height: =32
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: |
+        =Refresh('pursuit-tracker-actions');
+        ClearCollect(colActions, 'pursuit-tracker-actions');
+        ClearCollect(
+            colPursuitsMin,
+            ForAll(
+                'pursuit-tracker-pursuits' As P,
+                { Key: P.Title, Account: P.'Account Name', Name: P.'Pursuit Name' }
+            )
+        );
+        ClearCollect(
+            colMyActions,
+            ForAll(
+                Filter(
+                    colActions,
+                    Status.Value <> "Completed",
+                    Lower('Action Owner Entra ID') = Lower(gblUser.Email)
+                ) As A,
+                With(
+                    { P: LookUp(colPursuitsMin, Key = A.'Pursuit ID') },
+                    With(
+                        {
+                            Acct: Coalesce(P.Account, ""),
+                            Full: Coalesce(P.Name, ""),
+                            DueOrFar: If(IsBlank(A.'Due Date'), Date(2099, 12, 31), A.'Due Date')
+                        },
+                        With(
+                            {
+                                Short: Trim(
+                                    If(
+                                        !IsBlank(Find(": ", Full)),  Mid(Full, Find(": ", Full) + 2),
+                                        !IsBlank(Find(" - ", Full)), Mid(Full, Find(" - ", Full) + 3),
+                                        Full
+                                    )
+                                ),
+                                DueText: Text(DueOrFar, "yyyy-mm-dd")
+                            },
+                            {
+                                ActionKey:   A.Title,
+                                PursuitKey:  A.'Pursuit ID',
+                                ActionTitle: A.'Action Title',
+                                StageText:   A.'Workflow Stage'.Value,
+                                StatusText:  A.Status.Value,
+                                HealthText:  A.Health.Value,
+                                EffortText:  A.'Effort Size'.Value,
+                                Account:     Acct,
+                                Opportunity: PursuitLabel(A.'Pursuit ID', Short),
+                                Due:         A.'Due Date',
+                                DueWording:  If(
+                                                 !IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'),
+                                                 "",
+                                                 "After " & Lower(
+                                                     LookUp(colActions, Title = A.'Predecessor Action ID').'Workflow Stage'.Value
+                                                 )
+                                             ),
+                                DueKey:      DueText & " " & Acct & " " & A.Title,
+                                OppKey:      Acct & " " & Short & " " & A.'Pursuit ID' & " " & DueText & " " & A.Title
+                            }
+                        )
+                    )
+                )
+            )
+        )
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
+      RadiusBottomLeft: =4
+      RadiusBottomRight: =4
+      RadiusTopLeft: =4
+      RadiusTopRight: =4
+      Size: =16
+      Text: ="↻"
+      Tooltip: ="Refresh Actions"
+      Width: =32
+      X: =Parent.Width - Self.Width - GapPage
+      Y: =168
+- lblHdrAction:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="ACTION"
+      Width: =420
+      X: =GapPage
+      Y: =218
+- lblHdrOpp:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="OPPORTUNITY"
+      Width: =380
+      X: =460
+      Y: =218
+- lblHdrStatus:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="STATUS"
+      Width: =200
+      X: =856
+      Y: =218
+- lblHdrDue:
+    Control: Label@2.5.1
+    Properties:
+      Align: =Align.Right
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="DUE"
+      Width: =130
+      Wrap: =false
+      X: =Parent.Width - GapPage - 150
+      Y: =218
+- recHeaderRule:
+    Control: Rectangle@2.3.0
+    Properties:
+      Fill: =ClrBorder
+      Height: =1
+      Width: =Parent.Width - (GapPage * 2)
+      X: =GapPage
+      Y: =242
+- galMyActions:
+    Control: Gallery@2.15.0
+    Variant: Vertical
+    Properties:
+      Height: =Parent.Height - 250 - 56
+      Items: |
+        =If(
+            drpMASort.Selected.Value = "Opportunity",
+            Sort(colMyActions, OppKey, SortOrder.Ascending),
+            Sort(colMyActions, DueKey, SortOrder.Ascending)
+        )
+      TemplatePadding: =0
+      TemplateSize: =64
+      Width: =Parent.Width - (GapPage * 2)
+      X: =GapPage
+      Y: =250
+    Children:
+      - recRowDivider:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =ClrDivider
+            Height: =1
+            Width: =Parent.Width - 20
+            Y: =Parent.TemplateHeight - 1
+      - lblRowAction:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrText
+            Font: =FontUI
+            FontWeight: =FontWeight.Semibold
+            Height: =26
+            Size: =SizeBody
+            Text: =Clip(ThisItem.ActionTitle, 62)
+            VerticalAlign: =VerticalAlign.Top
+            Width: =420
+            Y: =8
+      - lblRowMeta:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrTextFaint
+            Font: =FontUI
+            Height: =18
+            Size: =SizeMeta
+            Text: =Clip(Trim(ThisItem.StageText & If(IsBlank(ThisItem.EffortText), "", " · " & ThisItem.EffortText)), 60)
+            Width: =420
+            Wrap: =false
+            Y: =36
+      - lblRowOpp:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrText
+            Font: =FontUI
+            Height: =26
+            Size: =SizeBody
+            Text: =Clip(ThisItem.Opportunity, 52)
+            VerticalAlign: =VerticalAlign.Top
+            Width: =380
+            X: =436
+            Y: =8
+      - lblRowAccount:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrTextFaint
+            Font: =FontUI
+            Height: =18
+            Size: =SizeMeta
+            Text: =Clip(ThisItem.Account, 52)
+            Width: =380
+            Wrap: =false
+            X: =436
+            Y: =36
+      - lblRowStatus:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrTextMuted
+            Font: =FontUI
+            Height: =26
+            Size: =SizeBody
+            Text: =Clip(ThisItem.StatusText, 28)
+            VerticalAlign: =VerticalAlign.Top
+            Width: =200
+            X: =832
+            Y: =8
+      - recRowPill:
+          Control: Classic/Button@2.2.0
+          Properties:
+            Fill: =ClrRiskFill
+            Height: =24
+            HoverFill: =ClrRiskFill
+            PressedFill: =ClrRiskFill
+            RadiusBottomLeft: =RadiusChip
+            RadiusBottomRight: =RadiusChip
+            RadiusTopLeft: =RadiusChip
+            RadiusTopRight: =RadiusChip
+            TabIndex: =-1
+            Text: =""
+            Visible: =ThisItem.HealthText = "At Risk"
+            Width: =84
+            X: =Parent.Width - 250
+            Y: =12
+      - lblRowPill:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =ClrRiskText
+            Font: =FontUI
+            Height: =24
+            Size: =SizeChip
+            Text: ="At Risk"
+            Visible: =recRowPill.Visible
+            Width: =84
+            X: =Parent.Width - 250
+            Y: =12
+      - lblRowDue:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =If(!IsBlank(ThisItem.Due) && ThisItem.Due < Today(), ClrRiskText, ClrDate)
+            Font: =FontUI
+            Height: =24
+            Size: =SizeBody
+            Text: =Clip(DueLabel(ThisItem.Due, ThisItem.DueWording), 24)
+            Width: =130
+            Wrap: =false
+            X: =Parent.Width - 150
+            Y: =12
+      - btnRowClick:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =0
+            Fill: =Color.Transparent
+            Height: =Parent.TemplateHeight - 1
+            HoverFill: =RGBA(255, 255, 255, 0.04)
+            OnSelect: =Set(gblPursuitKey, ThisItem.PursuitKey); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+            PressedFill: =RGBA(255, 255, 255, 0.07)
+            Text: =""
+            Tooltip: ="Open In Pursuit Workspace"
+            Width: =Parent.Width - 20
+- lblEmptyTitle:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrText
+      Font: =FontUI
+      FontWeight: =FontWeight.Semibold
+      Height: =28
+      Size: =SizeCardTitle
+      Text: ="Nothing Open Assigned To You"
+      VerticalAlign: =VerticalAlign.Top
+      Visible: =IsEmpty(colMyActions)
+      Width: =900
+      X: =GapPage
+      Y: =290
+- lblEmptyHint:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextFaint
+      Font: =FontUI
+      Height: =44
+      Size: =SizeBody
+      Text: ="Rows are matched on 'Action Owner Entra ID' = " & gblUser.Email & ". An action owned by any other spelling of your address won't appear here."
+      VerticalAlign: =VerticalAlign.Top
+      Visible: =IsEmpty(colMyActions)
+      Width: =900
+      X: =GapPage
+      Y: =322
+- lblFooterNote:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =24
+      Size: =SizeBody
+      Text: ="Completed actions drop off this list. Open a row to edit it in the pursuit workspace."
+      Width: =1100
+      X: =GapPage
+      Y: =Parent.Height - 40
+
+# ---------------------------------------------------------------------------
+# SCREEN PROPERTIES — set by hand:
+#
+#   Fill       =ClrPage
+#   OnVisible  src/screens/scrMyActions.OnVisible.powerfx, pasted whole
+#
+# The other four screens each need btnNavActions added to their nav bar, or this screen
+# is only reachable by editing the app. Either repaste those screens whole, or copy the
+# btnNavActions block out of any one of them and paste it onto each screen in Studio.
+# ---------------------------------------------------------------------------

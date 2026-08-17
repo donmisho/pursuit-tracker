@@ -2,7 +2,7 @@
 
 No explanations. Reasoning lives in `docs/01`–`08`.
 
-**Ten files get pasted, each into exactly one place. Nothing is pasted twice, and no file
+**Twelve files get pasted, each into exactly one place. Nothing is pasted twice, and no file
 is a fragment of another** — that last part matters, because the `OnVisible` blocks used to
 be described as "the part of `App.OnStart` below the banner comment" and that stopped being
 unambiguous once `OnStart` grew a section after it.
@@ -15,12 +15,14 @@ unambiguous once `OnStart` grew a section after it.
 | 4 | `src/yaml/02-PortfolioList.pa.yaml` | right-click `scrPortfolioList` → **Paste** |
 | 5 | `src/yaml/03-PursuitWorkspace.pa.yaml` | right-click `scrPursuitWorkspace` → **Paste** |
 | 6 | `src/yaml/04-PursuitDocsAI.pa.yaml` | right-click `scrPursuitDocsAI` → **Paste** |
-| 7 | `src/screens/scrPortfolioBoard.OnVisible.powerfx` | `scrPortfolioBoard` → **OnVisible** |
-| 8 | `src/screens/scrPortfolioList.OnVisible.powerfx` | `scrPortfolioList` → **OnVisible** |
-| 9 | `src/screens/scrPursuitWorkspace.OnVisible.powerfx` | `scrPursuitWorkspace` → **OnVisible** |
-| 10 | `src/screens/scrPursuitDocsAI.OnVisible.powerfx` | `scrPursuitDocsAI` → **OnVisible** |
+| 7 | `src/yaml/05-MyActions.pa.yaml` | right-click `scrMyActions` → **Paste** |
+| 8 | `src/screens/scrPortfolioBoard.OnVisible.powerfx` | `scrPortfolioBoard` → **OnVisible** |
+| 9 | `src/screens/scrPortfolioList.OnVisible.powerfx` | `scrPortfolioList` → **OnVisible** |
+| 10 | `src/screens/scrPursuitWorkspace.OnVisible.powerfx` | `scrPursuitWorkspace` → **OnVisible** |
+| 11 | `src/screens/scrPursuitDocsAI.OnVisible.powerfx` | `scrPursuitDocsAI` → **OnVisible** |
+| 12 | `src/screens/scrMyActions.OnVisible.powerfx` | `scrMyActions` → **OnVisible** |
 
-Files 7 and 8 are the same `LoadPortfolio` block that's inside `App.OnStart`, differing
+Files 8 and 9 are the same `LoadPortfolio` block that's inside `App.OnStart`, differing
 only in their last line. That duplication is deliberate: canvas apps have no user-defined
 behaviour functions, so a block that has to run both at startup and on every visit has to
 exist in both places.
@@ -73,22 +75,23 @@ empty, and saving a pursuit writes a blank stage that SharePoint rejects.
 
 ## E. Create the screens
 
-17. **+ New screen** → **Blank**, four times.
+17. **+ New screen** → **Blank**, five times.
 18. Rename each (double-click in the tree) to exactly:
     - `scrPortfolioBoard`
     - `scrPortfolioList`
     - `scrPursuitWorkspace`
     - `scrPursuitDocsAI`
+    - `scrMyActions`
 19. Delete `Screen1` if one exists.
 20. Click **App** → property **StartScreen** → `=scrPortfolioBoard`.
 
-**All four have to exist before any paste.** Every screen's nav bar navigates to the other
-three by name, and `Navigate()` to a screen that doesn't exist is an error Studio can't
+**All five have to exist before any paste.** Every screen's nav bar navigates to the other
+four by name, and `Navigate()` to a screen that doesn't exist is an error Studio can't
 resolve on its own.
 
 ## F. Paste the screens
 
-For each of the four, in order:
+For each of the five, in order:
 
 21. Click the screen in the tree → property **Fill** → `=ClrPage`.
 22. Open the YAML file, select all, copy.
@@ -97,10 +100,14 @@ For each of the four, in order:
 
 | Screen | File | Controls |
 |---|---|---|
-| `scrPortfolioBoard` | `src/yaml/01-PortfolioBoard.pa.yaml` | 36 |
-| `scrPortfolioList` | `src/yaml/02-PortfolioList.pa.yaml` | 42 |
-| `scrPursuitWorkspace` | `src/yaml/03-PursuitWorkspace.pa.yaml` | 119 |
-| `scrPursuitDocsAI` | `src/yaml/04-PursuitDocsAI.pa.yaml` | 45 |
+| `scrPortfolioBoard` | `src/yaml/01-PortfolioBoard.pa.yaml` | 44 |
+| `scrPortfolioList` | `src/yaml/02-PortfolioList.pa.yaml` | 48 |
+| `scrPursuitWorkspace` | `src/yaml/03-PursuitWorkspace.pa.yaml` | 137 |
+| `scrPursuitDocsAI` | `src/yaml/04-PursuitDocsAI.pa.yaml` | 59 |
+| `scrMyActions` | `src/yaml/05-MyActions.pa.yaml` | 33 |
+
+Counts are what `python3 tools/validate-screens.py` prints — every control including
+gallery children.
 
 On a fresh build the screens are empty, so there's nothing to delete first. **On a rebuild
 there is**: pasting over existing controls adds a second copy of everything rather than
@@ -109,7 +116,7 @@ other. Click a blank part of the screen background, **Ctrl+A**, **Delete**, then
 
 ## G. Screen OnVisible
 
-Four files, four screens, no editing.
+Five files, five screens, no editing.
 
 24. `scrPortfolioBoard` → **OnVisible** → all of
     `src/screens/scrPortfolioBoard.OnVisible.powerfx`
@@ -119,6 +126,8 @@ Four files, four screens, no editing.
     `src/screens/scrPursuitWorkspace.OnVisible.powerfx`
 27. `scrPursuitDocsAI` → **OnVisible** → all of
     `src/screens/scrPursuitDocsAI.OnVisible.powerfx`
+28. `scrMyActions` → **OnVisible** → all of
+    `src/screens/scrMyActions.OnVisible.powerfx`
 
 Skipping 24 is why a published board comes up blank while Studio looks fine: Studio keeps
 collections alive from your last **Run OnStart**, so preview shows data the published app
@@ -126,24 +135,24 @@ never loads.
 
 ## H. Run it
 
-28. **File → Save**.
-29. **F5**. On a responsive app, run maximised at 1366×768 or larger.
-30. Check against `docs/08-deploy-and-test.md` §2.
+29. **File → Save**.
+30. **F5**. On a responsive app, run maximised at 1366×768 or larger.
+31. Check against `docs/08-deploy-and-test.md` §2.
 
 **Preview writes to your real SharePoint lists.** Before testing the move handle or Add
 pursuit, add a throwaway `PUR-999` row and test on that.
 
 ## I. Excel download (optional, later)
 
-31. Build the flow: `docs/06-flows.md`.
-32. **Data → Add data** → search `PursuitTracker-ExportPortfolio`.
-33. Select `btnDownloadExcel` → **OnSelect** → replace the placeholder with the formula in
+32. Build the flow: `docs/06-flows.md`.
+33. **Data → Add data** → search `PursuitTracker-ExportPortfolio`.
+34. Select `btnDownloadExcel` → **OnSelect** → replace the placeholder with the formula in
     `docs/04-screen-portfolio-list.md` (under "The download").
 
 ## J. Publish
 
-34. **File → Save**, then **Publish** → **Publish this version**.
-35. App detail page in make.powerapps.com → copy the **Web link**.
+35. **File → Save**, then **Publish** → **Publish this version**.
+36. App detail page in make.powerapps.com → copy the **Web link**.
 
 Saving is not publishing. The played app keeps serving the last published version, and the
 player caches hard — close the tab and reopen rather than refreshing.
@@ -168,6 +177,8 @@ player caches hard — close the tab and reopen rather than refreshing.
 | Save does nothing on a pursuit | Empty dropdowns write a blank stage and SharePoint rejects it — fix the dropdowns first |
 | Save raises "Save failed: …" | Real SharePoint error. Most likely the lookup values don't match the column's choices — see `docs/05-screen-pursuit-workspace.md` |
 | Workspace or Docs & AI tab greyed out | Correct — both need a pursuit selected. Click a card |
+| My Actions is empty and says so | The owner email on the actions doesn't match your sign-in. The screen prints the address it matched — fix `Action Owner Entra ID` in the list |
+| My Actions is blank with no message | Step 28 was skipped, or the screen was pasted before `scrMyActions` existed |
 | Workspace opens blank after clicking a card | Step 26. Check `gblPursuitKey` in View → Variables: if it holds `PUR-nnn`, navigation worked and OnVisible is the problem |
 | Docs & AI screen empty | Step 27 |
 | Blue squiggle under `Status.Value <> "Completed"` | Delegation warning — correct, ignore it |
