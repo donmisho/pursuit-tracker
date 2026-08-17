@@ -109,26 +109,10 @@ For each of the five, in order:
 Counts are what `python3 tools/validate-screens.py` prints — every control including
 gallery children.
 
-### If the paste is rejected with `PA1001 … Source Code schema`
-
-Newer Studio builds want the document wrapped rather than a bare control list. `src/yaml/wrapped/`
-holds the same five screens in that shape:
-
-```
-Screens:
-  scrMyActions:
-    Properties:
-      Fill: =ClrPage
-      OnVisible: |-
-        =…
-    Children:
-      - navBg: …
-```
-
-Paste the wrapped file instead — it also carries `Fill` and `OnVisible`, so section G is
-already done for that screen. The wrapped copies are generated:
-`python3 tools/wrap-screen.py src/yaml/05-MyActions.pa.yaml scrMyActions src/screens/scrMyActions.OnVisible.powerfx`.
-Nothing checks that the two forms agree, so regenerate after editing a flat file.
+**A screen file is a bare control list — it must not start with `Screens:`.** A document
+that opens with `Screens:` / `<name>:` / `Children:` declares a screen, so Studio creates a
+second one (`scrPortfolioBoard_1`) instead of pasting into the one you selected. The files in
+`src/yaml/` start with `- navBg:`; that is the form that pastes controls into a screen.
 
 **Check what's actually on the clipboard before re-reporting a rejection.** The line and
 column in a `PA1001` refer to the pasted text: if the error repeats unchanged after a fix,
