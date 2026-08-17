@@ -1,0 +1,793 @@
+Screens:
+  scrPortfolioBoard:
+    Properties:
+      Fill: =ClrPage
+      OnVisible: |-
+        =ClearCollect(colActions, 'pursuit-tracker-actions');
+
+        // Owner display names. The owner column is an email string, not a Person column, so
+        // there's no .DisplayName to read -- resolve each distinct address once here rather
+        // than calling the connector per card. IfError keeps a departed or mistyped address
+        // from blanking the whole collection; you get the raw email in the UI instead.
+        ClearCollect(
+            colPeople,
+            ForAll(
+                Distinct('pursuit-tracker-pursuits', 'WM Pursuit Owner Entra ID') As E,
+                {
+                    Email: E.Value,
+                    Name:  IfError(Office365Users.UserProfileV2(E.Value).displayName, E.Value)
+                }
+            )
+        );
+
+        ClearCollect(
+            colPortfolio,
+            AddColumns(
+                // Every pursuit loads. Active is filtered in the UI instead -- drpFltActive on
+                // the board and the list -- so one row can be hidden without reloading, and the
+                // three rows still holding "0" from when the column was a Number stay visible
+                // rather than vanishing without explanation.
+                'pursuit-tracker-pursuits' As P,
+
+                OwnerName,
+                Coalesce(
+                    LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name,
+                    P.'WM Pursuit Owner Entra ID'
+                ),
+
+                // The next open action, as two scalar columns rather than one record column.
+                // A record-valued column doesn't survive into a collection with its type intact:
+                // ThisItem.NextAction.'Due Date' comes back untyped, so Text() rejects the date
+                // format and Coalesce() rejects the title. Scalars just work.
+                //
+                // Actions with no due date are excluded -- they can't be "next due", and
+                // including them would let an undated action win the sort and blank the date.
+                NextActionTitle,
+                First(
+                    Sort(
+                        Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))),
+                        'Due Date',
+                        SortOrder.Ascending
+                    )
+                ).'Action Title',
+
+                NextActionDue,
+                First(
+                    Sort(
+                        Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))),
+                        'Due Date',
+                        SortOrder.Ascending
+                    )
+                ).'Due Date',
+
+                // Flattened choice values. Galleries bind to the raw multi-choice tables, but the
+                // Excel export needs text, and computing it in two places invites drift.
+                SIsText,  Concat(P.'Aligned SIs', Value, ", "),
+                HypeText, Concat(P.Hyperscalers, Value, ", "),
+
+                // Active as plain text, so the filter dropdown compares text to text rather than
+                // reaching through a choice record inside a Filter predicate.
+                ActiveText, P.Active.Value
+            )
+        );
+
+        // Board columns. A literal table, in board order, matching the Workflow Stage choice set
+        // in the list exactly -- casing, spacing and all. Add or reorder a stage here and in the
+        // SharePoint column, in all three copies of this block.
+        //
+        // This used to read the column with Choices(), which is the better design and is why the
+        // commented version is kept below: board order would be a list setting rather than an app
+        // edit. It's a literal because the record Choices() returns doesn't type as text on this
+        // column, so Text(C.Value) raised "Expected text or number" and the whole collection
+        // resolved to Error -- which is a blank board with no columns and no message. A stage list
+        // that has changed twice in a month isn't worth a screen that can't render.
+        //
+        //  ClearCollect(colStages, ForAll(Choices('pursuit-tracker-pursuits'.'Workflow Stage') As C, { Stage: C.Value }));
+        ClearCollect(
+            colStages,
+            Table(
+                { Stage: "Intake" },
+                { Stage: "WM Account Team Assimilation" },
+                { Stage: "Partner Introduction" },
+                { Stage: "Preliminary Scoping" },
+                { Stage: "Proposal/Quote" },
+                { Stage: "Review/Decision" }
+            )
+        );
+
+        // No fill-in append. Workflow Stage is FillInChoice="FALSE" in the list, so a pursuit
+        // cannot carry a stage that isn't in the choice set and there is nothing to append. The
+        // block that used to be here walked Distinct(colPortfolio, 'Workflow Stage'.Value) and was
+        // the source of the "Incompatible types for comparison" / "Text has some invalid arguments"
+        // pair that appeared identically in all three copies of this block.
+
+        // Filter options. "All" has to be prepended as its own row -- Power Fx has no way to
+        // concatenate two tables in a single expression, so it's a ClearCollect followed by a
+        // Collect rather than one formula.
+        //
+        // SI and Hyperscaler read the lookup list, so a value only appears here if it's in
+        // pursuit-tracker-lookups. If a value is in the SharePoint column but not the lookup
+        // list, it can't be filtered on.
+        ClearCollect(colFltSI, { Value: "All" });
+        Collect(colFltSI, ForAll(Filter(colLookups, LookupType = "Systems Integrator") As L, { Value: L.Value }));
+
+        ClearCollect(colFltHype, { Value: "All" });
+        Collect(colFltHype, ForAll(Filter(colLookups, LookupType = "Hyperscaler") As L, { Value: L.Value }));
+
+        // Active is the pursuits column's own choice set, which is fixed at three values.
+        ClearCollect(colFltActive, Table({ Value: "All" }, { Value: "Yes" }, { Value: "No" }, { Value: "Suspended" }));
+
+        // Clear any half-finished stage move. A card left picked up would still be armed on the
+        // next visit. The ID < 0 lookup rather than Blank() because it returns an empty record of
+        // the right shape, which is the type information the compiler needs.
+        Set(gblMoving, LookUp('pursuit-tracker-pursuits', ID < 0))
+    Children:
+      - navBg:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =ClrNav
+            Height: =64
+            Width: =Parent.Width
+      - navRule:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =ClrBorder
+            Height: =1
+            Width: =Parent.Width
+            Y: =63
+      - navBrand:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrText
+            Font: =FontUI
+            FontWeight: =FontWeight.Semibold
+            Height: =64
+            Size: =14
+            Text: ="Pursuit Tracker"
+            Width: =180
+            X: =GapPage
+      - btnNavBoard:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =0
+            Color: =ClrAccentText
+            Fill: =ClrAccent
+            Font: =FontUI
+            Height: =36
+            HoverColor: =ClrAccentText
+            HoverFill: =ClrAccentHover
+            PressedColor: =ClrAccentText
+            PressedFill: =ClrAccentHover
+            RadiusBottomLeft: =6
+            RadiusBottomRight: =6
+            RadiusTopLeft: =6
+            RadiusTopRight: =6
+            Size: =12
+            Text: ="Portfolio Board"
+            Width: =170
+            X: =210
+            Y: =14
+      - btnNavList:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =0
+            Color: =ClrTextMuted
+            Fill: =ClrNav
+            Font: =FontUI
+            Height: =36
+            HoverColor: =ClrText
+            HoverFill: =ClrCardHover
+            OnSelect: =Navigate(scrPortfolioList, ScreenTransition.None)
+            PressedColor: =ClrText
+            PressedFill: =ClrCardHover
+            RadiusBottomLeft: =6
+            RadiusBottomRight: =6
+            RadiusTopLeft: =6
+            RadiusTopRight: =6
+            Size: =12
+            Text: ="Portfolio List"
+            X: =390
+            Y: =14
+      - btnNavWorkspace:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =0
+            Color: =ClrTextMuted
+            DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =ClrNav
+            Font: =FontUI
+            Height: =36
+            HoverColor: =ClrText
+            HoverFill: =ClrCardHover
+            OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+            PressedColor: =ClrText
+            PressedFill: =ClrCardHover
+            RadiusBottomLeft: =6
+            RadiusBottomRight: =6
+            RadiusTopLeft: =6
+            RadiusTopRight: =6
+            Size: =12
+            Text: ="Pursuit Workspace"
+            Width: =190
+            X: =560
+            Y: =14
+      - btnNavDocsAI:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =0
+            Color: =ClrTextMuted
+            DisplayMode: =If(IsBlank(gblPursuitKey), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =ClrNav
+            Font: =FontUI
+            Height: =36
+            HoverColor: =ClrText
+            HoverFill: =ClrCardHover
+            OnSelect: =Set(gblNewPursuit, false); Navigate(scrPursuitDocsAI, ScreenTransition.None)
+            PressedColor: =ClrText
+            PressedFill: =ClrCardHover
+            RadiusBottomLeft: =6
+            RadiusBottomRight: =6
+            RadiusTopLeft: =6
+            RadiusTopRight: =6
+            Size: =12
+            Text: ="Documents & AI"
+            Width: =200
+            X: =760
+            Y: =14
+      - btnNavActions:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =0
+            Color: =ClrTextMuted
+            Fill: =ClrNav
+            Font: =FontUI
+            Height: =36
+            HoverColor: =ClrText
+            HoverFill: =ClrCardHover
+            OnSelect: =Navigate(scrMyActions, ScreenTransition.None)
+            PressedColor: =ClrText
+            PressedFill: =ClrCardHover
+            RadiusBottomLeft: =6
+            RadiusBottomRight: =6
+            RadiusTopLeft: =6
+            RadiusTopRight: =6
+            Size: =12
+            Text: ="My Actions"
+            Width: =150
+            X: =970
+            Y: =14
+      - lblPageTitle:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrText
+            Font: =FontUI
+            FontWeight: =FontWeight.Semibold
+            Height: =36
+            Size: =SizePageTitle
+            Text: ="SI Pursuit Management"
+            Width: =700
+            X: =GapPage
+            Y: =88
+      - lblPageSub:
+          Control: Label@2.5.1
+          Properties:
+            Color: =If(IsBlank(gblMoving), ClrTextMuted, ClrAccent)
+            Font: =FontUI
+            Height: =24
+            Size: =SizeBody
+            Text: |
+              =If(
+                  IsBlank(gblMoving),
+                  "Select the move handle on a pursuit, then choose its new stage.",
+                  "Moving " & gblMoving.'Pursuit Name' & " — choose a stage, or press the handle again to cancel."
+              )
+            Width: =900
+            X: =GapPage
+            Y: =126
+      - btnNewPursuit:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =0
+            Color: =ClrAccentText
+            Fill: =ClrAccent
+            Font: =FontUI
+            HoverColor: =ClrAccentText
+            HoverFill: =ClrAccentHover
+            OnSelect: =Set(gblPursuitKey, Blank()); Set(gblNewPursuit, true); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+            PressedColor: =ClrAccentText
+            PressedFill: =ClrAccentHover
+            RadiusBottomLeft: =6
+            RadiusBottomRight: =6
+            RadiusTopLeft: =6
+            RadiusTopRight: =6
+            Size: =20
+            Text: ="+"
+            Width: =38
+            X: =Parent.Width - Self.Width - GapPage
+            Y: =96
+            Height: =38
+            Tooltip: ="Add Pursuit"
+      - lblFltSI:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrTextMuted
+            Font: =FontUI
+            Height: =32
+            Size: =SizeMeta
+            Text: ="SI"
+            Width: =24
+            Wrap: =false
+            X: =24
+            Y: =164
+      - drpFltSI:
+          Control: Classic/DropDown@2.2.0
+          Properties:
+            BorderColor: =ClrBorder
+            Color: =ClrText
+            Default: ="All"
+            Fill: =ClrColumn
+            Font: =FontUI
+            Height: =32
+            Items: =colFltSI
+            Size: =SizeBody
+            Width: =180
+            X: =52
+            Y: =164
+      - lblFltHype:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrTextMuted
+            Font: =FontUI
+            Height: =32
+            Size: =SizeMeta
+            Text: ="HS"
+            Width: =26
+            Wrap: =false
+            X: =248
+            Y: =164
+      - drpFltHype:
+          Control: Classic/DropDown@2.2.0
+          Properties:
+            BorderColor: =ClrBorder
+            Color: =ClrText
+            Default: ="All"
+            Fill: =ClrColumn
+            Font: =FontUI
+            Height: =32
+            Items: =colFltHype
+            Size: =SizeBody
+            Width: =180
+            X: =278
+            Y: =164
+      - lblFltActive:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrTextMuted
+            Font: =FontUI
+            Height: =32
+            Size: =SizeMeta
+            Text: ="ACTIVE"
+            Width: =52
+            Wrap: =false
+            X: =474
+            Y: =164
+      - drpFltActive:
+          Control: Classic/DropDown@2.2.0
+          Properties:
+            BorderColor: =ClrBorder
+            Color: =ClrText
+            Default: ="All"
+            Fill: =ClrColumn
+            Font: =FontUI
+            Height: =32
+            Items: =colFltActive
+            Size: =SizeBody
+            Width: =140
+            X: =530
+            Y: =164
+      - btnFltClear:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =ClrBorder
+            BorderThickness: =1
+            Color: =ClrTextMuted
+            Fill: =ClrPage
+            Font: =FontUI
+            Height: =32
+            HoverColor: =ClrText
+            HoverFill: =ClrCardHover
+            OnSelect: =Reset(drpFltSI); Reset(drpFltHype); Reset(drpFltActive)
+            PressedColor: =ClrText
+            PressedFill: =ClrCardHover
+            RadiusBottomLeft: =6
+            RadiusBottomRight: =6
+            RadiusTopLeft: =6
+            RadiusTopRight: =6
+            Size: =11
+            Text: ="Clear Filters"
+            Width: =110
+            X: =686
+            Y: =164
+      - galStages:
+          Control: Gallery@2.15.0
+          Variant: Horizontal
+          Properties:
+            Height: =Parent.Height - 214 - GapPage
+            Items: =colStages
+            TemplatePadding: =0
+            TemplateSize: =(Parent.Width - (GapPage * 2)) / BoardColumns
+            Width: =Parent.Width - (GapPage * 2)
+            X: =GapPage
+            Y: =214
+          Children:
+            - colBg:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =ClrBorder
+                  BorderThickness: =1
+                  Fill: =ClrColumn
+                  Height: =Parent.Height - 8
+                  Width: =Parent.TemplateWidth - 12
+            - recStageAccent:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =StageAccent(ThisItem.Stage)
+                  Height: =3
+                  Width: =colBg.Width
+            - lblStageName:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =ClrText
+                  Font: =FontUI
+                  FontWeight: =FontWeight.Semibold
+                  Height: =32
+                  Size: =SizeBody
+                  Text: =ThisItem.Stage
+                  Width: =colBg.Width - 72
+                  X: =16
+                  Y: =14
+            - lblStageCount:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  Color: =ClrTextMuted
+                  Font: =FontUI
+                  Height: =32
+                  Size: =SizeBody
+                  Text: |
+                    =CountRows(
+                        Filter(
+                            colPortfolio,
+                            'Workflow Stage'.Value = ThisItem.Stage,
+                            drpFltSI.Selected.Value = "All" || drpFltSI.Selected.Value in SIsText,
+                            drpFltHype.Selected.Value = "All" || drpFltHype.Selected.Value in HypeText,
+                            drpFltActive.Selected.Value = "All" || drpFltActive.Selected.Value = ActiveText
+                        )
+                    )
+                  Width: =36
+                  X: =colBg.Width - 52
+                  Y: =14
+            - recDropTarget:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =ClrAccent
+                  BorderStyle: =BorderStyle.Dashed
+                  BorderThickness: =1
+                  Fill: =ColorFade(ClrAccent, 0.75)
+                  Height: =44
+                  OnSelect: |
+                    =Patch(
+                        'pursuit-tracker-pursuits',
+                        LookUp('pursuit-tracker-pursuits', Title = gblMoving.Title),
+                        { 'Workflow Stage': { Value: ThisItem.Stage } }
+                    );
+                    Set(gblMoving, Blank());
+                    ClearCollect(
+                        colPortfolio,
+                        AddColumns(
+                            'pursuit-tracker-pursuits' As P,
+                            OwnerName,
+                            Coalesce(LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name, P.'WM Pursuit Owner Entra ID'),
+                            NextActionTitle,
+                            First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Action Title',
+                            NextActionDue,
+                            First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Due Date',
+                            SIsText,  Concat(P.'Aligned SIs', Value, ", "),
+                            HypeText, Concat(P.Hyperscalers, Value, ", "),
+                            ActiveText, P.Active.Value
+                        )
+                    );
+                    Notify("Moved to " & ThisItem.Stage, NotificationType.Success, 2000)
+                  Visible: =Not(IsBlank(gblMoving)) && gblMoving.'Workflow Stage'.Value <> ThisItem.Stage
+                  Width: =colBg.Width - 28
+                  X: =14
+                  Y: =52
+            - lblDropHint:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =ClrAccent
+                  Font: =FontUI
+                  Height: =44
+                  OnSelect: |
+                    =Patch(
+                        'pursuit-tracker-pursuits',
+                        LookUp('pursuit-tracker-pursuits', Title = gblMoving.Title),
+                        { 'Workflow Stage': { Value: ThisItem.Stage } }
+                    );
+                    Set(gblMoving, Blank());
+                    ClearCollect(
+                        colPortfolio,
+                        AddColumns(
+                            'pursuit-tracker-pursuits' As P,
+                            OwnerName,
+                            Coalesce(LookUp(colPeople, Email = P.'WM Pursuit Owner Entra ID').Name, P.'WM Pursuit Owner Entra ID'),
+                            NextActionTitle,
+                            First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Action Title',
+                            NextActionDue,
+                            First(Sort(Filter(colActions, 'Pursuit ID' = P.Title, Status.Value <> "Completed", Not(IsBlank('Due Date'))), 'Due Date', SortOrder.Ascending)).'Due Date',
+                            SIsText,  Concat(P.'Aligned SIs', Value, ", "),
+                            HypeText, Concat(P.Hyperscalers, Value, ", "),
+                            ActiveText, P.Active.Value
+                        )
+                    );
+                    Notify("Moved to " & ThisItem.Stage, NotificationType.Success, 2000)
+                  Size: =SizeBody
+                  Text: ="Move Here"
+                  Visible: =recDropTarget.Visible
+                  Width: =colBg.Width - 28
+                  X: =14
+                  Y: =52
+            - galCards:
+                Control: Gallery@2.15.0
+                Variant: Vertical
+                Properties:
+                  Height: =colBg.Height - Self.Y - 14
+                  Items: |
+                    =Sort(
+                        Filter(
+                            colPortfolio,
+                            'Workflow Stage'.Value = ThisItem.Stage,
+                            drpFltSI.Selected.Value = "All" || drpFltSI.Selected.Value in SIsText,
+                            drpFltHype.Selected.Value = "All" || drpFltHype.Selected.Value in HypeText,
+                            drpFltActive.Selected.Value = "All" || drpFltActive.Selected.Value = ActiveText
+                        ),
+                        If(IsBlank('Target Decision Date'), Date(2099, 12, 31), 'Target Decision Date'),
+                        SortOrder.Ascending
+                    )
+                  TemplatePadding: =6
+                  TemplateSize: =240
+                  Width: =colBg.Width - 28
+                  X: =14
+                  Y: =If(recDropTarget.Visible, 104, 56)
+                Children:
+                  - recCard:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrBorder)
+                        BorderThickness: =If(gblMoving.Title = ThisItem.Title, 2, 1)
+                        Fill: =ClrCard
+                        Height: =228
+                        HoverFill: =ClrCardHover
+                        OnSelect: =Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+                        PressedFill: =ClrCardHover
+                        RadiusBottomLeft: =RadiusCard
+                        RadiusBottomRight: =RadiusCard
+                        RadiusTopLeft: =RadiusCard
+                        RadiusTopRight: =RadiusCard
+                        Text: =""
+                        Width: =Parent.Width - 20
+                  - recHealth:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =If(ThisItem.Health.Value = "At Risk", ClrRiskFill, Color.Transparent)
+                        Height: =228
+                        Width: =3
+                  - lblCardAccount:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =ClrText
+                        Font: =FontUI
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        Size: =SizeCardTitle
+                        Text: =Clip(ThisItem.'Account Name', 26)
+                        Width: =recCard.Width - 54
+                        Wrap: =false
+                        X: =14
+                        Y: =8
+                  - lblCardTitle:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =ClrText
+                        Font: =FontUI
+                        Height: =54
+                        Size: =SizeBody
+                        Text: |
+                          =Clip(
+                              With(
+                                  { n: ThisItem.'Pursuit Name' },
+                                  Trim(
+                                      If(
+                                          !IsBlank(Find(": ", n)),  Mid(n, Find(": ", n) + 2),
+                                          !IsBlank(Find(" - ", n)), Mid(n, Find(" - ", n) + 3),
+                                          n
+                                      )
+                                  )
+                              ),
+                              88
+                          )
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =recCard.Width - 28
+                        X: =14
+                        Y: =32
+                  - lblSICap:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =ClrTextMuted
+                        Font: =FontUI
+                        Height: =24
+                        Size: =SizeMeta
+                        Text: ="SI:"
+                        Width: =32
+                        Wrap: =false
+                        X: =14
+                        Y: =90
+                  - galCardSIs:
+                      Control: Gallery@2.15.0
+                      Variant: Horizontal
+                      Properties:
+                        Height: =24
+                        Items: =ThisItem.'Aligned SIs'
+                        ShowScrollbar: =false
+                        TemplatePadding: =0
+                        TemplateSize: =84
+                        Width: =recCard.Width - 62
+                        X: =48
+                        Y: =90
+                      Children:
+                        - recSIChipB:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              Fill: =ClrChip
+                              Height: =22
+                              HoverFill: =ClrChip
+                              PressedFill: =ClrChip
+                              RadiusBottomLeft: =RadiusChip
+                              RadiusBottomRight: =RadiusChip
+                              RadiusTopLeft: =RadiusChip
+                              RadiusTopRight: =RadiusChip
+                              Text: =""
+                              Width: =80
+                              Y: =1
+                        - lblSIChipB:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              Color: =ClrChipText
+                              Font: =FontUI
+                              Height: =22
+                              Size: =SizeChip
+                              Text: =ThisItem.Value
+                              Width: =80
+                              Wrap: =false
+                              Y: =1
+                  - lblHSCap:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =ClrTextMuted
+                        Font: =FontUI
+                        Height: =24
+                        Size: =SizeMeta
+                        Text: ="HS:"
+                        Width: =32
+                        Wrap: =false
+                        X: =14
+                        Y: =118
+                  - galCardHype:
+                      Control: Gallery@2.15.0
+                      Variant: Horizontal
+                      Properties:
+                        Height: =24
+                        Items: =ThisItem.Hyperscalers
+                        ShowScrollbar: =false
+                        TemplatePadding: =0
+                        TemplateSize: =84
+                        Width: =recCard.Width - 62
+                        X: =48
+                        Y: =118
+                      Children:
+                        - recHSChipB:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              Fill: =ClrChip
+                              Height: =22
+                              HoverFill: =ClrChip
+                              PressedFill: =ClrChip
+                              RadiusBottomLeft: =RadiusChip
+                              RadiusBottomRight: =RadiusChip
+                              RadiusTopLeft: =RadiusChip
+                              RadiusTopRight: =RadiusChip
+                              Text: =""
+                              Width: =80
+                              Y: =1
+                        - lblHSChipB:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              Color: =ClrChipText
+                              Font: =FontUI
+                              Height: =22
+                              Size: =SizeChip
+                              Text: =ThisItem.Value
+                              Width: =80
+                              Wrap: =false
+                              Y: =1
+                  - recCardDivider:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =ClrDivider
+                        Height: =1
+                        Width: =recCard.Width - 28
+                        X: =14
+                        Y: =150
+                  - lblNextCap:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =ClrTextMuted
+                        Font: =FontUI
+                        Height: =16
+                        Size: =SizeMeta
+                        Text: ="NEXT ACTION"
+                        Width: =recCard.Width - 28
+                        Wrap: =false
+                        X: =14
+                        Y: =156
+                  - lblNextTask:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =If(IsBlank(ThisItem.NextActionTitle), ClrTextFaint, ClrText)
+                        Font: =FontUI
+                        Height: =32
+                        Size: =SizeBody
+                        Text: =If(IsBlank(ThisItem.NextActionTitle), "No Open Actions", Clip(ThisItem.NextActionTitle, 52))
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =recCard.Width - 28
+                        X: =14
+                        Y: =172
+                  - lblNextTaskDue:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =ClrDate
+                        Font: =FontUI
+                        Height: =18
+                        Size: =SizeBody
+                        Text: =If(IsBlank(ThisItem.NextActionDue), "", Text(ThisItem.NextActionDue, "mmmm d"))
+                        Width: =recCard.Width - 28
+                        X: =14
+                        Y: =204
+                  - btnCardClick:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =Color.Transparent
+                        Height: =228
+                        HoverFill: =RGBA(255, 255, 255, 0.03)
+                        OnSelect: =Set(gblPursuitKey, ThisItem.Title); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)
+                        PressedFill: =RGBA(255, 255, 255, 0.06)
+                        Text: =""
+                        Width: =recCard.Width
+                  - lblMoveHandle:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        Color: =If(gblMoving.Title = ThisItem.Title, ClrAccent, ClrTextFaint)
+                        Font: =FontUI
+                        Height: =28
+                        OnSelect: =Set(gblMoving, If(gblMoving.Title = ThisItem.Title, Blank(), ThisItem))
+                        Size: =12
+                        Text: ="⋮⋮"
+                        Tooltip: ="Move to another stage"
+                        Width: =28
+                        X: =recCard.Width - 36
+                        Y: =8
