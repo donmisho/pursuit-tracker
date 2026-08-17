@@ -14,14 +14,14 @@ scrMyActions
 ├── drpMASort                      ◄── Due Date | Opportunity
 ├── btnFltClear
 ├── lblActionCount + btnRefreshActions
-├── recHeaderRule + four column-header labels
-├── galMyActions                   ◄── one row per open action
+├── recHeaderRule + five column-header labels
+├── galMyActions                   ◄── one row per action
 │   ├── recRowDivider
-│   ├── lblRowAction / lblRowMeta          stage · effort
-│   ├── lblRowOpp / lblRowAccount          PUR-014 - Dynamics F&O / account
-│   ├── lblRowStatus
-│   ├── recRowPill + lblRowPill            At Risk
+│   ├── lblRowAccount                      Elevance Health
+│   ├── lblRowOpp / lblRowSub              PUR-014 - Dynamics F&O / action · health
 │   ├── lblRowDue                          due date, or the dependency wording
+│   ├── lblRowStatus
+│   ├── lblRowEffort
 │   └── btnRowClick                ◄── transparent, on top: opens the pursuit workspace
 ├── lblEmptyTitle / lblEmptyHint   ◄── only when colMyActions is empty
 └── lblFooterNote
@@ -38,9 +38,9 @@ Create a blank screen named exactly `scrMyActions` before pasting anything, incl
 other four screens — their nav buttons `Navigate(scrMyActions, …)`, and `Navigate()` to a
 screen that doesn't exist is an error Studio can't resolve on its own.
 
-Laid out for Tablet (1366 × 768), "Scale to fit" off. Columns, `X` relative to the gallery
-and +24 for the header labels above it: Action 0/420 · Opportunity 436/380 · Status 832/200,
-with the At Risk pill and the due date anchored to the right edge.
+Laid out for Tablet (1366 × 768), "Scale to fit" off. Five columns, `X` relative to the
+gallery and +24 for the header labels above it: Account 0/240 · Opportunity 256/520 ·
+Due 792/130 · Status 938/160 · Effort 1114/110.
 
 The filter row at `Y = 168`: View 68/130 · Account 278/190 · Pursuit 544/250 · Sort 872/150 ·
 Clear Filters 1034/110 · count 1156/140 · refresh anchored right.
@@ -156,29 +156,37 @@ of this — sort by date, then re-sort by opportunity — would be relying on an
 
 ## Row template
 
-`TemplateSize` is 64. Two lines on the left, two in the middle, one each on the right.
+`TemplateSize` is 64. The opportunity column carries two lines; every other column is one,
+top-aligned to the first.
 
 | Control | Property | Formula |
 |---|---|---|
-| `lblRowAction` | `Text` | `=Clip(ThisItem.ActionTitle, 62)` |
-| | `Color` | `=If(ThisItem.IsClosed, ClrTextFaint, ClrText)` |
-| | `X` / `Width` | `=0` / `=420` |
-| `lblRowMeta` | `Text` | stage, then `· effort` when there is one |
-| `lblRowOpp` | `Text` | `=Clip(ThisItem.Opportunity, 52)` |
-| | `X` / `Width` | `=436` / `=380` |
-| `lblRowAccount` | `Text` | `=Clip(ThisItem.Account, 52)` |
-| `lblRowStatus` | `X` / `Width` | `=832` / `=200` |
-| `recRowPill` / `lblRowPill` | `Visible` | `=ThisItem.HealthText = "At Risk" && !ThisItem.IsClosed` |
-| `lblRowDue` | `Text` | `=Clip(DueLabel(ThisItem.Due, ThisItem.DueWording), 24)` |
+| `lblRowAccount` | `Text` | `=Clip(ThisItem.Account, 32)` |
+| | `X` / `Width` | `=0` / `=240` |
+| | `Color` / `FontWeight` | `=If(ThisItem.IsClosed, ClrTextFaint, ClrText)` / Semibold |
+| `lblRowOpp` | `Text` | `=Clip(ThisItem.Opportunity, 68)` |
+| | `X` / `Width` | `=256` / `=520` |
+| `lblRowSub` | `Text` | `=Clip(Trim(ThisItem.ActionTitle & If(IsBlank(ThisItem.HealthText), "", " · " & ThisItem.HealthText)), 84)` |
+| | `Color` | `=If(ThisItem.HealthText = "At Risk" && !ThisItem.IsClosed, ClrRiskText, ClrTextFaint)` |
+| | `Size` / `Y` | `=SizeMeta` / `=34` |
+| `lblRowDue` | `Text` | `=Clip(DueLabel(ThisItem.Due, ThisItem.DueWording), 22)` |
 | | `Color` | `=If(ThisItem.IsClosed, ClrTextFaint, !IsBlank(ThisItem.Due) && ThisItem.Due < Today(), ClrRiskText, ClrDate)` |
+| | `X` / `Width` | `=792` / `=130` |
+| `lblRowStatus` | `X` / `Width` | `=938` / `=160` |
+| `lblRowEffort` | `X` / `Width` | `=1114` / `=110` |
 | `btnRowClick` | `OnSelect` | `=Set(gblPursuitKey, ThisItem.PursuitKey); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
 
 Every label is `Clip()`ped. Labels don't clip themselves — a Label whose text needs more room
 than its `Height` allows keeps rendering and spills out of both ends onto its neighbours, and
 a 64px row has no slack for that.
 
+**Health rides in the subtitle rather than in a pill.** `lblRowSub` reads
+"Draft executive proposal · At Risk", and the whole line turns `ClrRiskText` when health is
+At Risk — one label instead of a pill plus its caption, and no guessing where variable-width
+text ends. Closed rows drop the colour: a completed action can't be at risk.
+
 **At risk is `Health`, not `Status`** — an in-progress action can be at risk, and so can a
-not-started one. Same pill as the workspace.
+not-started one.
 
 **The row opens the pursuit workspace, not the action.** The workspace's edit panel is opened
 by `btnActionRow`, whose `OnSelect` `Reset()`s nine controls on that screen; `Reset()` can't

@@ -393,15 +393,15 @@
       Width: =32
       X: =Parent.Width - Self.Width - GapPage
       Y: =168
-- lblHdrAction:
+- lblHdrAccount:
     Control: Label@2.5.1
     Properties:
       Color: =ClrTextMuted
       Font: =FontUI
       Height: =20
       Size: =SizeMeta
-      Text: ="ACTION"
-      Width: =420
+      Text: ="ACCOUNT"
+      Width: =240
       X: =GapPage
       Y: =218
 - lblHdrOpp:
@@ -412,8 +412,19 @@
       Height: =20
       Size: =SizeMeta
       Text: ="OPPORTUNITY"
-      Width: =380
-      X: =460
+      Width: =520
+      X: =280
+      Y: =218
+- lblHdrDue:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =20
+      Size: =SizeMeta
+      Text: ="DUE"
+      Width: =130
+      X: =816
       Y: =218
 - lblHdrStatus:
     Control: Label@2.5.1
@@ -423,21 +434,19 @@
       Height: =20
       Size: =SizeMeta
       Text: ="STATUS"
-      Width: =200
-      X: =856
+      Width: =160
+      X: =962
       Y: =218
-- lblHdrDue:
+- lblHdrEffort:
     Control: Label@2.5.1
     Properties:
-      Align: =Align.Right
       Color: =ClrTextMuted
       Font: =FontUI
       Height: =20
       Size: =SizeMeta
-      Text: ="DUE"
-      Width: =130
-      Wrap: =false
-      X: =Parent.Width - GapPage - 150
+      Text: ="EFFORT"
+      Width: =110
+      X: =1138
       Y: =218
 - recHeaderRule:
     Control: Rectangle@2.3.0
@@ -483,7 +492,7 @@
             Height: =1
             Width: =Parent.Width - 20
             Y: =Parent.TemplateHeight - 1
-      - lblRowAction:
+      - lblRowAccount:
           Control: Label@2.5.1
           Properties:
             Color: =If(ThisItem.IsClosed, ClrTextFaint, ClrText)
@@ -491,45 +500,47 @@
             FontWeight: =FontWeight.Semibold
             Height: =26
             Size: =SizeBody
-            Text: =Clip(ThisItem.ActionTitle, 62)
+            Text: =Clip(ThisItem.Account, 32)
             VerticalAlign: =VerticalAlign.Top
-            Width: =420
-            Y: =8
-      - lblRowMeta:
-          Control: Label@2.5.1
-          Properties:
-            Color: =ClrTextFaint
-            Font: =FontUI
-            Height: =18
-            Size: =SizeMeta
-            Text: =Clip(Trim(ThisItem.StageText & If(IsBlank(ThisItem.EffortText), "", " · " & ThisItem.EffortText)), 60)
-            Width: =420
-            Wrap: =false
-            Y: =36
+            Width: =240
+            Y: =10
       - lblRowOpp:
           Control: Label@2.5.1
           Properties:
             Color: =If(ThisItem.IsClosed, ClrTextFaint, ClrText)
             Font: =FontUI
-            Height: =26
+            Height: =24
             Size: =SizeBody
-            Text: =Clip(ThisItem.Opportunity, 52)
+            Text: =Clip(ThisItem.Opportunity, 68)
             VerticalAlign: =VerticalAlign.Top
-            Width: =380
-            X: =436
+            Width: =520
+            X: =256
             Y: =8
-      - lblRowAccount:
+      - lblRowSub:
           Control: Label@2.5.1
           Properties:
-            Color: =ClrTextFaint
+            Color: =If(ThisItem.HealthText = "At Risk" && !ThisItem.IsClosed, ClrRiskText, ClrTextFaint)
             Font: =FontUI
-            Height: =18
+            Height: =20
             Size: =SizeMeta
-            Text: =Clip(ThisItem.Account, 52)
-            Width: =380
+            Text: =Clip(Trim(ThisItem.ActionTitle & If(IsBlank(ThisItem.HealthText), "", " · " & ThisItem.HealthText)), 84)
+            Width: =520
             Wrap: =false
-            X: =436
-            Y: =36
+            X: =256
+            Y: =34
+      - lblRowDue:
+          Control: Label@2.5.1
+          Properties:
+            Color: =If(ThisItem.IsClosed, ClrTextFaint, !IsBlank(ThisItem.Due) && ThisItem.Due < Today(), ClrRiskText, ClrDate)
+            Font: =FontUI
+            Height: =26
+            Size: =SizeBody
+            Text: =Clip(DueLabel(ThisItem.Due, ThisItem.DueWording), 22)
+            VerticalAlign: =VerticalAlign.Top
+            Width: =130
+            Wrap: =false
+            X: =792
+            Y: =10
       - lblRowStatus:
           Control: Label@2.5.1
           Properties:
@@ -537,54 +548,25 @@
             Font: =FontUI
             Height: =26
             Size: =SizeBody
-            Text: =Clip(ThisItem.StatusText, 28)
+            Text: =Clip(ThisItem.StatusText, 22)
             VerticalAlign: =VerticalAlign.Top
-            Width: =200
-            X: =832
-            Y: =8
-      - recRowPill:
-          Control: Classic/Button@2.2.0
-          Properties:
-            Fill: =ClrRiskFill
-            Height: =24
-            HoverFill: =ClrRiskFill
-            PressedFill: =ClrRiskFill
-            RadiusBottomLeft: =RadiusChip
-            RadiusBottomRight: =RadiusChip
-            RadiusTopLeft: =RadiusChip
-            RadiusTopRight: =RadiusChip
-            TabIndex: =-1
-            Text: =""
-            Visible: =ThisItem.HealthText = "At Risk" && !ThisItem.IsClosed
-            Width: =84
-            X: =Parent.Width - 250
-            Y: =12
-      - lblRowPill:
-          Control: Label@2.5.1
-          Properties:
-            Align: =Align.Center
-            Color: =ClrRiskText
-            Font: =FontUI
-            Height: =24
-            Size: =SizeChip
-            Text: ="At Risk"
-            Visible: =recRowPill.Visible
-            Width: =84
-            X: =Parent.Width - 250
-            Y: =12
-      - lblRowDue:
-          Control: Label@2.5.1
-          Properties:
-            Align: =Align.Right
-            Color: =If(ThisItem.IsClosed, ClrTextFaint, !IsBlank(ThisItem.Due) && ThisItem.Due < Today(), ClrRiskText, ClrDate)
-            Font: =FontUI
-            Height: =24
-            Size: =SizeBody
-            Text: =Clip(DueLabel(ThisItem.Due, ThisItem.DueWording), 24)
-            Width: =130
+            Width: =160
             Wrap: =false
-            X: =Parent.Width - 150
-            Y: =12
+            X: =938
+            Y: =10
+      - lblRowEffort:
+          Control: Label@2.5.1
+          Properties:
+            Color: =ClrTextMuted
+            Font: =FontUI
+            Height: =26
+            Size: =SizeBody
+            Text: =Clip(ThisItem.EffortText, 14)
+            VerticalAlign: =VerticalAlign.Top
+            Width: =110
+            Wrap: =false
+            X: =1114
+            Y: =10
       - btnRowClick:
           Control: Classic/Button@2.2.0
           Properties:
