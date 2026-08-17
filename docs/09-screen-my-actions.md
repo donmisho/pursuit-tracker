@@ -81,8 +81,8 @@ nobody has triaged is still outstanding. The whole actions list loads either way
 view filters `colMyActions` in memory: SharePoint doesn't delegate `<>` on a choice column,
 so filtering in the query would silently truncate the set.
 
-Closed rows render in `ClrTextFaint` and drop the At Risk pill — a completed action can't
-be at risk.
+Closed rows render in `ClrTextFaint`, and their subtitle drops the risk colour — a completed
+action can't be at risk.
 
 ## Account and pursuit filters
 
