@@ -37,13 +37,10 @@ was unreadable. `StatusHtml()` in `src/App.Formulas.powerfx` now strips `color:`
 headings bold at `SizeBody + 2`. Applied to `htmLatestBody` (workspace) and `htmAiBody`
 (documents).
 
-Still open on my side, in SharePoint rather than in code:
-
-- Lookup values don't match the Choice sets exactly (`Unassigned / Intake` → `Intake`,
-  `Proposal / Quote` → `Proposal/Quote`, `GCP` → `Google/GCP`, and the rest — the list is in
-  `CLAUDE.md`).
-- Three pursuits still hold `0` in `Active`, so the Active filter stays commented out in
-  `App.OnStart.powerfx`.
+Still open on my side, in SharePoint rather than in code — the list is in
+`docs/OPEN-ITEMS.md`: the lookup values don't match the Choice sets exactly, and three
+pursuits still hold `0` in `Active`, so the Active filter stays commented out in
+`App.OnStart.powerfx`.
 
 ## What I want to do next
 

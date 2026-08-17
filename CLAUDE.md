@@ -30,7 +30,10 @@ not a delivered change.
 
 ---
 
-## 2. Hard constraints (do not relitigate)
+## 2. Settled decisions
+
+Decided as of August 2026, with the workarounds already built. Don't reopen any of these
+casually. If you have specific evidence the platform has changed, say so once and move on.
 
 - **No IT involvement.** No Entra app registration, no admin consent, no premium licence.
   Standard connectors only: SharePoint, Office 365 Users, OneDrive for Business. This is why
@@ -38,9 +41,8 @@ not a delivered change.
   user-consentable in July 2025.
 - **The AI overview is display-only.** SharePoint's native AI writes `Overview Text`; the app
   renders it. No Refresh button, no generation call.
-- **Two mockup features are impossible in canvas apps:** drag-and-drop, and horizontally
-  scrolling galleries. Both have shipped workarounds — see `docs/07-gaps-and-decisions.md`.
-  Don't re-propose them.
+- **Drag-and-drop and horizontally scrolling galleries don't exist in canvas apps.** Both
+  mockup features have shipped alternatives — see `docs/07-gaps-and-decisions.md`.
 
 ---
 
@@ -49,14 +51,15 @@ not a delivered change.
 1. **Pull current code from GitHub, not from memory.** The user edits screens directly in
    Studio and pushes the result. Assume every file has moved since you last saw it. Read the
    file before editing it, every time.
-2. Branch: `claude/pursuit-tracker-local-app-bof6aq`. Never push elsewhere without
-   permission. Never open a PR unless asked outright.
-3. `python3 tools/validate-screens.py` **must** be clean (0 errors, 0 warnings) before every
-   commit. It catches four classes of failure that otherwise only surface as a rejected paste
-   in Studio.
-4. Push with `git push -u origin <branch>`; retry network failures at 2s, 4s, 8s, 16s.
-5. If the user pastes a screen back at you, **that version is the source of truth** — merge
+2. If the user pastes a screen back at you, **that version is the source of truth** — merge
    your change into theirs, don't overwrite with yours.
+3. `python3 tools/validate-screens.py` **must** print 0 errors and 0 warnings before every
+   commit. It catches four classes of failure that otherwise only surface as a rejected paste
+   in Studio. Any new named formula or UDF goes in its `KNOWN_GLOBALS`.
+4. Update `docs/` in the same commit when behaviour changes. The docs are the fallback when a
+   paste is rejected, so they can't drift.
+5. Branch `claude/pursuit-tracker-local-app-bof6aq` unless told otherwise. Never open a PR
+   unless asked outright.
 
 ### When the user pastes YAML back
 
@@ -145,11 +148,9 @@ they'd do. No preamble, no recap.
 
 ## 6. Design system
 
-All colour, size and spacing lives in `src/App.Formulas.powerfx` as named formulas. **Never
-hardcode a colour or a font size in a screen.** Dark theme: `ClrPage #10141F`, `ClrCard
-#1E2534`, `ClrText #F2F5FA`, `ClrTextMuted #98A3B8`, `ClrAccent #6B7DF2`. `SizeBody 12`,
-`SizeMeta 10`, `SizeChip 9`, `SizeCardTitle 15`, `SizePageTitle 26`. `GapPage 24`,
-`RadiusCard 8`, `RadiusChip 10`, `BoardColumns 6`.
+Every colour, size and spacing value is a named formula in `src/App.Formulas.powerfx`. Read
+them there — they are the source of truth and this file would only drift from them. **Never
+hardcode a colour or a font size in a screen.** The theme is dark.
 
 Standing UI conventions the user has asked for explicitly:
 
@@ -175,26 +176,5 @@ exports over anything remembered.
 `pursuit-tracker-lookups` drives every edit dropdown: rows are `Title` (the lookup type),
 `Value`, `Sort Order`. `colLookups` reshapes it to `{ LookupType, Value }`.
 
-### Open data issues — user's to fix in SharePoint, not code
-
-These have been flagged repeatedly and are still outstanding. Don't "fix" them with code.
-
-- Lookup values must match the Choice sets **exactly**: `Unassigned / Intake` → `Intake`,
-  `Proposal / Quote` → `Proposal/Quote`, `Review / Decision` → `Review/Decision`, delete
-  `Completed / Closed`; `GCP` → `Google/GCP`, add `SAP` and `Databricks`; add
-  `Everforth/Apex Systems`; `Complete` → `Completed`.
-- Three pursuits still hold `0` in `Active` from when it was a Number column. It is now a
-  Choice (`Yes` / `No` / `Suspended`), so the board's Active filter sits commented out in
-  `App.OnStart.powerfx` until those rows are cleaned.
-
----
-
-## 8. Before you commit
-
-```bash
-python3 tools/validate-screens.py    # must print 0 errors, 0 warnings
-```
-
-Then update `docs/` in the same commit if the change alters behaviour someone would look up —
-the docs are the fallback when a paste is rejected, so they can't drift. Add any new named
-formula or UDF to `KNOWN_GLOBALS` in the validator.
+Known data problems live in **`docs/OPEN-ITEMS.md`**. They are the user's to fix in
+SharePoint — don't work around them in code.
