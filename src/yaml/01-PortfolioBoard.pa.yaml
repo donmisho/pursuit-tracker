@@ -196,7 +196,7 @@
       X: =24
       Y: =164
 - drpFltSI:
-    Control: Classic/DropDown@2.2.0
+    Control: Classic/DropDown@2.3.1
     Properties:
       BorderColor: =ClrBorder
       Color: =ClrText
@@ -205,6 +205,7 @@
       Font: =FontUI
       Height: =32
       Items: =colFltSI
+      Items.Value: =Value
       Size: =SizeBody
       Width: =180
       X: =52
@@ -222,7 +223,7 @@
       X: =248
       Y: =164
 - drpFltHype:
-    Control: Classic/DropDown@2.2.0
+    Control: Classic/DropDown@2.3.1
     Properties:
       BorderColor: =ClrBorder
       Color: =ClrText
@@ -231,6 +232,7 @@
       Font: =FontUI
       Height: =32
       Items: =colFltHype
+      Items.Value: =Value
       Size: =SizeBody
       Width: =180
       X: =278
@@ -248,7 +250,7 @@
       X: =474
       Y: =164
 - drpFltActive:
-    Control: Classic/DropDown@2.2.0
+    Control: Classic/DropDown@2.3.1
     Properties:
       BorderColor: =ClrBorder
       Color: =ClrText
@@ -257,6 +259,7 @@
       Font: =FontUI
       Height: =32
       Items: =colFltActive
+      Items.Value: =Value
       Size: =SizeBody
       Width: =140
       X: =530

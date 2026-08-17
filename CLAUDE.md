@@ -94,6 +94,11 @@ they'd do. No preamble, no recap.
   property sets, and the paste fails on the first property they don't have.
 - **`Classic/Button` with `Text: =""` is the rounded-rectangle primitive.** It is the only
   classic control with `Radius*` properties, so every card, panel and chip in this app is one.
+- **One version per control type.** `Classic/DropDown@2.2.0` on the filter row and
+  `Classic/DropDown@2.3.1` in a panel copied from another screen is `PA2107 Another
+  instance of control type 'X' has already been referenced using a different version`, and
+  the paste dies. Every dropdown in this app is `@2.3.1` with `Items.Value: =Value`; the
+  validator errors on a second version of any type in a file.
 - **A property may appear once.** A duplicate key is `PA1001 YamlInvalidSyntax: Duplicate
   name 'Color'` and kills the whole screen. PyYAML silently keeps the last one, which is why
   the validator installs a `StrictLoader`.

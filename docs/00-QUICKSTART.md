@@ -194,6 +194,7 @@ player caches hard — close the tab and reopen rather than refreshing.
 | "Unknown property 'Fill' for control type 'Button'" | Older YAML — re-copy. Buttons and inputs need the `Classic/` prefix |
 | "Name isn't valid" on `Transparent` | Older YAML — re-copy. It's `Color.Transparent` |
 | "Duplicate name 'Color'" (PA1001) | Older YAML — re-copy |
+| "…already been referenced using a different version" (PA2107) | Older YAML — re-copy. Every `Classic/DropDown` in the app is `@2.3.1` |
 | Headers doubled / text overlapping itself | You pasted over existing controls. Ctrl+A, Delete, paste again |
 | A paste in step 23 is rejected | See the FALLBACKS block at the bottom of that YAML file |
 

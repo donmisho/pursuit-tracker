@@ -168,6 +168,23 @@ for path in files:
                           f"move it to docs/")
             break
 
+    # One version per control type. Studio rejects the paste with
+    #   PA2107 Another instance of control type 'X' has already been referenced using a
+    #   different version
+    # as soon as two instances of the same type name different versions -- which is what
+    # happens when a control is copied in from another screen built at a different time.
+    versions = {}
+    for n, line in enumerate(text.split("\n"), start=1):
+        s = line.strip()
+        if s.startswith("Control: ") and "@" in s:
+            ctype, ver = s[len("Control: "):].split("@", 1)
+            versions.setdefault(ctype, {}).setdefault(ver, n)
+    for ctype, vers in versions.items():
+        if len(vers) > 1:
+            where = ", ".join(f"{v} (line {ln})" for v, ln in sorted(vers.items()))
+            errors.append(f"{path.name}: control type '{ctype}' is used at two versions -- "
+                          f"{where} (PA2107)")
+
     try:
         doc = yaml.load(text, Loader=StrictLoader)
     except yaml.YAMLError as exc:

@@ -168,7 +168,7 @@
       X: =GapPage
       Y: =168
 - drpMAView:
-    Control: Classic/DropDown@2.2.0
+    Control: Classic/DropDown@2.3.1
     Properties:
       BorderColor: =ClrBorder
       Color: =ClrText
@@ -177,6 +177,7 @@
       Font: =FontUI
       Height: =32
       Items: =colFltView
+      Items.Value: =Value
       Size: =SizeBody
       Width: =130
       X: =68
@@ -194,7 +195,7 @@
       X: =212
       Y: =168
 - drpMAAcct:
-    Control: Classic/DropDown@2.2.0
+    Control: Classic/DropDown@2.3.1
     Properties:
       BorderColor: =ClrBorder
       Color: =ClrText
@@ -203,6 +204,7 @@
       Font: =FontUI
       Height: =32
       Items: =colFltAcct
+      Items.Value: =Value
       Size: =SizeBody
       Width: =190
       X: =278
@@ -220,7 +222,7 @@
       X: =482
       Y: =168
 - drpMAPursuit:
-    Control: Classic/DropDown@2.2.0
+    Control: Classic/DropDown@2.3.1
     Properties:
       BorderColor: =ClrBorder
       Color: =ClrText
@@ -229,6 +231,7 @@
       Font: =FontUI
       Height: =32
       Items: =colFltPursuit
+      Items.Value: =Value
       Size: =SizeBody
       Width: =250
       X: =544
@@ -246,7 +249,7 @@
       X: =808
       Y: =168
 - drpMASort:
-    Control: Classic/DropDown@2.2.0
+    Control: Classic/DropDown@2.3.1
     Properties:
       BorderColor: =ClrBorder
       Color: =ClrText
@@ -255,6 +258,7 @@
       Font: =FontUI
       Height: =32
       Items: =colFltSort
+      Items.Value: =Value
       Size: =SizeBody
       Width: =150
       X: =872
