@@ -24,6 +24,13 @@ scrPortfolioList
 **Z-order**: `btnRowClick` is declared after the row content it covers and before the `⋯`
 menu, so the whole row is clickable but the menu still receives its own clicks.
 
+`btnAddPursuit` sits to the left of the download button using plain arithmetic on
+`Parent.Width`, not `btnDownloadExcel.X`. It used to read the neighbour's position, which
+is correct until the reference breaks — a paste that lands on existing controls makes
+Studio rename the duplicates, the reference resolves to 0, and the button jumps to
+`-50`, half off the left edge of the screen. Nothing on this screen positions itself off
+another control now.
+
 There is no owner avatar. The initials circle (`recRowAvatar` + `lblRowInitials`) was
 removed — a 24px disc repeating down a reporting table is decoration, and the name is
 already spelled out beside it.
@@ -43,6 +50,7 @@ already spelled out beside it.
 | `lblPageSub` | `Text` | `="A reportable view of the same portfolio shown on the board."` |
 | `btnDownloadExcel` | `Text` | `="Download Excel"` |
 | | `X` | `=Parent.Width - Self.Width - GapPage` |
+| `btnAddPursuit` | `X` | `=Parent.Width - GapPage - 170 - 12 - Self.Width` |
 | | `Fill` / `Color` / `HoverFill` | `=ClrAccent` / `=ClrAccentText` / `=ClrAccentHover` |
 | | `DisplayMode` | `=If(CountRows(galPortfolioList.AllItems) = 0, DisplayMode.Disabled, DisplayMode.Edit)` |
 | | `OnSelect` | see [The download](#the-download) |
