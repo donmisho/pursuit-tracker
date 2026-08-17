@@ -104,7 +104,7 @@ For each of the five, in order:
 | `scrPortfolioList` | `src/yaml/02-PortfolioList.pa.yaml` | 48 |
 | `scrPursuitWorkspace` | `src/yaml/03-PursuitWorkspace.pa.yaml` | 137 |
 | `scrPursuitDocsAI` | `src/yaml/04-PursuitDocsAI.pa.yaml` | 59 |
-| `scrMyActions` | `src/yaml/05-MyActions.pa.yaml` | 33 |
+| `scrMyActions` | `src/yaml/05-MyActions.pa.yaml` | 40 |
 
 Counts are what `python3 tools/validate-screens.py` prints — every control including
 gallery children.
@@ -186,7 +186,7 @@ player caches hard — close the tab and reopen rather than refreshing.
 | Save does nothing on a pursuit | Empty dropdowns write a blank stage and SharePoint rejects it — fix the dropdowns first |
 | Save raises "Save failed: …" | Real SharePoint error. Most likely the lookup values don't match the column's choices — see `docs/05-screen-pursuit-workspace.md` |
 | Workspace or Docs & AI tab greyed out | Correct — both need a pursuit selected. Click a card |
-| My Actions is empty and says so | The owner email on the actions doesn't match your sign-in. The screen prints the address it matched — fix `Action Owner Entra ID` in the list |
+| My Actions is empty and says so | The owner email on the actions matches neither your address nor the part before its `@`. The screen prints the address it matched — fix `Action Owner Entra ID` in the list |
 | My Actions is blank with no message | Step 28 was skipped, or the screen was pasted before `scrMyActions` existed |
 | Workspace opens blank after clicking a card | Step 26. Check `gblPursuitKey` in View → Variables: if it holds `PUR-nnn`, navigation worked and OnVisible is the problem |
 | Docs & AI screen empty | Step 27 |

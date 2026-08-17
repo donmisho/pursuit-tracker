@@ -1,14 +1,18 @@
 # Screen — `scrMyActions`
 
-Every open action assigned to the signed-in user, across every pursuit, sorted by due date
-or by opportunity. The other four screens answer "what is happening on this pursuit"; this
-one answers "what do I owe anyone this week".
+Every action assigned to the signed-in user, across every pursuit — Open, Closed or All,
+filtered by account and pursuit, sorted by due date or by opportunity. The other four
+screens answer "what is happening on this pursuit"; this one answers "what do I owe anyone
+this week".
 
 ```
 scrMyActions
 ├── nav bar                        ◄── My Actions is the active tab
 ├── lblPageTitle / lblPageSub
-├── lblSortCap + drpMASort         ◄── Due Date | Opportunity
+├── drpMAView                      ◄── Open | Closed | All
+├── drpMAAcct / drpMAPursuit       ◄── built from your own actions
+├── drpMASort                      ◄── Due Date | Opportunity
+├── btnFltClear
 ├── lblActionCount + btnRefreshActions
 ├── recHeaderRule + four column-header labels
 ├── galMyActions                   ◄── one row per open action
@@ -38,25 +42,57 @@ Laid out for Tablet (1366 × 768), "Scale to fit" off. Columns, `X` relative to 
 and +24 for the header labels above it: Action 0/420 · Opportunity 436/380 · Status 832/200,
 with the At Risk pill and the due date anchored to the right edge.
 
+The filter row at `Y = 168`: View 68/130 · Account 278/190 · Pursuit 544/250 · Sort 872/150 ·
+Clear Filters 1034/110 · count 1156/140 · refresh anchored right.
+
 **Z-order**: `btnRowClick` is declared after the row content it covers, so the whole row is
 clickable. The two empty-state labels come after the gallery, since they only show when it
 has no rows and nothing under them is clickable then.
 
-## What "mine" and "open" mean
+## What "mine" means
 
-**Mine** is `Lower('Action Owner Entra ID') = Lower(gblUser.Email)`. The owner column is a
-text column holding an email, not a Person column, so nothing normalises what gets typed
-into it — `Don.Mishory@…` and `don.mishory@…` are different strings to SharePoint and the
-comparison is case-folded on both sides to compensate. It cannot compensate for a different
-address: an action owned by an alias, or by a name rather than an address, will not appear.
-That is why the empty state prints the address it matched instead of just saying "nothing
-found" — the difference between "no work" and "wrong email in the list" is the only thing
-worth knowing when the screen is blank.
+The owner column is text holding an email, not a Person column, so nothing normalises what
+gets typed into it. Two mismatches show up in the real data: casing, and the domain — the
+list holds `dmishory@westmonroe.com` while `User().Email` returns
+`dmishory@westmonroepartners.com`. A row matches if the whole address matches
+case-insensitively, **or** if the part before the `@` does:
 
-**Open** is `Status.Value <> "Completed"`, filtered in memory. SharePoint doesn't delegate
-`<>` on a choice column, so doing it in the query would silently truncate the set; the whole
-actions list is pulled and filtered locally, exactly as the board and the list screens do.
-A blank status counts as open — an action nobody has triaged is still outstanding.
+```powerfx
+Lower('Action Owner Entra ID') = Lower(gblUser.Email) ||
+Lower(Left('Action Owner Entra ID' & "@", Find("@", 'Action Owner Entra ID' & "@") - 1)) =
+    Lower(Left(gblUser.Email & "@", Find("@", gblUser.Email & "@") - 1))
+```
+
+The `& "@"` before each `Find` is what stops an address with no `@` from taking the whole
+formula down: `Find` returns blank on no match and `Left(s, blank - 1)` errors. With the `@`
+appended, a bare `dmishory` finds the one on the end and comes back whole.
+
+Matching on the local part assumes one person owns a given mailbox name across the tenant's
+domains. That holds here and it beats a screen that silently shows nothing — but the real
+fix is in the list, and it's logged in `docs/OPEN-ITEMS.md`. An action owned by a different
+name entirely still won't appear, which is why the empty state prints the address it
+matched.
+
+## The three views
+
+`drpMAView` — **Open**, **Closed**, **All**, defaulting to Open. Closed is exactly
+`Status = "Completed"`; everything else is open, including a blank status, since an action
+nobody has triaged is still outstanding. The whole actions list loads either way and the
+view filters `colMyActions` in memory: SharePoint doesn't delegate `<>` on a choice column,
+so filtering in the query would silently truncate the set.
+
+Closed rows render in `ClrTextFaint` and drop the At Risk pill — a completed action can't
+be at risk.
+
+## Account and pursuit filters
+
+`drpMAAcct` and `drpMAPursuit` are built from `colMyActions`, not from the portfolio: an
+account you own nothing on would only be an empty result waiting to happen. `btnFltClear`
+resets all four dropdowns.
+
+The pursuit list is **not** narrowed by the selected account. Picking an account and then a
+pursuit outside it returns nothing, and the empty state says so rather than the screen
+looking broken.
 
 ## `colMyActions`
 
@@ -74,6 +110,7 @@ into a collection with its type intact, which is the same trap `NextActionTitle`
 | `Account` | the account name, from the pursuit |
 | `Opportunity` | `PursuitLabel(key, name)` → `PUR-014 - Dynamics F&O` |
 | `Due` | the raw `Due Date`, for display and the overdue test |
+| `IsClosed` | `Status = "Completed"` — what the View filter reads |
 | `DueWording` | "After proposal / quote", derived from `Predecessor Action ID` |
 | `DueKey` | text sort key, due date first |
 | `OppKey` | text sort key, account and pursuit first |
@@ -86,15 +123,22 @@ so a row reads "Carelon Data Platform" over "Elevance Health" rather than the ac
 ## The sort
 
 `drpMASort` offers **Due Date** and **Opportunity**, from `colFltSort`. `galMyActions.Items`
-switches between two whole `Sort()` calls rather than sorting once on a conditional key:
+filters once into a `With`, then switches between two whole `Sort()` calls rather than
+sorting on a conditional key:
 
 ```
-=If(
-    drpMASort.Selected.Value = "Opportunity",
-    Sort(colMyActions, OppKey, SortOrder.Ascending),
-    Sort(colMyActions, DueKey, SortOrder.Ascending)
+=With(
+    { rows: Filter(colMyActions, …view…, …account…, …pursuit…) },
+    If(
+        drpMASort.Selected.Value = "Opportunity",
+        Sort(rows, OppKey, SortOrder.Ascending),
+        Sort(rows, DueKey, SortOrder.Ascending)
+    )
 )
 ```
+
+There is **no date filter**. The only conditions are the owner match and the three
+dropdowns.
 
 Both keys are single text columns computed at load, which is what makes one `Sort()` per
 branch enough:
@@ -117,15 +161,16 @@ of this — sort by date, then re-sort by opportunity — would be relying on an
 | Control | Property | Formula |
 |---|---|---|
 | `lblRowAction` | `Text` | `=Clip(ThisItem.ActionTitle, 62)` |
+| | `Color` | `=If(ThisItem.IsClosed, ClrTextFaint, ClrText)` |
 | | `X` / `Width` | `=0` / `=420` |
 | `lblRowMeta` | `Text` | stage, then `· effort` when there is one |
 | `lblRowOpp` | `Text` | `=Clip(ThisItem.Opportunity, 52)` |
 | | `X` / `Width` | `=436` / `=380` |
 | `lblRowAccount` | `Text` | `=Clip(ThisItem.Account, 52)` |
 | `lblRowStatus` | `X` / `Width` | `=832` / `=200` |
-| `recRowPill` / `lblRowPill` | `Visible` | `=ThisItem.HealthText = "At Risk"` |
+| `recRowPill` / `lblRowPill` | `Visible` | `=ThisItem.HealthText = "At Risk" && !ThisItem.IsClosed` |
 | `lblRowDue` | `Text` | `=Clip(DueLabel(ThisItem.Due, ThisItem.DueWording), 24)` |
-| | `Color` | `=If(!IsBlank(ThisItem.Due) && ThisItem.Due < Today(), ClrRiskText, ClrDate)` |
+| | `Color` | `=If(ThisItem.IsClosed, ClrTextFaint, !IsBlank(ThisItem.Due) && ThisItem.Due < Today(), ClrRiskText, ClrDate)` |
 | `btnRowClick` | `OnSelect` | `=Set(gblPursuitKey, ThisItem.PursuitKey); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
 
 Every label is `Clip()`ped. Labels don't clip themselves — a Label whose text needs more room

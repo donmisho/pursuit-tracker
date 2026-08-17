@@ -22,6 +22,15 @@ value the list will reject on save.
 | SI | add `Everforth/Apex Systems` |
 | Action Status | `Complete` → `Completed` |
 
+### `Action Owner Entra ID` uses a different domain from the sign-in address
+
+The actions list holds `dmishory@westmonroe.com`; `User().Email` returns
+`dmishory@westmonroepartners.com`. My Actions matched neither and showed nothing, so the
+screen now also matches on the part before the `@` — see `docs/09-screen-my-actions.md`.
+That is a workaround with a real limit: it can't match an action owned by a different name,
+and it would collide if two people ever shared a mailbox name across the two domains. Put
+the sign-in address in the column and the loose half of the match stops mattering.
+
 ### Three pursuits hold `0` in `Active`
 
 Left over from when `Active` was a Number column. It is now a Choice (`Yes` / `No` /

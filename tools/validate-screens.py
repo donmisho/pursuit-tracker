@@ -71,6 +71,7 @@ KNOWN_GLOBALS = {
     "colDocs", "colLinks", "colHistory", "colLookups", "colMyActions", "colPursuitsMin",
     "colFltSI", "colFltHype", "colFltActive", "colFltStage", "colFltStatus",
     "colFltHealth", "colFltEffort", "colFltRisk", "colFltDate", "colFltSort",
+    "colFltView", "colFltAcct", "colFltPursuit",
     "SiteUrl", "PursuitLabel", "PlainText",
     "ClrDocWord", "ClrDocPpt", "ClrDocXl", "ClrDocMail", "ClrDocPdf", "ClrDocOther",
     "scrPortfolioBoard", "scrPortfolioList", "scrPursuitWorkspace", "scrPursuitDocsAI",

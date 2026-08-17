@@ -1,9 +1,9 @@
 // Paste into: Power Apps Studio -> Tree view -> scrMyActions -> OnVisible property
 //
-// Builds colMyActions: one row per open action assigned to the signed-in user, flattened
-// to scalars and carrying both sort keys. The screen reads nothing else -- the gallery
-// binds to this collection and switches between DueKey and OppKey, so sorting costs no
-// lookups and the two orders can't disagree about what a row says.
+// Builds colMyActions: one row per action assigned to the signed-in user -- every status,
+// not just the open ones, because the screen's View filter switches between Open, Closed
+// and All. Everything the gallery needs is flattened to a scalar here, including both sort
+// keys and the closed flag, so the filters and the sort do no lookups.
 //
 // Everything this screen needs is loaded here rather than assumed from App.OnStart.
 // Collections can be stale-but-present in Studio and empty at runtime, so a screen that
@@ -11,14 +11,14 @@
 
 Set(gblUser, User());
 
-// The whole actions list. Filtering Status <> "Completed" server-side would look tidier
-// but SharePoint doesn't delegate <> on a choice column, so it would silently return a
-// truncated set. Pulled whole and filtered in memory, as everywhere else in this app.
+// The whole actions list. Filtering on Status server-side would look tidier but SharePoint
+// doesn't delegate <> on a choice column, so it would silently return a truncated set.
+// Pulled whole and filtered in memory, as everywhere else in this app.
 ClearCollect(colActions, 'pursuit-tracker-actions');
 
 // Pursuit identity only -- key, account, name. An action names its pursuit by text key,
-// and this screen needs to print and sort on the account and pursuit name, so the whole
-// pursuits list is reshaped once here instead of a LookUp per action against SharePoint.
+// and this screen prints and filters on the account and pursuit name, so the whole pursuits
+// list is reshaped once here instead of a LookUp per action against SharePoint.
 ClearCollect(
     colPursuitsMin,
     ForAll(
@@ -27,25 +27,29 @@ ClearCollect(
     )
 );
 
-// Mine and open.
+// Mine.
 //
-// "Mine" is a case-insensitive match on the owner email. 'Action Owner Entra ID' is a
-// text column, not a Person column, so nothing normalises what gets typed into it and
-// Don.Mishory@... and don.mishory@... are different strings to SharePoint.
+// 'Action Owner Entra ID' is a text column, not a Person column, so nothing normalises what
+// gets typed into it. Two mismatches show up in the real data: casing, and the domain --
+// the list holds dmishory@westmonroe.com while User().Email returns
+// dmishory@westmonroepartners.com. A row matches if the whole address matches, or if the
+// part before the "@" does. That is deliberately loose: it assumes one person owns a given
+// mailbox name across the tenant's domains, which holds here and is worth it against a
+// screen that silently shows nothing.
 //
-// "Open" is Status <> "Completed". A blank status counts as open, which is right -- an
-// action nobody has set a status on is still outstanding.
+// Appending "@" before Find() is what keeps an address with no "@" in it from erroring --
+// Find returns blank on no match, and Left(s, blank - 1) takes the whole formula with it.
+// With the "@" appended, a bare "dmishory" finds the one at the end and comes back whole.
 //
-// Every column is a scalar. Record-valued and choice-valued columns don't survive into a
-// collection with their types intact (see the NextAction note in App.OnStart), so the
-// choices are flattened to .Value here and the gallery binds to plain text.
+// Every status loads. "Open" is a view, not a filter on the data -- see IsClosed below.
 ClearCollect(
     colMyActions,
     ForAll(
         Filter(
             colActions,
-            Status.Value <> "Completed",
-            Lower('Action Owner Entra ID') = Lower(gblUser.Email)
+            Lower('Action Owner Entra ID') = Lower(gblUser.Email) ||
+            Lower(Left('Action Owner Entra ID' & "@", Find("@", 'Action Owner Entra ID' & "@") - 1)) =
+                Lower(Left(gblUser.Email & "@", Find("@", gblUser.Email & "@") - 1))
         ) As A,
         With(
             { P: LookUp(colPursuitsMin, Key = A.'Pursuit ID') },
@@ -84,6 +88,10 @@ ClearCollect(
                         Opportunity: PursuitLabel(A.'Pursuit ID', Short),
                         Due:         A.'Due Date',
 
+                        // Closed is exactly "Completed". A blank status counts as open --
+                        // an action nobody has triaged is still outstanding.
+                        IsClosed:    A.Status.Value = "Completed",
+
                         // Same derivation the workspace uses: an action with no due date
                         // but a predecessor renders "after proposal / quote" instead.
                         DueWording:  If(
@@ -107,8 +115,31 @@ ClearCollect(
     )
 );
 
-// The sort dropdown's options. Two rows, in a collection rather than inline on the
-// control, so the Items formula is a name and the default matches a real row.
+// The three views. Open is the default because it's the working list; Closed and All are
+// for looking back.
+ClearCollect(colFltView, Table({ Value: "Open" }, { Value: "Closed" }, { Value: "All" }));
+
+// Account and pursuit options, built from your own actions rather than from the full
+// portfolio -- an account you own nothing on would only be an empty result waiting to
+// happen. "All" is prepended as its own row: Power Fx can't concatenate two tables in one
+// expression, so each is a ClearCollect followed by a Collect.
+//
+// The pursuit list is not narrowed by the selected account. Choosing an account and then a
+// pursuit that isn't in it returns nothing, which the empty state explains.
+ClearCollect(colFltAcct, { Value: "All" });
+Collect(
+    colFltAcct,
+    ForAll(Sort(Filter(Distinct(colMyActions, Account), !IsBlank(Value)), Value) As D, { Value: D.Value })
+);
+
+ClearCollect(colFltPursuit, { Value: "All" });
+Collect(
+    colFltPursuit,
+    ForAll(Sort(Filter(Distinct(colMyActions, Opportunity), !IsBlank(Value)), Value) As D, { Value: D.Value })
+);
+
+// Sort options. In a collection rather than inline on the control, so the Items formula is
+// a name and the default matches a real row.
 ClearCollect(colFltSort, Table({ Value: "Due Date" }, { Value: "Opportunity" }));
 
 // Nothing on this screen edits a pursuit, but the nav bar's Workspace button reads

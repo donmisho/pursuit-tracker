@@ -140,7 +140,7 @@
       FontWeight: =FontWeight.Semibold
       Height: =36
       Size: =SizePageTitle
-      Text: ="My Open Actions"
+      Text: ="My Actions"
       Width: =700
       X: =GapPage
       Y: =88
@@ -151,11 +151,89 @@
       Font: =FontUI
       Height: =24
       Size: =SizeBody
-      Text: ="Every action assigned to you that isn't completed, across all pursuits."
+      Text: ="Everything assigned to you, across every pursuit."
       Width: =900
       X: =GapPage
       Y: =126
-- lblSortCap:
+- lblMAViewCap:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =32
+      Size: =SizeMeta
+      Text: ="VIEW"
+      Width: =40
+      Wrap: =false
+      X: =GapPage
+      Y: =168
+- drpMAView:
+    Control: Classic/DropDown@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      Color: =ClrText
+      Default: ="Open"
+      Fill: =ClrColumn
+      Font: =FontUI
+      Height: =32
+      Items: =colFltView
+      Size: =SizeBody
+      Width: =130
+      X: =68
+      Y: =168
+- lblMAAcctCap:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =32
+      Size: =SizeMeta
+      Text: ="ACCOUNT"
+      Width: =62
+      Wrap: =false
+      X: =212
+      Y: =168
+- drpMAAcct:
+    Control: Classic/DropDown@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      Color: =ClrText
+      Default: ="All"
+      Fill: =ClrColumn
+      Font: =FontUI
+      Height: =32
+      Items: =colFltAcct
+      Size: =SizeBody
+      Width: =190
+      X: =278
+      Y: =168
+- lblMAPursuitCap:
+    Control: Label@2.5.1
+    Properties:
+      Color: =ClrTextMuted
+      Font: =FontUI
+      Height: =32
+      Size: =SizeMeta
+      Text: ="PURSUIT"
+      Width: =58
+      Wrap: =false
+      X: =482
+      Y: =168
+- drpMAPursuit:
+    Control: Classic/DropDown@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      Color: =ClrText
+      Default: ="All"
+      Fill: =ClrColumn
+      Font: =FontUI
+      Height: =32
+      Items: =colFltPursuit
+      Size: =SizeBody
+      Width: =250
+      X: =544
+      Y: =168
+- lblMASortCap:
     Control: Label@2.5.1
     Properties:
       Color: =ClrTextMuted
@@ -165,7 +243,7 @@
       Text: ="SORT BY"
       Width: =60
       Wrap: =false
-      X: =GapPage
+      X: =808
       Y: =168
 - drpMASort:
     Control: Classic/DropDown@2.2.0
@@ -178,20 +256,44 @@
       Height: =32
       Items: =colFltSort
       Size: =SizeBody
-      Width: =180
-      X: =88
+      Width: =150
+      X: =872
+      Y: =168
+- btnFltClear:
+    Control: Classic/Button@2.2.0
+    Properties:
+      BorderColor: =ClrBorder
+      BorderThickness: =1
+      Color: =ClrTextMuted
+      Fill: =ClrPage
+      Font: =FontUI
+      Height: =32
+      HoverColor: =ClrText
+      HoverFill: =ClrCardHover
+      OnSelect: =Reset(drpMAView); Reset(drpMAAcct); Reset(drpMAPursuit); Reset(drpMASort)
+      PressedColor: =ClrText
+      PressedFill: =ClrCardHover
+      RadiusBottomLeft: =6
+      RadiusBottomRight: =6
+      RadiusTopLeft: =6
+      RadiusTopRight: =6
+      Size: =11
+      Text: ="Clear Filters"
+      Width: =110
+      X: =1034
       Y: =168
 - lblActionCount:
     Control: Label@2.5.1
     Properties:
+      Align: =Align.Right
       Color: =ClrTextFaint
       Font: =FontUI
       Height: =32
       Size: =SizeBody
-      Text: =CountRows(galMyActions.AllItems) & If(CountRows(galMyActions.AllItems) = 1, " Open Action", " Open Actions")
-      Width: =240
+      Text: =CountRows(galMyActions.AllItems) & If(CountRows(galMyActions.AllItems) = 1, " Action", " Actions")
+      Width: =140
       Wrap: =false
-      X: =284
+      X: =1156
       Y: =168
 - btnRefreshActions:
     Control: Classic/Button@2.2.0
@@ -219,8 +321,9 @@
             ForAll(
                 Filter(
                     colActions,
-                    Status.Value <> "Completed",
-                    Lower('Action Owner Entra ID') = Lower(gblUser.Email)
+                    Lower('Action Owner Entra ID') = Lower(gblUser.Email) ||
+                    Lower(Left('Action Owner Entra ID' & "@", Find("@", 'Action Owner Entra ID' & "@") - 1)) =
+                        Lower(Left(gblUser.Email & "@", Find("@", gblUser.Email & "@") - 1))
                 ) As A,
                 With(
                     { P: LookUp(colPursuitsMin, Key = A.'Pursuit ID') },
@@ -252,6 +355,7 @@
                                 Account:     Acct,
                                 Opportunity: PursuitLabel(A.'Pursuit ID', Short),
                                 Due:         A.'Due Date',
+                                IsClosed:    A.Status.Value = "Completed",
                                 DueWording:  If(
                                                  !IsBlank(A.'Due Date') || IsBlank(A.'Predecessor Action ID'),
                                                  "",
@@ -266,6 +370,16 @@
                     )
                 )
             )
+        );
+        ClearCollect(colFltAcct, { Value: "All" });
+        Collect(
+            colFltAcct,
+            ForAll(Sort(Filter(Distinct(colMyActions, Account), !IsBlank(Value)), Value) As D, { Value: D.Value })
+        );
+        ClearCollect(colFltPursuit, { Value: "All" });
+        Collect(
+            colFltPursuit,
+            ForAll(Sort(Filter(Distinct(colMyActions, Opportunity), !IsBlank(Value)), Value) As D, { Value: D.Value })
         )
       PressedColor: =ClrText
       PressedFill: =ClrCardHover
@@ -339,10 +453,22 @@
     Properties:
       Height: =Parent.Height - 250 - 56
       Items: |
-        =If(
-            drpMASort.Selected.Value = "Opportunity",
-            Sort(colMyActions, OppKey, SortOrder.Ascending),
-            Sort(colMyActions, DueKey, SortOrder.Ascending)
+        =With(
+            {
+                rows: Filter(
+                    colMyActions,
+                    drpMAView.Selected.Value = "All" ||
+                    (drpMAView.Selected.Value = "Open"   && !IsClosed) ||
+                    (drpMAView.Selected.Value = "Closed" && IsClosed),
+                    drpMAAcct.Selected.Value = "All" || drpMAAcct.Selected.Value = Account,
+                    drpMAPursuit.Selected.Value = "All" || drpMAPursuit.Selected.Value = Opportunity
+                )
+            },
+            If(
+                drpMASort.Selected.Value = "Opportunity",
+                Sort(rows, OppKey, SortOrder.Ascending),
+                Sort(rows, DueKey, SortOrder.Ascending)
+            )
         )
       TemplatePadding: =0
       TemplateSize: =64
@@ -360,7 +486,7 @@
       - lblRowAction:
           Control: Label@2.5.1
           Properties:
-            Color: =ClrText
+            Color: =If(ThisItem.IsClosed, ClrTextFaint, ClrText)
             Font: =FontUI
             FontWeight: =FontWeight.Semibold
             Height: =26
@@ -383,7 +509,7 @@
       - lblRowOpp:
           Control: Label@2.5.1
           Properties:
-            Color: =ClrText
+            Color: =If(ThisItem.IsClosed, ClrTextFaint, ClrText)
             Font: =FontUI
             Height: =26
             Size: =SizeBody
@@ -429,7 +555,7 @@
             RadiusTopRight: =RadiusChip
             TabIndex: =-1
             Text: =""
-            Visible: =ThisItem.HealthText = "At Risk"
+            Visible: =ThisItem.HealthText = "At Risk" && !ThisItem.IsClosed
             Width: =84
             X: =Parent.Width - 250
             Y: =12
@@ -450,7 +576,7 @@
           Control: Label@2.5.1
           Properties:
             Align: =Align.Right
-            Color: =If(!IsBlank(ThisItem.Due) && ThisItem.Due < Today(), ClrRiskText, ClrDate)
+            Color: =If(ThisItem.IsClosed, ClrTextFaint, !IsBlank(ThisItem.Due) && ThisItem.Due < Today(), ClrRiskText, ClrDate)
             Font: =FontUI
             Height: =24
             Size: =SizeBody
@@ -479,9 +605,9 @@
       FontWeight: =FontWeight.Semibold
       Height: =28
       Size: =SizeCardTitle
-      Text: ="Nothing Open Assigned To You"
+      Text: =If(IsEmpty(colMyActions), "Nothing Assigned To You", "No Actions Match These Filters")
       VerticalAlign: =VerticalAlign.Top
-      Visible: =IsEmpty(colMyActions)
+      Visible: =IsEmpty(galMyActions.AllItems)
       Width: =900
       X: =GapPage
       Y: =290
@@ -492,9 +618,15 @@
       Font: =FontUI
       Height: =44
       Size: =SizeBody
-      Text: ="Rows are matched on 'Action Owner Entra ID' = " & gblUser.Email & ". An action owned by any other spelling of your address won't appear here."
+      Text: |
+        =If(
+            IsEmpty(colMyActions),
+            "Rows are matched on 'Action Owner Entra ID' against " & gblUser.Email &
+            ", on the whole address or on the part before the @. An action owned by a different name won't appear here.",
+            "Change the view or clear the filters to see everything assigned to you."
+        )
       VerticalAlign: =VerticalAlign.Top
-      Visible: =IsEmpty(colMyActions)
+      Visible: =IsEmpty(galMyActions.AllItems)
       Width: =900
       X: =GapPage
       Y: =322
@@ -505,7 +637,7 @@
       Font: =FontUI
       Height: =24
       Size: =SizeBody
-      Text: ="Completed actions drop off this list. Open a row to edit it in the pursuit workspace."
+      Text: ="Open is everything not marked Completed. Open a row to edit it in the pursuit workspace."
       Width: =1100
       X: =GapPage
       Y: =Parent.Height - 40
