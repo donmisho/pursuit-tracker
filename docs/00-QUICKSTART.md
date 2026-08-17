@@ -104,7 +104,7 @@ For each of the five, in order:
 | `scrPortfolioList` | `src/yaml/02-PortfolioList.pa.yaml` | 48 |
 | `scrPursuitWorkspace` | `src/yaml/03-PursuitWorkspace.pa.yaml` | 137 |
 | `scrPursuitDocsAI` | `src/yaml/04-PursuitDocsAI.pa.yaml` | 59 |
-| `scrMyActions` | `src/yaml/05-MyActions.pa.yaml` | 39 |
+| `scrMyActions` | `src/yaml/05-MyActions.pa.yaml` | 65 |
 
 Counts are what `python3 tools/validate-screens.py` prints — every control including
 gallery children.

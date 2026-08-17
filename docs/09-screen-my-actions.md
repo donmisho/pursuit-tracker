@@ -22,9 +22,12 @@ scrMyActions
 │   ├── lblRowDue                          due date, or the dependency wording
 │   ├── lblRowStatus
 │   ├── lblRowEffort
-│   └── btnRowClick                ◄── transparent, on top: opens the pursuit workspace
+│   └── btnRowClick                ◄── transparent, on top: opens the edit panel
 ├── lblEmptyTitle / lblEmptyHint   ◄── only when colMyActions is empty
-└── lblFooterNote
+├── lblFooterNote
+└── EDIT PANEL                     ◄── recPanelScrim + recPanel + the nine action fields
+                                       + btnPanelWorkspace / btnPanelDelete
+                                       / btnPanelCancel / btnPanelSave
 ```
 
 ## Screen
@@ -47,7 +50,55 @@ Clear Filters 1034/110 · count 1156/140 · refresh anchored right.
 
 **Z-order**: `btnRowClick` is declared after the row content it covers, so the whole row is
 clickable. The two empty-state labels come after the gallery, since they only show when it
-has no rows and nothing under them is clickable then.
+has no rows and nothing under them is clickable then. The edit panel is the last block in
+the file, so it sits over the page.
+
+## Editing in place
+
+Selecting a row opens the action in a slide-over on this screen rather than navigating to
+the workspace. `btnRowClick.OnSelect` sets the record globals and resets every input so the
+panel shows the row you picked and not the one before it:
+
+```powerfx
+Set(gblPursuitKey, ThisItem.PursuitKey);
+Set(gblEditKey, ThisItem.ActionKey);
+Set(gblEditAction, LookUp('pursuit-tracker-actions', Title = ThisItem.ActionKey));
+Set(gblPanel, "action");
+Reset(txtMAActTitle); Reset(drpMAActStage); … Reset(txtMAActNotes)
+```
+
+`Reset()` is what makes this work: a `Default` is only re-read when the control is reset, so
+without it the panel keeps the first row's values for the whole session. That is also why the
+workspace can't open its own panel for you — `Reset()` can't reach controls on a screen you
+aren't on, which is why this screen carries its own copy of the fields under `MA` names.
+
+**The globals are shared with the workspace on purpose.** `gblPanel`, `gblEditKey` and
+`gblEditAction` are the same three the workspace uses, already seeded with a typed empty
+record in `App.OnStart`, so nothing there needs repasting. Both screens clear `gblPanel` in
+their `OnVisible`, so a panel left open on one never greets you on the other.
+
+`gblPursuitKey` is still set on click even though the screen no longer navigates — it enables
+the Pursuit Workspace tab and drives `btnPanelWorkspace`, which closes the panel and opens
+that action's pursuit in full.
+
+### Save, delete, refresh
+
+`btnPanelSave` patches the nine editable fields onto the action, sets `Completed Date` when
+the status is Completed (keeping the original if it already had one), then checks
+`Errors('pursuit-tracker-actions')` — a `Patch` SharePoint rejects returns blank and carries
+on, so an unchecked save looks like a save that did nothing. `btnPanelDelete` removes the
+action behind the same error check.
+
+Both then call `Select(btnRefreshActions)` rather than repeating the load. The refresh
+button's `OnSelect` already rebuilds `colActions`, `colPursuitsMin`, `colMyActions` and the
+account and pursuit dropdown options; `Select()` runs it in place. That keeps this screen to
+two copies of the load — `OnVisible` and the refresh button — instead of four.
+
+Saving an action whose owner you changed to somebody else makes the row disappear from the
+list, which is correct: it isn't yours any more.
+
+There is no **New Action** here. Actions are created in the workspace, where the pursuit they
+belong to is unambiguous.
 
 ## What "mine" means
 
@@ -174,7 +225,7 @@ top-aligned to the first.
 | | `X` / `Width` | `=792` / `=130` |
 | `lblRowStatus` | `X` / `Width` | `=938` / `=160` |
 | `lblRowEffort` | `X` / `Width` | `=1114` / `=110` |
-| `btnRowClick` | `OnSelect` | `=Set(gblPursuitKey, ThisItem.PursuitKey); Set(gblNewPursuit, false); Navigate(scrPursuitWorkspace, ScreenTransition.None)` |
+| `btnRowClick` | `OnSelect` | sets `gblEditKey` / `gblEditAction` / `gblPanel` and resets the panel inputs — see [Editing in place](#editing-in-place) |
 
 Every label is `Clip()`ped. Labels don't clip themselves — a Label whose text needs more room
 than its `Height` allows keeps rendering and spills out of both ends onto its neighbours, and
@@ -188,16 +239,10 @@ text ends. Closed rows drop the colour: a completed action can't be at risk.
 **At risk is `Health`, not `Status`** — an in-progress action can be at risk, and so can a
 not-started one.
 
-**The row opens the pursuit workspace, not the action.** The workspace's edit panel is opened
-by `btnActionRow`, whose `OnSelect` `Reset()`s nine controls on that screen; `Reset()` can't
-reach controls on a screen you aren't on, and `scrPursuitWorkspace.OnVisible` clears
-`gblPanel` and `gblEditKey` on arrival anyway. So the row sets the pursuit and navigates, and
-the action is one more click from there.
-
 ## Refresh
 
-`btnRefreshActions` carries a copy of the `OnVisible` file's three `ClearCollect`s behind a
-`Refresh('pursuit-tracker-actions')`. Canvas apps have no user-defined behaviour functions,
+`btnRefreshActions` carries a copy of the `OnVisible` file's load — the three `ClearCollect`s
+plus the account and pursuit options — behind a `Refresh('pursuit-tracker-actions')`. Canvas apps have no user-defined behaviour functions,
 so a load that has to run both on arrival and on demand exists twice — the same duplication
 `LoadPortfolio` has across `App.OnStart` and two `OnVisible`s. **Change both copies.**
 

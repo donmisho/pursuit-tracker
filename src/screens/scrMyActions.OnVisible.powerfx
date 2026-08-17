@@ -144,4 +144,9 @@ ClearCollect(colFltSort, Table({ Value: "Due Date" }, { Value: "Opportunity" }))
 
 // Nothing on this screen edits a pursuit, but the nav bar's Workspace button reads
 // gblNewPursuit -- leaving it true would open the workspace in create mode.
-Set(gblNewPursuit, false)
+Set(gblNewPursuit, false);
+
+// Close the edit panel on arrival. gblPanel is shared with the workspace, so a panel left
+// open there would otherwise be open here too, over a row you never selected.
+Set(gblPanel, "");
+Set(gblEditKey, "")
