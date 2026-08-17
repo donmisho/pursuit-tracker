@@ -1,17 +1,3 @@
-# scrPursuitWorkspace — complete screen.
-#
-# Round-tripped out of Studio, so this matches what's on the canvas. Control versions
-# (@2.5.1 etc.) are Studio's own and are kept verbatim; properties equal to a control
-# default are omitted, which is how Studio emits them.
-#
-# PASTE: create all four screens first and set App.Formulas + App.OnStart, then
-# right-click scrPursuitWorkspace in the tree view -> Paste. Set Fill to =ClrPage and
-# OnVisible from src/screens/scrPursuitWorkspace.OnVisible.powerfx.
-#
-# Z-ORDER: document order is z-order. Anything clickable must be declared AFTER
-# everything it overlaps -- btnLatestClick, btnActionRow and btnUpdateRow are transparent
-# layers over their content, and the edit panel comes last so it sits over the page.
-
 - navBg_2:
     Control: Rectangle@2.3.0
     Properties:

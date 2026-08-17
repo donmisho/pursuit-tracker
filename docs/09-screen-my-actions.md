@@ -30,6 +30,18 @@ scrMyActions
 | `Fill` | `=ClrPage` |
 | `OnVisible` | `src/screens/scrMyActions.OnVisible.powerfx`, pasted whole |
 
+Create a blank screen named exactly `scrMyActions` before pasting anything, including the
+other four screens — their nav buttons `Navigate(scrMyActions, …)`, and `Navigate()` to a
+screen that doesn't exist is an error Studio can't resolve on its own.
+
+Laid out for Tablet (1366 × 768), "Scale to fit" off. Columns, `X` relative to the gallery
+and +24 for the header labels above it: Action 0/420 · Opportunity 436/380 · Status 832/200,
+with the At Risk pill and the due date anchored to the right edge.
+
+**Z-order**: `btnRowClick` is declared after the row content it covers, so the whole row is
+clickable. The two empty-state labels come after the gallery, since they only show when it
+has no rows and nothing under them is clickable then.
+
 ## What "mine" and "open" mean
 
 **Mine** is `Lower('Action Owner Entra ID') = Lower(gblUser.Email)`. The owner column is a

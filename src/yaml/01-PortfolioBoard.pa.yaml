@@ -1,29 +1,3 @@
-# scrPortfolioBoard — complete screen.
-#
-# Round-tripped out of Studio, so this matches what's on the canvas. Control versions
-# (@2.5.1 etc.) are Studio's own and are kept verbatim. Properties equal to a control
-# default (X/Y of 0, VerticalAlign Middle, ShowScrollbar true) are omitted, which is how
-# Studio emits them.
-#
-# PASTE: create all four screens first (scrPortfolioBoard / scrPortfolioList /
-# scrPursuitWorkspace / scrPursuitDocsAI) and set App.Formulas + App.OnStart, then
-# right-click scrPortfolioBoard in the tree view -> Paste. Set the screen's Fill to
-# =ClrPage and its OnVisible from src/screens/scrPortfolioBoard.OnVisible.powerfx.
-#
-# Laid out for Tablet (1366 x 768) with "Scale to fit" OFF.
-#
-# CONTROL TYPES: buttons and inputs use the Classic/ prefix -- the unprefixed names
-# resolve to the modern Fluent controls, which have no Fill, Color or Radius properties.
-# Rounded shapes are Classic/Button with Text "" rather than Rectangle: the classic
-# Rectangle has no Radius properties at all, and Button is the only classic control that
-# does. Square shapes (rules, dividers, accent bars) stay Rectangle.
-#
-# Z-ORDER: document order is z-order, and anything clickable must be declared AFTER
-# everything it overlaps. btnCardClick covers the whole card and so comes after the card's
-# content; lblMoveHandle comes after btnCardClick so the handle still gets its own clicks.
-# lblDropHint sits on top of recDropTarget and therefore carries the same OnSelect --
-# without it the label swallows the click and "Move Here" does nothing.
-
 - navBg:
     Control: Rectangle@2.3.0
     Properties:
@@ -693,18 +667,3 @@
                   Width: =28
                   X: =recCard.Width - 36
                   Y: =8
-
-# ---------------------------------------------------------------------------
-# SCREEN PROPERTIES — set by hand:
-#
-#   Fill       =ClrPage
-#   OnVisible  src/screens/scrPortfolioBoard.OnVisible.powerfx, pasted whole
-#
-# FALLBACKS — if Studio rejects the paste, it is almost always one of two controls:
-#   galStages   a Horizontal gallery with a nested Vertical gallery (galCards). Insert
-#               both by hand from the Insert pane and paste the property formulas in.
-#   recCard     Classic/Button used as a rounded panel. If the Radius properties are
-#               rejected, drop them and accept square corners.
-# Every control and formula is also in docs/03-screen-portfolio-board.md as a property
-# table, which always works.
-# ---------------------------------------------------------------------------

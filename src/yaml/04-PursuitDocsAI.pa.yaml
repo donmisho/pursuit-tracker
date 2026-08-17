@@ -1,12 +1,3 @@
-# scrPursuitDocsAI — complete screen. Create a blank screen named scrPursuitDocsAI,
-# set Fill to =ClrPage, then paste this onto it.
-#
-#   LEFT   Documents and links, newest change first, add/edit/delete
-#   RIGHT  Current AI overview (top half) over previous versions (bottom half)
-#
-# See docs/05a-screen-documents-ai.md for the OnVisible block and the note on why
-# there is no drag-and-drop file upload.
-
 - navBg:
     Control: Rectangle
     Properties:
@@ -197,7 +188,6 @@
       Wrap: =false
       VerticalAlign: =VerticalAlign.Middle
 
-# ================================================ LEFT — documents
 - cardDocs:
     Control: Classic/Button
     Properties:
@@ -439,7 +429,6 @@
             Tooltip: ="Open This Document"
             OnSelect: =Launch(ThisItem.'Link to item')
 
-# ================================================ LEFT — links
 - cardLinks:
     Control: Classic/Button
     Properties:
@@ -614,7 +603,6 @@
             RadiusBottomRight: =4
             OnSelect: =Set(gblPanel, "doc"); Set(gblEditKey, ThisItem.Title); Set(gblEditDoc, ThisItem); Reset(txtDocTitle); Reset(drpDocType); Reset(txtDocUrl); Reset(drpDocInc)
 
-# ================================================ RIGHT — AI overview
 - cardAiCurrent:
     Control: Classic/Button
     Properties:
@@ -782,7 +770,6 @@
             Tooltip: ="Show this version above"
             OnSelect: =Set(gblOverview, ThisItem)
 
-# ================================================ DOCUMENT PANEL
 - recPanelScrim:
     Control: Rectangle
     Properties:
@@ -1070,7 +1057,3 @@
             Set(gblPanel, ""),
             Notify("Save failed: " & First(Errors('pursuit-tracker-documents')).Message, NotificationType.Error)
         )
-
-# ---------------------------------------------------------------------------
-# SCREEN PROPERTIES — Fill =ClrPage, OnVisible per docs/05a-screen-documents-ai.md
-# ---------------------------------------------------------------------------

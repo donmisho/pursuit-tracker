@@ -1,43 +1,3 @@
-# scrMyActions — complete screen. Paste onto scrMyActions.
-# Tablet (1366 x 768), "Scale to fit" OFF. See 01-PortfolioBoard.pa.yaml for paste
-# instructions and fallbacks.
-#
-# Every open action assigned to the signed-in user, across every pursuit, sorted either by
-# due date or by opportunity. The rows come from colMyActions, built in this screen's
-# OnVisible (src/screens/scrMyActions.OnVisible.powerfx) — the screen never reads the
-# actions list directly, so both sort keys are computed once at load rather than per row.
-#
-# CONTROL TYPES: buttons and inputs use the Classic/ prefix -- the unprefixed names
-# resolve to the modern Fluent controls, which have no Fill, Color or Radius properties.
-# Rounded shapes are Classic/Button with Text "" rather than Rectangle: the classic
-# Rectangle has no Radius properties at all, and Button is the only classic control that
-# does. Square shapes (rules, dividers) stay Rectangle.
-#
-# COLUMNS (X relative to the gallery, +24 for the header labels above it):
-#   Action 0/420 · Opportunity 436/380 · Status 832/200 · At Risk pill (right) · Due (right)
-#
-# Z-ORDER: btnRowClick is declared AFTER the row content it covers, so the whole row is
-# clickable. The two empty-state labels come after the gallery because they only show when
-# it has no rows, and nothing under them is clickable then.
-#
-# THE SORT (galMyActions.Items) is two branches rather than one Sort with a conditional
-# key. Each key is a single text column computed at load: DueKey is the due date first
-# (undated actions carry 2099-12-31, so they sort last), OppKey is account, then pursuit,
-# then the due date -- so grouping by opportunity still reads soonest-first inside each
-# one. Both keys end in the ACT id, which makes the order stable without relying on Sort
-# itself being stable, which Power Fx doesn't promise.
-#
-# btnRefreshActions.OnSelect carries a copy of the OnVisible file's three ClearCollects,
-# behind a Refresh() of the actions list. Canvas apps have no user-defined behaviour
-# functions, so a load that runs both on arrival and on demand exists twice -- change both.
-#
-# lblRowDue colours overdue dates with ClrRiskText rather than the warm ClrDate. Undated
-# actions fall through to DueLabel's dependency wording ("after proposal / quote"), which
-# is never overdue.
-#
-# lblEmptyHint names the address being matched. Ownership is an email string in the list,
-# not a Person column, so a mismatched address looks exactly like having no work.
-
 - navBg:
     Control: Rectangle@2.3.0
     Properties:
@@ -549,14 +509,3 @@
       Width: =1100
       X: =GapPage
       Y: =Parent.Height - 40
-
-# ---------------------------------------------------------------------------
-# SCREEN PROPERTIES — set by hand:
-#
-#   Fill       =ClrPage
-#   OnVisible  src/screens/scrMyActions.OnVisible.powerfx, pasted whole
-#
-# The other four screens each need btnNavActions added to their nav bar, or this screen
-# is only reachable by editing the app. Either repaste those screens whole, or copy the
-# btnNavActions block out of any one of them and paste it onto each screen in Studio.
-# ---------------------------------------------------------------------------

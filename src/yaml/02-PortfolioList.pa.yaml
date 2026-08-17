@@ -1,28 +1,3 @@
-# scrPortfolioList — complete screen. Paste onto scrPortfolioList.
-# Tablet (1366 x 768), "Scale to fit" OFF. See 01-PortfolioBoard.pa.yaml for paste
-# instructions and fallbacks.
-#
-# Round-tripped out of Studio, so this matches what's on the canvas. Control versions
-# (@2.5.1 etc.) are Studio's own and are kept verbatim.
-#
-# CONTROL TYPES: buttons and inputs use the Classic/ prefix -- the unprefixed names
-# resolve to the modern Fluent controls, which have no Fill, Color or Radius properties.
-# Rounded shapes are Classic/Button with Text "" rather than Rectangle: the classic
-# Rectangle has no Radius properties at all, and Button is the only classic control that
-# does. Square shapes (rules, dividers) stay Rectangle.
-#
-# COLUMNS (X relative to the gallery, +24 for the header labels above it):
-#   Account 0/150 · Pursuit 160/230 · ⋯ 396/28 · Stage 434/170 · Owner 646/180
-#   SIs 804/130 · Hyperscalers 944/130 · Next action 1084/210
-#
-# No owner avatar. The initials circle (recRowAvatar + lblRowInitials) was removed --
-# a 24px disc repeating down a reporting table is decoration, and the name is already
-# spelled out beside it.
-#
-# Z-ORDER: btnRowClick is declared AFTER the row content it covers and BEFORE the ⋯
-# menu, so the whole row is clickable but the menu still receives its own clicks.
-# Anything clickable must come after everything it overlaps.
-
 - navBg:
     Control: Rectangle@2.3.0
     Properties:
@@ -722,13 +697,3 @@
       Width: =1100
       X: =GapPage
       Y: =Parent.Height - 40
-
-# ---------------------------------------------------------------------------
-# SCREEN PROPERTIES — set by hand:
-#
-#   Fill       =ClrPage
-#   OnVisible  src/screens/scrPortfolioList.OnVisible.powerfx, pasted whole
-#
-# AFTER BUILDING THE FLOW: replace btnDownloadExcel.OnSelect with the full
-# export formula in docs/04-screen-portfolio-list.md.
-# ---------------------------------------------------------------------------

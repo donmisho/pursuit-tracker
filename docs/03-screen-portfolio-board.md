@@ -25,6 +25,18 @@ scrPortfolioBoard
 
 Three nested galleries is the deepest canvas apps allow, and this uses all of it.
 
+**If the paste is rejected**, it is almost always one of two controls. `galStages` is a
+horizontal gallery with a nested vertical gallery (`galCards`) — insert both by hand from
+the Insert pane and paste the property formulas in. `recCard` is a `Classic/Button` used as
+a rounded panel — if the `Radius*` properties are rejected, drop them and accept square
+corners. Every control and formula below works as a property table either way.
+
+**Z-order**, since document order is z-order and the YAML no longer says so: `btnCardClick`
+covers the whole card and so comes after the card's content; `lblMoveHandle` comes after
+`btnCardClick` so the handle still gets its own clicks; `lblDropHint` sits on top of
+`recDropTarget` and carries the same `OnSelect`, because without it the label swallows the
+click and "Move Here" does nothing.
+
 ---
 
 ## Screen

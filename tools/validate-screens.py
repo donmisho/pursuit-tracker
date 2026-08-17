@@ -154,8 +154,21 @@ if not files:
     sys.exit(f"No .pa.yaml files under {YAML_DIR}")
 
 for path in files:
+    text = path.read_text()
+
+    # No comments, anywhere. PyYAML skips them; Studio's parser does not, and a comment
+    # containing ": " comes back as
+    #   PA1001 YamlInvalidSyntax: While scanning a multiline plain scalar, found invalid
+    #   mapping
+    # which kills the whole paste. Explanations go in docs/, not in the paste payload.
+    for n, line in enumerate(text.split("\n"), start=1):
+        if line.lstrip().startswith("#"):
+            errors.append(f"{path.name}:{n}: comment line -- Studio rejects the paste, "
+                          f"move it to docs/")
+            break
+
     try:
-        doc = yaml.load(path.read_text(), Loader=StrictLoader)
+        doc = yaml.load(text, Loader=StrictLoader)
     except yaml.YAMLError as exc:
         errors.append(f"{path.name}: YAML did not parse -- {exc}")
         continue

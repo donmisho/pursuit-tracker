@@ -118,6 +118,22 @@ is one paste. The selected-tab styling is already set per screen. The cost of th
 adding a screen changes the nav bar on every other one: all five get repasted, or the new
 nav button gets pasted onto each screen by hand.
 
+### The files carry no comments
+
+Every `.pa.yaml` in `src/yaml/` is a bare control list — no header block, no section
+markers, nothing beginning with `#`. Studio's parser does not skip YAML comments the way
+an ordinary YAML reader does: a comment containing `": "` is read as content and the paste
+fails with
+
+```
+PA1001 YamlInvalidSyntax: While scanning a multiline plain scalar, found invalid mapping
+```
+
+naming a line inside the comment block. Everything those headers used to say — the layout,
+the column maps, the z-order reasoning, the paste fallbacks — is in `docs/03`–`05a` and
+`docs/09`. `tools/validate-screens.py` fails on any comment line, so this can't come back
+by accident.
+
 ### If a paste is rejected
 
 Studio only accepts the exact YAML shape its own code view emits, and that shape moves

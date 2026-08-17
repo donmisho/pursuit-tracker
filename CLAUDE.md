@@ -81,6 +81,11 @@ they'd do. No preamble, no recap.
 
 ## 4. Power Apps `.pa.yaml` — the rules that break pastes
 
+- **No comments in a `.pa.yaml` file. None.** PyYAML skips them, Studio does not: a `#`
+  line containing `": "` comes back as `PA1001 YamlInvalidSyntax: While scanning a
+  multiline plain scalar, found invalid mapping` and the whole paste is rejected. Every
+  screen file is now a bare control list; the commentary that used to live in the headers
+  is in `docs/`. The validator errors on the first comment line it finds.
 - **Document order is z-order.** The last control declared renders on top and captures the
   pointer. **Anything clickable must be declared after everything it overlaps.** Half the
   "the button doesn't work" bugs in this project were this.

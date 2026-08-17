@@ -21,6 +21,13 @@ scrPortfolioList
 └── lblFooterNote
 ```
 
+**Z-order**: `btnRowClick` is declared after the row content it covers and before the `⋯`
+menu, so the whole row is clickable but the menu still receives its own clicks.
+
+There is no owner avatar. The initials circle (`recRowAvatar` + `lblRowInitials`) was
+removed — a 24px disc repeating down a reporting table is decoration, and the name is
+already spelled out beside it.
+
 ## Screen
 
 | Property | Formula |
