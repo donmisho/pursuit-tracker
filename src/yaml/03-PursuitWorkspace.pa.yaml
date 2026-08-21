@@ -1463,11 +1463,13 @@
       Color: =ClrText
       DefaultSelectedItems: |
         =ForAll(gblPursuit.'Aligned SIs' As S, { Value: S.Value })
+      DisplayFields: =["Value"]
       Fill: =ClrColumn
       Font: =FontUI
       Height: =34
       Items: |
         =ForAll(Filter(colLookups, LookupType = "Systems Integrator") As L, { Value: L.Value })
+      SearchFields: =["Value"]
       Size: =SizeBody
       TabIndex: =10
       Visible: =gblPanel = "pursuit"
@@ -1494,11 +1496,13 @@
       Color: =ClrText
       DefaultSelectedItems: |
         =ForAll(gblPursuit.Hyperscalers As H, { Value: H.Value })
+      DisplayFields: =["Value"]
       Fill: =ClrColumn
       Font: =FontUI
       Height: =34
       Items: |
         =ForAll(Filter(colLookups, LookupType = "Hyperscaler") As L, { Value: L.Value })
+      SearchFields: =["Value"]
       Size: =SizeBody
       TabIndex: =11
       Visible: =gblPanel = "pursuit"

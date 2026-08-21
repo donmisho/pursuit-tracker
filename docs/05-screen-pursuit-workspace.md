@@ -352,6 +352,22 @@ split into `Pursuit Health` / `Action Health`. An action that's off track on a p
 that's on track is a comparison you want to be able to make, and it stops being one the
 moment the two vocabularies can drift.
 
+### The multi-selects need `DisplayFields` and `SearchFields`
+
+A `Classic/ComboBox` bound to a projected table doesn't infer which column to show. Without
+both of these it ignores `Items` entirely and renders the control's built-in sample list —
+`Item 1`, `Item 2`, `Item 3` — which is what the published app showed for Aligned SIs and
+Hyperscalers. Nothing errors and the paste is accepted, so it only surfaces at run time.
+
+```
+DisplayFields: =["Value"]
+SearchFields:  =["Value"]
+```
+
+`Classic/DropDown` needs the same binding under a different name — `Items.Value: =Value` —
+which is why every dropdown on the screen carries it and these two were the only controls
+that didn't.
+
 ### The multi-selects needed one more change
 
 `cmbPurSIs` and `cmbPurHype` write to multi-choice columns, and they were passing

@@ -99,6 +99,10 @@ they'd do. No preamble, no recap.
   instance of control type 'X' has already been referenced using a different version`, and
   the paste dies. Every dropdown in this app is `@2.3.1` with `Items.Value: =Value`; the
   validator errors on a second version of any type in a file.
+- **A bound `Classic/ComboBox` needs `DisplayFields` and `SearchFields`**, both `=["Value"]`.
+  Without them the paste succeeds, `Items` is ignored, and the control renders the built-in
+  sample list — `Item 1`, `Item 2`, … — in the published app. `Classic/DropDown` wants the
+  same thing spelled differently: `Items.Value: =Value`.
 - **A property may appear once.** A duplicate key is `PA1001 YamlInvalidSyntax: Duplicate
   name 'Color'` and kills the whole screen. PyYAML silently keeps the last one, which is why
   the validator installs a `StrictLoader`.
